@@ -1,0 +1,2841 @@
+<!DOCTYPE html>
+<html lang="ja"><head><meta charset="utf-8"><title>習慣の森</title>
+<link rel="icon" href="icon.png" type="image/png">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>
+:root{--bg:#f4f7f4;--card:#fff;--tx:#1f3a2a;--sub:#6b7d72;--pri:#2e7d4f;--bd:#dfe8e2;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#13201a;--card:#1d2e25;--tx:#e6f1ea;--sub:#93a89b;--bd:#2c4338}}
+*{box-sizing:border-box}html,body{margin:0;height:100%}
+body{background:var(--bg);color:var(--tx);font-family:system-ui,"Hiragino Sans","Noto Sans JP",sans-serif;display:flex;justify-content:center}
+#app{width:100%;max-width:480px;height:100%;display:flex;flex-direction:column;position:relative}
+main{flex:1;overflow-y:auto;padding:12px 14px 90px}
+nav{display:flex;border-top:1px solid var(--bd);background:var(--card)}
+nav button{flex:1;border:0;background:none;padding:10px 0;color:var(--sub);font-size:12px}
+nav button.on{color:var(--pri);font-weight:700}nav span{display:block;font-size:20px}
+.card{background:var(--card);border-radius:14px;padding:12px;margin-bottom:10px;border:1px solid var(--bd)}
+.row{display:flex;align-items:center;gap:8px}.sp{flex:1}
+.tabs{display:flex;border-bottom:2px solid var(--bd);margin:8px 0}
+.tabs button{flex:1;border:0;background:none;padding:9px;color:var(--sub);font-size:15px}
+.tabs button.on{color:var(--pri);font-weight:700;border-bottom:3px solid var(--pri);margin-bottom:-2px}
+.chips{display:flex;gap:6px;overflow-x:auto;padding:4px 0;scrollbar-width:none}
+.chip{white-space:nowrap;border:1px solid var(--bd);background:var(--card);color:var(--tx);border-radius:99px;padding:5px 12px;font-size:13px}
+.chip.on{background:var(--pri);color:#fff;border-color:var(--pri)}
+select,input,textarea{font:inherit;color:var(--tx);background:var(--card);border:1px solid var(--bd);border-radius:8px;padding:7px;width:100%}
+select.s{width:auto}
+.rt{display:flex;align-items:center;gap:10px;cursor:pointer}.rt.done{background:#E5E7EB;color:#333}
+.chk{width:28px;height:28px;border-radius:50%;border:2px solid var(--pri);display:flex;align-items:center;justify-content:center;color:#fff}
+.done .chk{background:var(--pri)}
+.sm{font-size:12px;color:var(--sub)}.done .sm{color:#555}
+.btn{border:0;background:var(--pri);color:#fff;border-radius:8px;padding:6px 10px;font-size:13px}
+.btn.g{background:var(--bd);color:var(--tx)}
+.fab{position:absolute;right:16px;bottom:78px;width:54px;height:54px;border-radius:50%;border:0;background:var(--pri);color:#fff;font-size:30px;box-shadow:0 3px 10px #0004;z-index:5}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.tile{border-radius:14px;padding:16px 6px;text-align:center;color:#fff;cursor:pointer;background:#E06655}
+.tile.ok{background:#82B541}.tile .ic{width:76px;height:76px;margin:0 auto 6px;border-radius:50%;border:5px solid #0004;display:flex;align-items:center;justify-content:center;font-size:34px}
+.tile.top .ic{background:#fff;border-color:#fff}
+.modal{position:fixed;inset:0;background:#0007;display:flex;align-items:flex-end;justify-content:center;z-index:20}
+.modal>div{background:var(--bg);width:100%;max-width:480px;max-height:88%;overflow:auto;border-radius:18px 18px 0 0;padding:16px}
+.modal label{display:block;font-size:12px;color:var(--sub);margin:8px 0 3px}
+.bar{position:sticky;top:0;z-index:4;background:var(--pri);color:#fff;border-radius:12px;padding:8px 12px;margin-bottom:8px;display:flex;align-items:center;gap:8px}
+.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;text-align:center;font-size:13px}
+.cal b{width:34px;height:34px;border-radius:50%;margin:auto;display:flex;align-items:center;justify-content:center;background:#e9ecea;color:#555;font-weight:400}
+.post{display:flex;gap:8px;margin-bottom:12px}.bub{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:8px;max-width:85%}
+.bub img{max-width:100%;border-radius:8px}
+.lock{position:fixed;inset:0;background:linear-gradient(#17382a,#0b1d15);color:#fff;z-index:30;display:flex;flex-direction:column;align-items:center;padding:60px 20px;gap:14px}
+.lock .w{background:#ffffff22;border-radius:16px;padding:14px;width:100%;max-width:380px}
+.tree{font-size:52px;text-align:center}
+.shop{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.shop button{border:1px solid var(--bd);background:var(--card);color:var(--tx);border-radius:10px;padding:6px 2px;font-size:11px}
+.shop button.on{border:2px solid var(--pri)}.shop em{display:block;font-size:26px;font-style:normal}
+.bars{display:flex;align-items:flex-end;gap:8px;height:140px;margin-top:8px}
+.bc{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;font-size:12px}
+.bc i{display:block;width:100%;background:#6aa84f;border-radius:4px 4px 0 0;margin:2px 0}.bc small{color:var(--sub)}
+.seg{display:flex;border:1px solid var(--bd);border-radius:99px;overflow:hidden}.seg button{border:0;background:none;color:var(--sub);padding:4px 10px;font-size:12px}.seg button.on{background:var(--pri);color:#fff}
+.card.ed,.tile.ed{outline:2px dashed var(--pri);outline-offset:-2px}.tile{position:relative}.card.ed .btn{padding:6px 8px}
+[data-lp]{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+.tree.sway{animation:sw 2.4s ease-in-out infinite alternate;transform-origin:50% 90%;font-size:96px}@keyframes sw{from{transform:rotate(-4deg) scale(1)}to{transform:rotate(4deg) scale(1.08)}}
+.prog{height:8px;background:#ffffff33;border-radius:9px;margin:10px 0;overflow:hidden}.prog i{display:block;height:100%;background:#8fe0a0;transition:width 1s linear}
+.toast{position:fixed;left:50%;bottom:100px;transform:translateX(-50%);background:#000c;color:#fff;padding:8px 16px;border-radius:99px;z-index:40;font-size:13px}
+.txt{white-space:pre-wrap;margin-bottom:6px}
+
+:root{--spacing-2:8px;--spacing-3:12px;--spacing-4:16px;--radius-sm:8px;--color-moss-dark:#4f6b40;--color-ink:var(--tx);--color-ink-soft:var(--sub);--fs-sm:12px;--border-thin:1px solid var(--bd)}
+#mini{position:sticky;top:0;z-index:25;padding:0 14px;flex:none}
+#mini .bar{margin:8px 0 0;position:static}
+#mini .bar .btn{white-space:nowrap;padding:6px 8px;font-size:12px}
+.ell{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#sc{position:absolute;left:0;right:0;bottom:0;top:0;z-index:15;background:var(--bg);flex-direction:column}
+#app.timing #sc{top:64px}
+.scbar{display:flex;align-items:center;gap:8px;padding:8px 12px;border-bottom:1px solid var(--bd);background:var(--card)}
+#screen-container{flex:1;overflow-y:auto;padding:12px 14px 40px}
+#dg{position:fixed;inset:0;background:#0009;z-index:60;display:none;align-items:center;justify-content:center;padding:20px}
+.dgb{background:var(--card);color:var(--tx);border-radius:14px;padding:16px;width:100%;max-width:360px}
+.dgm{white-space:pre-wrap}.dgbtn{display:flex;flex-direction:column;gap:8px;margin-top:12px}.dgbtn .btn{padding:10px;font-size:14px}
+.btn.d{background:#d9534f;color:#fff}
+.tabs.t4{display:grid;grid-template-columns:1fr 1fr}
+.acc{border:1px solid var(--bd);border-radius:10px;margin:8px 0;background:var(--card)}
+.acc>summary{padding:10px 12px;font-weight:700;cursor:pointer}.accb{padding:0 12px 12px}.accb label{display:block;margin:8px 0 3px}
+input[type=checkbox]{width:auto}input[type=file]{padding:4px;font-size:12px}
+.screen-inner h2{margin:4px 0 10px}
+.panel{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:12px;margin-bottom:10px}
+button.panel{display:block;width:100%;text-align:left;font:inherit;color:var(--tx);cursor:pointer}
+.panel h3{margin:0 0 6px;font-size:15px}.panel p{margin:2px 0}
+.btn-primary{background:var(--pri)}.btn-secondary{background:var(--bd);color:var(--tx)}.btn-moss{background:#6f8f5c}
+.btn-block{display:block;width:100%;padding:10px;margin:6px 0;font-size:14px}
+.review-typing-input,.review-textarea{margin:4px 0}.review-textarea{min-height:80px}
+.settings-accordion{border:1px solid var(--bd);border-radius:10px;background:var(--card);margin:8px 0;padding:0 10px 10px}.settings-accordion>summary{padding:10px 0;font-weight:700;cursor:pointer}
+.settings-row{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:6px 0}
+.explore-desc,.char-counter,.quote-note,.empty-state,.progress-meta{font-size:12px;color:var(--sub)}
+.progress-meta{display:flex;justify-content:space-between;margin-top:4px}
+.diary-field-label{font-size:13px;font-weight:700;margin:8px 0 3px}
+.chapter-row,.critical-question-row,.quote-row{margin:8px 0}.quote-text{margin:0;font-style:italic}
+.ladder-chain{display:flex;flex-direction:column;gap:6px;margin:8px 0}
+.ladder-item{display:flex;gap:8px;padding:8px;border-radius:8px;border:1px solid var(--bd)}
+.ladder-abstract{background:rgba(100,150,220,.15)}.ladder-concrete{background:rgba(111,143,92,.18);margin-left:18px}
+.ladder-kind-badge{font-size:11px;font-weight:700;flex:none}
+.quiz-choice-row{display:flex;gap:8px;margin:6px 0}.quiz-choice-row>*{flex:1}
+.flashcard-counter{text-align:center;font-weight:700}
+/* =========================================================
+   folders.css
+   【追加要望対応】音読ディクテーション／読書記録の「フォルダ（見た目上のグループ分け）」、
+   および音読ディクテーション画面の余白・分割文一覧の見た目。
+   ========================================================= */
+
+/* --- 「フォルダを追加」「新しい〜を追加」ボタン周りの余白 --- */
+.folder-add-btn {
+  display: block;
+  margin-top: var(--spacing-3);
+  margin-bottom: var(--spacing-3); /* 「フォルダを追加」と「新しい教材／本を追加」の間 */
+}
+.folder-add-item-btn {
+  display: block;
+  margin-bottom: var(--spacing-4); /* 「新しい教材／本を追加」と、その下のフォルダ・教材・本の一覧の間 */
+}
+
+/* --- 一覧 --- */
+.folder-list-box { margin-top: var(--spacing-2); }
+.folder-list-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+  min-height: 48px;
+  border-radius: var(--radius-sm);
+}
+.folder-items { display: flex; flex-direction: column; gap: var(--spacing-2); }
+.folder-controls { display: flex; gap: var(--spacing-2); flex-wrap: wrap; }
+.folder-controls .btn { flex: 1 1 140px; }
+.folder-empty-hint { font-size: var(--fs-sm); }
+
+@media (min-width: 1000px) {
+  .folder-items { display: grid; grid-template-columns: 1fr 1fr; gap: var(--spacing-3); }
+  .folder-items > .folder-empty-hint { grid-column: 1 / -1; }
+}
+
+/* --- ドラッグ操作 --- */
+.folder-draggable {
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}
+.folder-draggable.is-drag-source { opacity: 0.35; }
+.folder-drag-clone {
+  position: fixed;
+  z-index: 9999;
+  margin: 0;
+  pointer-events: none;
+  opacity: 0.92;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.28);
+  transform: scale(1.02);
+}
+body.folder-dragging { cursor: grabbing; user-select: none; -webkit-user-select: none; }
+.folder-list-wrap.is-dragging-active { outline: 2px dashed rgba(79, 107, 64, 0.45); outline-offset: 4px; }
+.folder-accordion.is-drop-target,
+.folder-list-wrap.is-drop-target {
+  outline: 3px dashed var(--color-moss-dark);
+  outline-offset: 2px;
+  background-color: rgba(111, 143, 92, 0.16);
+}
+
+/* --- 音読ディクテーション画面の余白 --- */
+.dict-row-spaced { margin-top: var(--spacing-3); } /* 「今の位置を開始にする」行と「試し再生／保存」行の間 */
+.dict-btn-gap { display: block; margin-top: var(--spacing-3); } /* 「この教材を削除する」と「一覧に戻る」の間など */
+.dict-reward-note { min-height: 1.4em; }
+
+/* --- 「▶ 練習する」画面：一文ごとに改行された分割文 --- */
+.dict-listen-list { display: flex; flex-direction: column; gap: var(--spacing-2); margin-top: var(--spacing-3); }
+.dict-sentence-btn {
+  display: flex;
+  align-items: baseline;
+  gap: var(--spacing-2);
+  width: 100%;
+  text-align: left;
+  border: var(--border-thin);
+  cursor: pointer;
+  color: var(--color-ink);
+  font: inherit;
+}
+.dict-sentence-btn.is-playing { background-color: rgba(111, 143, 92, 0.28); border-color: var(--color-moss-dark); }
+.dict-sentence-btn.is-disabled { opacity: 0.55; cursor: not-allowed; }
+.dict-sentence-no { flex: 0 0 auto; min-width: 1.6em; color: var(--color-ink-soft); font-size: var(--fs-sm); }
+.dict-sentence-text { flex: 1 1 auto; word-break: break-word; }
+.dict-sentence-note { flex: 0 0 auto; font-size: var(--fs-sm); color: var(--color-ink-soft); }
+
+@media (hover: hover) and (pointer: fine) {
+  .dict-sentence-btn:not(.is-disabled):hover { filter: brightness(0.97); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .folder-drag-clone { transform: none; }
+}
+.tabs.t3{display:grid;grid-template-columns:repeat(3,1fr)}
+.rt.off{opacity:.5;cursor:default}
+.av{width:40px;height:40px;border-radius:50%;border:1px solid var(--bd);background:var(--card);font-size:22px;line-height:1;padding:0;flex:none;cursor:pointer}
+.pnl code{display:block;background:var(--bd);border-radius:6px;padding:6px;margin:4px 0;word-break:break-all}
+.accb code{display:block;background:var(--bd);border-radius:6px;padding:6px;margin:4px 0;word-break:break-all}
+</style></head><body><div id="app"><div id="mini"></div><main id="m"></main><nav id="nv"></nav><div id="sc" style="display:none"></div></div><div id="ov"></div><div id="dg"></div>
+<script>
+const $=s=>document.querySelector(s);
+const kd=d=>d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate();
+const BASE_TREES=[['🌸','桜',0],['🍁','紅葉',0],['🌳','広葉樹',0],['💎','クリスタル',80],['🌲','杉',20],['🌴','ヤシ',30],['🎄','モミ',30],['🌵','サボテン',40],['🎋','竹',40],['🍎','りんご',50],['🍊','みかん',50],['🌻','ひまわり',60],['🍄','きのこ',60],['🪻','藤',70],['🌺','椿',70],['⭐','星の木',100]];
+const STG=['🌰','🌱','🪴','🌷',null];
+let today=new Date();
+function seed(){const h={};for(let i=1;i<=60;i++){const d=new Date(today);d.setDate(d.getDate()-i);const r=(Math.sin(i*7.3)+1)/2;const t=6,n=Math.round(r*6);h[kd(d)]={d:n,t,m:n*12}}return h}
+let S={tab:'home',mode:'rt',per:'1日',tag:'すべて',coins:120,sel:'🌸',own:['🌸','🍁','🌳'],
+R:[{id:1,n:'コップ1杯の水を飲む',w:'起床後',tag:'朝活',m:'check',st:14,done:1,alt:'',ic:'💧'},
+{id:2,n:'5分ストレッチ',w:'水を飲んだ後',tag:'朝活',m:'timer',min:5,st:9,done:0,alt:'1分だけ伸びる'},
+{id:3,n:'読書',w:'21:00',tag:'勉強',m:'sw',st:21,done:0,alt:'1ページ読む'},
+{id:4,n:'ジョギング30分',w:'18:00',tag:'運動',m:'timer',min:30,st:6,done:0,alt:'5分散歩'},
+{id:5,n:'英単語（ポモドーロ）',w:'通学中',tag:'勉強',m:'timer',pomo:1,min:25,st:3,done:0,alt:'10語だけ'},
+{id:6,n:'一言日記',w:'就寝前',tag:'健康',m:'check',st:30,done:1,alt:''}],
+T:[{id:1,n:'健康な食事',ic:'🥕',st:12,done:0},{id:2,n:'5,000歩',ic:'🚶',st:3,done:1},{id:3,n:'禁煙',ic:'🚭',st:30,done:1},{id:4,n:'楽器練習',ic:'🎸',st:4,done:0}],
+P:[{u:'ミカ',d:'td',t:'温野菜を食べました😋',img:'',tm:'14:23',st:['👏']},{u:'ケン',d:'td',t:'今日も10ページ勉強ノート完了！',img:'',tm:'12:10',st:[]},
+{u:'サキ',d:'yd',t:'サラダとお味噌汁で整えました🥗',img:'',tm:'19:40',st:['👍']},{u:'リョウ',d:'yd',t:'自炊できた！鶏むね肉のグリル',img:'',tm:'20:05',st:[]},{u:'ミカ',d:'yd',t:'お弁当に野菜を3種類入れました',img:'',tm:'12:30',st:['❤️']}],
+forest:['🌸','🌸','🍁','🌳','🌸','🍁','🌳','🌳','🌸','🍁','🌳','🌸'],hist:seed(),rem:{},selDay:null,diary:{},lastDay:kd(today),vw:'bar',st:'mo',tdy:'td',ed:0};
+/* ===== 保存基盤：IndexedDB優先／利用不可時のみlocalStorage =====
+   状態本体は 'kv' ストアに、音源(dataUrl)は 'audio' ストアに分けて保存する
+   （状態を保存するたびに巨大な音源を書き直さないため）。メモリ上では f.dataUrl として保持する。 */
+let DB=null,IDBok=false,ready=false,svT=null,stored=new Set();
+const idbReq=r=>new Promise((ok,ng)=>{r.onsuccess=()=>ok(r.result);r.onerror=()=>ng(r.error)});
+const txDone=tx=>new Promise((ok,ng)=>{tx.oncomplete=ok;tx.onerror=()=>ng(tx.error);tx.onabort=()=>ng(tx.error||new Error('abort'))});
+function idbOpen(){return new Promise((ok,ng)=>{if(!window.indexedDB)return ng(new Error('IndexedDB非対応'));let q;try{q=indexedDB.open('shukan_no_mori',1)}catch(e){return ng(e)}
+q.onupgradeneeded=()=>{const d=q.result;d.createObjectStore('kv');d.createObjectStore('audio')};q.onsuccess=()=>ok(q.result);q.onerror=()=>ng(q.error);q.onblocked=()=>ng(new Error('blocked'))})}
+function ensure(){const D={books:[],bookFolders:[],dictationSets:[],dictationFolders:[],dictationRewards:{},customTrees:[],diaryTickets:0,
+act:{},rv:[],rr:[],fv:'',fp:'all',cum:{rt:{},tk:{},n:{rt:0,tk:0},ini:0},pomo:{work:25,rest:5,loop:false,bgm:true},stopCnt:{d:'',n:0},pen:{until:0,rid:null},team:{db:'',tid:'',pw:'',uid:'',name:'',icon:'🙂',tname:''}};
+for(const k in D)if(S[k]==null||typeof S[k]!=typeof D[k]||Array.isArray(S[k])!=Array.isArray(D[k]))S[k]=D[k];
+if(!S.diary||Array.isArray(S.diary))S.diary={};if(!S.vw)S.vw='bar';if(!S.rem||typeof S.rem!='object')S.rem={};
+if(!S.user||typeof S.user!='object')S.user={};if(!S.user.settings||typeof S.user.settings!='object')S.user.settings={};
+if(!S.user.settings.github||typeof S.user.settings.github!='object')S.user.settings.github={owner:'',repo:'',branch:'main',token:''};
+pomoNorm();for(const k of ['db','tid','pw','uid','name','icon','tname'])if(typeof S.team[k]!='string')S.team[k]=k=='icon'?'🙂':'';
+if(!S.team.db&&TEAM_DB_DEFAULT)S.team.db=TEAM_DB_DEFAULT;if(typeof S.pen.until!='number')S.pen.until=0;if(typeof S.stopCnt.n!='number')S.stopCnt={d:'',n:0};
+S.R.concat(S.T).forEach(x=>{if(!Array.isArray(x.tags))x.tags=x.tag?[x.tag]:[];x.tags=x.tags.filter(t=>typeof t=='string'&&t);if(!x.tags.length)x.tags=['未分類'];x.tag=x.tags[0]});
+for(const k of ['rt','tk'])if(!S.cum[k]||typeof S.cum[k]!='object')S.cum[k]={};if(!S.cum.n||typeof S.cum.n!='object')S.cum.n={rt:0,tk:0};
+if(!S.cum.ini){S.cum.ini=1;for(const k in S.hist)((S.hist[k]||{}).ids||[]).forEach(id=>{const r=S.R.find(x=>x.id==id);if(r)cumAdd('rt',r,1)})}
+delete S.D;
+S.R.forEach(r=>{if(r.c==null)r.c=r.done?1:0});S.T.forEach(t=>{if(t.c==null)t.c=t.done?1:0});
+delete S.modal;S.ed=0}
+async function hydrateAudio(){for(const s of S.dictationSets)for(const f of s.audioFiles||[]){if(f.dataUrl)continue;
+try{const v=IDBok?await idbReq(DB.transaction('audio').objectStore('audio').get(f.id)):localStorage.getItem('hba_'+f.id);if(v){f.dataUrl=v;stored.add(f.id)}}catch(e){}}}
+async function loadState(){let raw=null;
+try{DB=await idbOpen();IDBok=true;raw=await idbReq(DB.transaction('kv').objectStore('kv').get('state'));stored=new Set(await idbReq(DB.transaction('audio').objectStore('audio').getAllKeys()))}
+catch(e){IDBok=false;DB=null;console.warn('[保存] IndexedDBが使えないためlocalStorageを使います',e)}
+if(raw==null){try{raw=localStorage.getItem('hb')}catch(e){}}   // 旧バージョンのlocalStorageデータも引き継ぐ
+if(raw){try{Object.assign(S,JSON.parse(raw))}catch(e){console.error(e)}}
+ensure();await hydrateAudio()}
+async function doFlush(){if(!ready)return;clearTimeout(svT);
+const files=[];S.dictationSets.forEach(s=>(s.audioFiles||[]).forEach(f=>files.push(f)));
+const json=JSON.stringify(snap(),(k,v)=>k==='dataUrl'?undefined:v);
+if(IDBok){try{const tx=DB.transaction(['kv','audio'],'readwrite'),kv=tx.objectStore('kv'),au=tx.objectStore('audio');kv.put(json,'state');
+const ids=new Set();files.forEach(f=>{ids.add(f.id);if(f.dataUrl&&!stored.has(f.id)){au.put(f.dataUrl,f.id);stored.add(f.id)}});
+[...stored].forEach(id=>{if(!ids.has(id)){au.delete(id);stored.delete(id)}});
+await txDone(tx);try{localStorage.removeItem('hb')}catch(e){}return}
+catch(e){console.error('[保存] IndexedDB書き込み失敗→localStorageへ',e);IDBok=false;stored=new Set()}}
+try{localStorage.setItem('hb',json)}catch(e){toast('保存容量が足りません。バックアップを書き出してください')}
+files.forEach(f=>{if(f.dataUrl&&!stored.has(f.id)){try{localStorage.setItem('hba_'+f.id,f.dataUrl);stored.add(f.id)}catch(e){toast('音源を保存できません（容量不足）')}}})}
+let flQ=Promise.resolve();
+const flush=()=>(flQ=flQ.then(doFlush).catch(e=>console.error(e)));
+const save=()=>{if(!ready)return;clearTimeout(svT);svT=setTimeout(flush,250);if(teamOn())teamDirty()};
+
+/* ===== StudyGameのモジュールを動かすための最小限の互換層 ===== */
+const Utils={
+el(tag,attrs,kids){const e=document.createElement(tag);for(const k in (attrs||{})){const v=attrs[k];if(v==null||v===false)continue;
+if(k==='class')e.className=v;else if(k==='style')e.style.cssText=v;else if(k.slice(0,2)==='on'&&typeof v==='function')e.addEventListener(k.slice(2),v);else e.setAttribute(k,v===true?'':String(v))}
+const add=c=>{if(c==null||c===false)return;if(Array.isArray(c))c.forEach(add);else e.appendChild(c.nodeType?c:document.createTextNode(String(c)))};add(kids);return e},
+generateId:p=>p+'_'+Date.now().toString(36)+Math.random().toString(36).slice(2,7),
+showToast:m=>toast(m),
+todayStr:()=>iso(kd(new Date()))};
+const GameState={getState:()=>S,update(fn){fn(S);save()},persist:()=>flush()};
+const RewardSystem={grantCompass(n){S.coins+=n;save()}};   // 学習ゲームの「コンパス」は、この森ではコインに読み替える
+let SC={n:null,p:null};
+const Router={_s:{},registerScreen(n,f){this._s[n]=f},
+navigate(n,p){const c=$('#screen-container');const keep=c&&SC.n==n?c.scrollTop:0;SC={n,p:p||{}};drawSc(keep)}};
+function drawSc(keep){const box=$('#sc');box.style.display='flex';
+box.innerHTML='<div class="scbar"><button class="btn g" onclick="closeSc()">✕ 閉じる</button><b>'+(SC.n&&/^book/.test(SC.n)?'📖 読書記録':'🎧 音読ディクテーション')+'</b></div><div id="screen-container"></div>';
+const c=$('#screen-container');try{Router._s[SC.n](c,SC.p)}catch(e){console.error(e);c.textContent='画面を表示できませんでした: '+e.message}
+c.scrollTop=keep||0}
+function openScreen(n){S.modal='';SC={n:null,p:null};render();Router.navigate(n)}
+function closeSc(){SC={n:null,p:null};const b=$('#sc');b.style.display='none';b.innerHTML='';Bgm.release();S.dv='w';S.dd=null;S.modal=dHtml();render()}
+
+/* ===== alert/confirmの代替（iframe・WebView・PWAでも確実に動く） ===== */
+function dlg(o){return new Promise(res=>{const d=$('#dg');
+d.innerHTML=`<div class="dgb"><div class="dgm">${esc(o.msg)}</div>${o.input!=null?`<input id="dgi" value="${esc(o.input)}">`:''}<div class="dgbtn">${o.btns.map((b,i)=>`<button class="btn ${b.c==null?'g':b.c}" data-i="${i}">${esc(b.l)}</button>`).join('')}</div></div>`;
+d.style.display='flex';const done=v=>{d.style.display='none';d.innerHTML='';res(v)};
+d.querySelectorAll('button').forEach(b=>b.onclick=()=>{const v=o.btns[+b.dataset.i].v;done(v==='__input'?$('#dgi').value:v)});const i=$('#dgi');if(i){i.focus();i.select();i.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();done(i.value)}}}})}
+const uiAlert=m=>dlg({msg:m,btns:[{l:'OK',v:true,c:''}]});
+const uiConfirm=(m,ok)=>dlg({msg:m,btns:[{l:'キャンセル',v:false},{l:ok||'OK',v:true,c:''}]});
+const uiPrompt=(m,d)=>dlg({msg:m,input:d||'',btns:[{l:'キャンセル',v:null},{l:'OK',v:'__input',c:''}]});
+
+/* ===== assetManager.js ===== */
+/**
+ * assetManager.js
+ * -----------------------------------------
+ * 【追加要望対応】設定画面の各種画像アップロード（ジャンル/問題セットの背景画像、
+ * キャラクター/建築物の画像）を一元的に処理するモジュール。
+ *
+ * 方針（要望6章対応）：
+ *   このアプリは外部バックエンドを持たない静的サイトなので、画像を「保存」する先は
+ *   2通りある。
+ *     ① GitHub連携が設定済み（設定画面でowner/repo/token等を入力済み）の場合：
+ *        ブラウザから直接 GitHub Contents API を叩き、リポジトリの
+ *        assets/img/ 配下に画像ファイルをPUTする（＝要望1章「自動でGitHubの
+ *        assetsディレクトリ内のimgディレクトリに保存する仕組み」）。
+ *        成功すればそのファイルの raw.githubusercontent.com URLを画像として使う。
+ *     ② GitHub連携が未設定、またはアップロードに失敗した場合：
+ *        画像をDataURL（Base64）に変換し、そのままgameStateに保存する。
+ *        これはIndexedDB/LocalStorageへの自動保存、およびバックアップJSON出力
+ *        （ImportExport.exportBackup）に自動的に含まれるため、GitHubに頼らず
+ *        端末内・バックアップJSON経由でも画像を引き継げる（要望6章の
+ *        「assetsフォルダ内のimg/videoフォルダを参照し、エリアとの紐づけを
+ *        JSONファイル及びIndexedDBへのバックアップでつなげる」に対応）。
+ *
+ *   どちらの経路でも戻り値の image は文字列（URLまたはdataURL）であり、
+ *   <img src="..."> にもSVGの <image href="..."> にもそのまま使える。
+ *
+ *   GitHub Personal Access Tokenは state.user.settings.github に保存され、
+ *   ブラウザのIndexedDB/LocalStorageにのみ残る（Anthropic等の外部には送信されない。
+ *   通信先は常にユーザー自身が指定したapi.github.comのみ）。
+ */
+
+const AssetManager = (() => {
+  function getGithubConfig() {
+    const state = GameState.getState();
+    const settings = state.user && state.user.settings;
+    return (settings && settings.github) || { owner: "", repo: "", branch: "main", token: "" };
+  }
+
+  function setGithubConfig({ owner, repo, branch, token }) {
+    GameState.update((s) => {
+      if (!s.user.settings) s.user.settings = {};
+      s.user.settings.github = {
+        owner: (owner || "").trim(),
+        repo: (repo || "").trim(),
+        branch: (branch || "").trim() || "main",
+        token: (token || "").trim(),
+      };
+    });
+  }
+
+  function isGithubConfigured() {
+    const c = getGithubConfig();
+    return !!(c.owner && c.repo && c.token);
+  }
+
+  function fileToDataURL(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = () => reject(reader.error || new Error("読み込みに失敗しました"));
+      reader.readAsDataURL(file);
+    });
+  }
+
+  function base64BodyOf(dataUrl) {
+    const idx = dataUrl.indexOf(",");
+    return idx >= 0 ? dataUrl.slice(idx + 1) : dataUrl;
+  }
+
+  function sanitizeFileName(name) {
+    return String(name || "image.png").replace(/[^a-zA-Z0-9_.-]/g, "_");
+  }
+
+  /**
+   * 画像ファイルをアップロードする。
+   * @param {File} file
+   * @param {string} folderHint 用途を表す短い文字列（ファイル名の接頭辞に使う。例："genre" "character"）
+   * @returns {Promise<{image:string, usedGithub:boolean}>}
+   */
+  async function uploadImage(file, folderHint = "misc") {
+    const dataUrl = await fileToDataURL(file);
+
+    if (!isGithubConfigured()) {
+      return { image: dataUrl, usedGithub: false };
+    }
+
+    const config = getGithubConfig();
+    try {
+      const filename = `${folderHint}_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}_${sanitizeFileName(file.name)}`;
+      const path = `assets/img/${filename}`;
+      const apiUrl = `https://api.github.com/repos/${config.owner}/${config.repo}/contents/${encodeURIComponent(path).replace(/%2F/g, "/")}`;
+
+      const res = await fetch(apiUrl, {
+        method: "PUT",
+        headers: {
+          "Authorization": `token ${config.token}`,
+          "Content-Type": "application/json",
+          "Accept": "application/vnd.github+json",
+        },
+        body: JSON.stringify({
+          message: `assets: add ${filename}`,
+          content: base64BodyOf(dataUrl),
+          branch: config.branch || "main",
+        }),
+      });
+
+      if (!res.ok) {
+        const errText = await res.text().catch(() => "");
+        console.error("[assetManager] GitHubへの画像保存に失敗しました", res.status, errText);
+        Utils.showToast("GitHubへの自動保存に失敗したため、ブラウザ内保存のみで続行します", "error");
+        return { image: dataUrl, usedGithub: false };
+      }
+
+      const json = await res.json();
+      const url = (json.content && json.content.download_url) || dataUrl;
+      Utils.showToast("画像をGitHubのassets/imgに保存しました", "success");
+      return { image: url, usedGithub: true, path };
+    } catch (err) {
+      console.error("[assetManager] GitHubアップロード中に例外が発生しました", err);
+      Utils.showToast("GitHubへの自動保存に失敗したため、ブラウザ内保存のみで続行します", "error");
+      return { image: dataUrl, usedGithub: false };
+    }
+  }
+
+  /** 値が画像として表示可能な文字列か（dataURL or http URL）。絵文字プレースホルダーと区別するため */
+  function isImageValue(value) {
+    return typeof value === "string" && (value.startsWith("data:image") || /^https?:\/\//.test(value));
+  }
+
+  return {
+    getGithubConfig, setGithubConfig, isGithubConfigured,
+    uploadImage, fileToDataURL, isImageValue,
+  };
+})();
+
+/* ===== zipUtil.js ===== */
+/**
+ * zipUtil.js
+ * -----------------------------------------
+ * 【追加要望対応】ZIPバックアップ用の最小限のZIP読み書き（外部ライブラリ不使用）。
+ *
+ *   ZipUtil.create(entries) → Blob
+ *       entries: [{ name:string, data:Uint8Array|string }]  ※圧縮なし（store）で書き出す
+ *       音声（m4a/mp3など）は元々圧縮済みのため、無圧縮でもサイズはほぼ変わらない。
+ *   ZipUtil.read(arrayBuffer) → Promise<Map<string, Uint8Array>>
+ *       無圧縮（store）と deflate 圧縮のZIPを読める。deflate はブラウザの
+ *       DecompressionStream に対応している環境のみ（非対応の場合は日本語エラー）。
+ *
+ * 制限：ZIP64（4GB超・65535ファイル超）には対応しない。
+ */
+
+const ZipUtil = (() => {
+  const encoder = new TextEncoder();
+  const decoder = new TextDecoder("utf-8");
+
+  let crcTable = null;
+  function getCrcTable() {
+    if (crcTable) return crcTable;
+    crcTable = new Uint32Array(256);
+    for (let n = 0; n < 256; n++) {
+      let c = n;
+      for (let k = 0; k < 8; k++) c = (c & 1) ? (0xEDB88320 ^ (c >>> 1)) : (c >>> 1);
+      crcTable[n] = c >>> 0;
+    }
+    return crcTable;
+  }
+
+  function crc32(bytes) {
+    const table = getCrcTable();
+    let crc = 0xFFFFFFFF;
+    for (let i = 0; i < bytes.length; i++) crc = table[(crc ^ bytes[i]) & 0xFF] ^ (crc >>> 8);
+    return (crc ^ 0xFFFFFFFF) >>> 0;
+  }
+
+  function dosDateTime(date) {
+    const time = (date.getHours() << 11) | (date.getMinutes() << 5) | Math.floor(date.getSeconds() / 2);
+    const day = ((Math.max(1980, date.getFullYear()) - 1980) << 9) | ((date.getMonth() + 1) << 5) | date.getDate();
+    return { time, day };
+  }
+
+  function create(entries) {
+    const now = dosDateTime(new Date());
+    const parts = [];
+    const central = [];
+    let offset = 0;
+
+    entries.forEach((entry) => {
+      const nameBytes = encoder.encode(entry.name);
+      const data = typeof entry.data === "string" ? encoder.encode(entry.data) : entry.data;
+      const crc = crc32(data);
+
+      const local = new DataView(new ArrayBuffer(30));
+      local.setUint32(0, 0x04034b50, true);
+      local.setUint16(4, 20, true);
+      local.setUint16(6, 0x0800, true); // ファイル名はUTF-8
+      local.setUint16(8, 0, true);      // 無圧縮
+      local.setUint16(10, now.time, true);
+      local.setUint16(12, now.day, true);
+      local.setUint32(14, crc, true);
+      local.setUint32(18, data.length, true);
+      local.setUint32(22, data.length, true);
+      local.setUint16(26, nameBytes.length, true);
+      local.setUint16(28, 0, true);
+      parts.push(new Uint8Array(local.buffer), nameBytes, data);
+
+      const cen = new DataView(new ArrayBuffer(46));
+      cen.setUint32(0, 0x02014b50, true);
+      cen.setUint16(4, 20, true);
+      cen.setUint16(6, 20, true);
+      cen.setUint16(8, 0x0800, true);
+      cen.setUint16(10, 0, true);
+      cen.setUint16(12, now.time, true);
+      cen.setUint16(14, now.day, true);
+      cen.setUint32(16, crc, true);
+      cen.setUint32(20, data.length, true);
+      cen.setUint32(24, data.length, true);
+      cen.setUint16(28, nameBytes.length, true);
+      cen.setUint32(42, offset, true);
+      central.push(new Uint8Array(cen.buffer), nameBytes);
+
+      offset += 30 + nameBytes.length + data.length;
+    });
+
+    const centralSize = central.reduce((sum, p) => sum + p.length, 0);
+    const end = new DataView(new ArrayBuffer(22));
+    end.setUint32(0, 0x06054b50, true);
+    end.setUint16(8, entries.length, true);
+    end.setUint16(10, entries.length, true);
+    end.setUint32(12, centralSize, true);
+    end.setUint32(16, offset, true);
+
+    return new Blob([...parts, ...central, new Uint8Array(end.buffer)], { type: "application/zip" });
+  }
+
+  async function inflateRaw(bytes) {
+    if (typeof DecompressionStream === "undefined") {
+      throw new Error("このブラウザは圧縮されたZIPの展開に対応していません（このアプリで書き出したZIPを使ってください）");
+    }
+    const stream = new Blob([bytes]).stream().pipeThrough(new DecompressionStream("deflate-raw"));
+    return new Uint8Array(await new Response(stream).arrayBuffer());
+  }
+
+  async function read(arrayBuffer) {
+    const bytes = new Uint8Array(arrayBuffer);
+    const view = new DataView(arrayBuffer);
+
+    // 末尾から End of Central Directory を探す
+    let eocd = -1;
+    for (let i = bytes.length - 22; i >= Math.max(0, bytes.length - 22 - 65535); i--) {
+      if (view.getUint32(i, true) === 0x06054b50) { eocd = i; break; }
+    }
+    if (eocd < 0) throw new Error("ZIPファイルの形式が正しくありません");
+
+    const count = view.getUint16(eocd + 10, true);
+    let pos = view.getUint32(eocd + 16, true);
+    const files = new Map();
+
+    for (let i = 0; i < count; i++) {
+      if (view.getUint32(pos, true) !== 0x02014b50) throw new Error("ZIPファイルが壊れています（目次を読めません）");
+      const method = view.getUint16(pos + 10, true);
+      const compSize = view.getUint32(pos + 20, true);
+      const nameLen = view.getUint16(pos + 28, true);
+      const extraLen = view.getUint16(pos + 30, true);
+      const commentLen = view.getUint16(pos + 32, true);
+      const localOffset = view.getUint32(pos + 42, true);
+      const name = decoder.decode(bytes.subarray(pos + 46, pos + 46 + nameLen));
+      pos += 46 + nameLen + extraLen + commentLen;
+
+      if (name.endsWith("/")) continue; // フォルダ項目
+
+      if (view.getUint32(localOffset, true) !== 0x04034b50) throw new Error("ZIPファイルが壊れています（データ位置が不正です）");
+      const dataStart = localOffset + 30 + view.getUint16(localOffset + 26, true) + view.getUint16(localOffset + 28, true);
+      const raw = bytes.subarray(dataStart, dataStart + compSize);
+
+      if (method === 0) files.set(name, raw);
+      else if (method === 8) files.set(name, await inflateRaw(raw));
+      else throw new Error("未対応の圧縮方式のZIPです");
+    }
+    return files;
+  }
+
+  function textOf(bytes) {
+    return decoder.decode(bytes);
+  }
+
+  return { create, read, textOf };
+})();
+
+/* ===== folderList.js ===== */
+/**
+ * folderList.js
+ * -----------------------------------------
+ * 【追加要望対応】音読ディクテーション一覧・読書記録一覧で共通に使う「フォルダ（見た目上の
+ * グループ分け）」機能。
+ *
+ *   ・フォルダ = { id, name, open } を state[foldersKey] に保存する。
+ *   ・各アイテム（教材・本）は folderId（null/未設定 = フォルダ外）を持つ。フォルダは
+ *     見た目上のグループ分けだけで、アイテム自体の内容・動作には一切影響しない。
+ *   ・フォルダはアコーディオン（<details>）で開閉できる。開閉状態も保存する。
+ *   ・移動方法：
+ *       PC     … アイテムをマウスでドラッグしてフォルダの上にドロップ
+ *       スマホ … アイテムを長押し（約0.45秒）してからドラッグしてフォルダの上で離す
+ *     フォルダ外へ出すときは、フォルダ以外の場所（一覧の余白やフォルダ外のアイテムの上）に
+ *     ドロップする。
+ *   ・ポインターイベントだけで実装（マウス・タッチ・ペン共通）。外部ライブラリ不使用。
+ *
+ * フォルダを削除してもアイテムは削除されず、フォルダ外へ戻るだけ（損失回避の方針）。
+ */
+
+const FolderList = (() => {
+  const LONG_PRESS_MS = 450;      // タッチ操作でドラッグを始めるまでの長押し時間
+  const TOUCH_CANCEL_MOVE_PX = 10; // 長押し成立前にこれ以上動いたらスクロールとみなす
+  const MOUSE_START_MOVE_PX = 6;  // マウスでドラッグを始める移動量
+  const EDGE_SCROLL_ZONE_PX = 64; // 画面端の自動スクロール範囲
+  const EDGE_SCROLL_SPEED_PX = 12;
+
+  /* ============================================================
+     データ操作
+     ============================================================ */
+
+  function getFolders(foldersKey) {
+    return GameState.getState()[foldersKey] || [];
+  }
+
+  function createFolder(foldersKey, name) {
+    const id = Utils.generateId("folder");
+    GameState.update((state) => {
+      if (!state[foldersKey]) state[foldersKey] = [];
+      state[foldersKey].push({
+        id,
+        name: (name || "").trim().slice(0, 60) || "新しいフォルダ",
+        open: true,
+      });
+    });
+    return id;
+  }
+
+  function renameFolder(foldersKey, folderId, name) {
+    const trimmed = (name || "").trim().slice(0, 60);
+    if (!trimmed) return;
+    GameState.update((state) => {
+      const f = (state[foldersKey] || []).find((x) => x.id === folderId);
+      if (f) f.name = trimmed;
+    });
+  }
+
+  function setFolderOpen(foldersKey, folderId, open) {
+    const f = getFolders(foldersKey).find((x) => x.id === folderId);
+    if (!f || !!f.open === !!open) return;
+    GameState.update((state) => {
+      const target = (state[foldersKey] || []).find((x) => x.id === folderId);
+      if (target) target.open = !!open;
+    });
+  }
+
+  /** フォルダだけを削除する。中のアイテムは削除せず、フォルダ外へ戻す。 */
+  function deleteFolder(foldersKey, itemsKey, folderId) {
+    GameState.update((state) => {
+      state[foldersKey] = (state[foldersKey] || []).filter((f) => f.id !== folderId);
+      (state[itemsKey] || []).forEach((item) => {
+        if (item.folderId === folderId) item.folderId = null;
+      });
+    });
+  }
+
+  function moveItem(itemsKey, itemId, folderId) {
+    GameState.update((state) => {
+      const item = (state[itemsKey] || []).find((x) => x.id === itemId);
+      if (item) item.folderId = folderId || null;
+    });
+  }
+
+  /* ============================================================
+     UI部品
+     ============================================================ */
+
+  /** 「フォルダを追加」ボタン。onCreated はフォルダ作成後（再描画用）に呼ばれる。 */
+  function createAddFolderButton(foldersKey, onCreated) {
+    return Utils.el("button", {
+      class: "btn btn-secondary btn-block folder-add-btn",
+      onclick: async () => {
+        const name = await uiPrompt("フォルダの名前を入力してください", "新しいフォルダ");
+        if (name === null) return;
+        createFolder(foldersKey, name);
+        Utils.showToast("フォルダを追加しました", "success");
+        if (onCreated) onCreated();
+      },
+    }, "📁 フォルダを追加");
+  }
+
+  /**
+   * フォルダ付き一覧を描画する。
+   * @param {HTMLElement} container 描画先（中身は一旦空にする）
+   * @param {object} opts
+   *   foldersKey / itemsKey : state上のキー
+   *   items                 : 表示するアイテム配列（検索などで絞り込み済みのもの）
+   *   renderItem(item)      : アイテム1件のDOM要素を返す（ドラッグ対象になる）
+   *   onChange()            : 移動・フォルダ編集後に再描画するためのコールバック
+   *   filtering             : true の間は、該当アイテムの無いフォルダを隠し、該当フォルダを開いて表示する
+   *   emptyMessage          : フォルダ外にも何も無いときの文言
+   */
+  function render(container, opts) {
+    const { foldersKey, itemsKey, items, renderItem, onChange, filtering = false, emptyMessage = "" } = opts;
+    container.innerHTML = "";
+
+    const wrap = Utils.el("div", { class: "folder-list-wrap", "data-drop-folder": "" });
+    const folders = getFolders(foldersKey);
+    const folderIds = new Set(folders.map((f) => f.id));
+
+    const byFolder = new Map();
+    const rootItems = [];
+    items.forEach((item) => {
+      if (item.folderId && folderIds.has(item.folderId)) {
+        if (!byFolder.has(item.folderId)) byFolder.set(item.folderId, []);
+        byFolder.get(item.folderId).push(item);
+      } else {
+        rootItems.push(item);
+      }
+    });
+
+    const makeDraggable = (el, item) => {
+      attachDrag(el, { itemId: item.id, itemsKey, wrap, onChange });
+      return el;
+    };
+
+    folders.forEach((folder) => {
+      const inFolder = byFolder.get(folder.id) || [];
+      if (filtering && inFolder.length === 0) return;
+
+      const details = Utils.el("details", {
+        class: "settings-accordion folder-accordion",
+        "data-drop-folder": folder.id,
+      });
+      if (filtering || folder.open) details.setAttribute("open", "");
+      details.addEventListener("toggle", () => {
+        if (!filtering) setFolderOpen(foldersKey, folder.id, details.open);
+      });
+
+      details.appendChild(Utils.el("summary", {}, `📁 ${folder.name}（${inFolder.length}）`));
+
+      const controls = Utils.el("div", { class: "folder-controls" }, [
+        Utils.el("button", {
+          class: "btn btn-secondary",
+          onclick: async () => {
+            const name = await uiPrompt("フォルダの新しい名前", folder.name);
+            if (name === null || !name.trim()) return;
+            renameFolder(foldersKey, folder.id, name);
+            if (onChange) onChange();
+          },
+        }, "名前を変更"),
+        Utils.el("button", {
+          class: "btn btn-secondary",
+          onclick: async () => {
+            if (!(await uiConfirm(`フォルダ「${folder.name}」を削除しますか？中身は削除されず、フォルダの外に戻ります。`,'削除'))) return;
+            deleteFolder(foldersKey, itemsKey, folder.id);
+            if (onChange) onChange();
+          },
+        }, "フォルダを削除"),
+      ]);
+      details.appendChild(controls);
+
+      const list = Utils.el("div", { class: "folder-items" });
+      inFolder.forEach((item) => list.appendChild(makeDraggable(renderItem(item), item)));
+      if (inFolder.length === 0) {
+        list.appendChild(Utils.el("p", { class: "empty-state folder-empty-hint" }, "ここにドラッグ（スマホは長押ししてからドラッグ）して入れます。"));
+      }
+      details.appendChild(list);
+      wrap.appendChild(details);
+    });
+
+    const rootList = Utils.el("div", { class: "folder-items folder-root-items" });
+    rootItems.forEach((item) => rootList.appendChild(makeDraggable(renderItem(item), item)));
+    wrap.appendChild(rootList);
+
+    if (rootItems.length === 0 && byFolder.size === 0 && emptyMessage) {
+      wrap.appendChild(Utils.el("p", { class: "empty-state" }, emptyMessage));
+    }
+    container.appendChild(wrap);
+  }
+
+  /* ============================================================
+     ドラッグ処理（マウスはそのままドラッグ、タッチは長押し後にドラッグ）
+     ============================================================ */
+
+  let pending = null; // 押下中（まだドラッグ開始前）
+  let drag = null;    // ドラッグ中
+  let listenersReady = false;
+  let rafId = null;
+
+  function ensureDocumentListeners() {
+    if (listenersReady) return;
+    listenersReady = true;
+    document.addEventListener("pointermove", onPointerMove);
+    document.addEventListener("pointerup", onPointerUp);
+    document.addEventListener("pointercancel", onPointerCancel);
+    // ドラッグ中は、タッチによる画面スクロールを止める（非passiveで登録が必要）
+    document.addEventListener("touchmove", (e) => {
+      if (drag && e.cancelable) e.preventDefault();
+    }, { passive: false });
+  }
+
+  function attachDrag(el, ctx) {
+    ensureDocumentListeners();
+    el.classList.add("folder-draggable");
+    el.addEventListener("pointerdown", (e) => {
+      if (drag || pending) return;
+      if (e.pointerType === "mouse" && e.button !== 0) return;
+      const st = {
+        el, ctx,
+        pointerId: e.pointerId,
+        pointerType: e.pointerType,
+        startX: e.clientX, startY: e.clientY,
+        x: e.clientX, y: e.clientY,
+        offsetX: 0, offsetY: 0,
+        timer: null, clone: null, target: null,
+      };
+      pending = st;
+      if (e.pointerType !== "mouse") {
+        st.timer = setTimeout(() => { if (pending === st) activate(st); }, LONG_PRESS_MS);
+      }
+    });
+    // 長押しで出るコンテキストメニュー（スマホ）を、ドラッグ準備中・ドラッグ中は抑止する
+    el.addEventListener("contextmenu", (e) => { if (pending || drag) e.preventDefault(); });
+  }
+
+  function activate(st) {
+    if (st.timer) { clearTimeout(st.timer); st.timer = null; }
+    pending = null;
+    drag = st;
+
+    const rect = st.el.getBoundingClientRect();
+    st.offsetX = st.x - rect.left;
+    st.offsetY = st.y - rect.top;
+
+    const clone = st.el.cloneNode(true);
+    clone.classList.add("folder-drag-clone");
+    clone.style.width = `${rect.width}px`;
+    clone.style.left = `${rect.left}px`;
+    clone.style.top = `${rect.top}px`;
+    document.body.appendChild(clone);
+    st.clone = clone;
+
+    st.el.classList.add("is-drag-source");
+    st.ctx.wrap.classList.add("is-dragging-active");
+    document.body.classList.add("folder-dragging");
+    if (navigator.vibrate) { try { navigator.vibrate(15); } catch (e) { /* 非対応環境は無視 */ } }
+
+    rafId = requestAnimationFrame(tick);
+  }
+
+  function findDropTarget(st) {
+    if (st.clone) st.clone.style.visibility = "hidden";
+    const hit = document.elementFromPoint(st.x, st.y);
+    if (st.clone) st.clone.style.visibility = "";
+    if (!hit) return null;
+    const target = hit.closest("[data-drop-folder]");
+    // 別の一覧（別画面の要素など）へは落とさない
+    if (!target || !st.ctx.wrap.contains(target) && target !== st.ctx.wrap) return null;
+    return target;
+  }
+
+  function updateTarget(st) {
+    const target = findDropTarget(st);
+    if (target === st.target) return;
+    if (st.target) st.target.classList.remove("is-drop-target");
+    st.target = target;
+    if (target) target.classList.add("is-drop-target");
+  }
+
+  function tick() {
+    if (!drag) return;
+    const st = drag;
+    // 画面の上下端に近いとき自動スクロール（長い一覧でも端まで運べるように）
+    const scroller = document.getElementById("screen-container");
+    if (scroller) {
+      const r = scroller.getBoundingClientRect();
+      if (st.y < r.top + EDGE_SCROLL_ZONE_PX) scroller.scrollTop -= EDGE_SCROLL_SPEED_PX;
+      else if (st.y > r.bottom - EDGE_SCROLL_ZONE_PX) scroller.scrollTop += EDGE_SCROLL_SPEED_PX;
+    }
+    updateTarget(st);
+    rafId = requestAnimationFrame(tick);
+  }
+
+  function onPointerMove(e) {
+    const st = drag || pending;
+    if (!st || e.pointerId !== st.pointerId) return;
+    st.x = e.clientX;
+    st.y = e.clientY;
+
+    if (drag) {
+      st.clone.style.left = `${st.x - st.offsetX}px`;
+      st.clone.style.top = `${st.y - st.offsetY}px`;
+      return;
+    }
+    const dist = Math.hypot(st.x - st.startX, st.y - st.startY);
+    if (st.pointerType === "mouse") {
+      if (dist > MOUSE_START_MOVE_PX) activate(st);
+    } else if (dist > TOUCH_CANCEL_MOVE_PX) {
+      // 長押しが成立する前に指が動いた＝通常のスクロール操作なのでドラッグは開始しない
+      clearTimeout(st.timer);
+      pending = null;
+    }
+  }
+
+  function endDrag(commit) {
+    const st = drag;
+    if (!st) return;
+    drag = null;
+    if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
+
+    const target = commit ? (st.target || findDropTarget(st)) : null;
+    if (st.target) st.target.classList.remove("is-drop-target");
+    if (st.clone) st.clone.remove();
+    st.el.classList.remove("is-drag-source");
+    st.ctx.wrap.classList.remove("is-dragging-active");
+    document.body.classList.remove("folder-dragging");
+
+    // ドラッグ操作の直後に発生する「クリック」（教材・本を開いてしまう動作）を1回だけ無効化する
+    const swallow = (ev) => { ev.stopPropagation(); ev.preventDefault(); };
+    document.addEventListener("click", swallow, { capture: true, once: true });
+    setTimeout(() => document.removeEventListener("click", swallow, { capture: true }), 400);
+
+    if (!target) return;
+    const folderId = target.getAttribute("data-drop-folder") || null;
+    const current = (GameState.getState()[st.ctx.itemsKey] || []).find((x) => x.id === st.ctx.itemId);
+    if (!current || (current.folderId || null) === folderId) return;
+    moveItem(st.ctx.itemsKey, st.ctx.itemId, folderId);
+    if (st.ctx.onChange) st.ctx.onChange();
+  }
+
+  function onPointerUp(e) {
+    if (pending && e.pointerId === pending.pointerId) {
+      if (pending.timer) clearTimeout(pending.timer);
+      pending = null; // 通常のタップ／クリックとして扱う
+      return;
+    }
+    if (drag && e.pointerId === drag.pointerId) endDrag(true);
+  }
+
+  function onPointerCancel(e) {
+    if (pending && e.pointerId === pending.pointerId) {
+      if (pending.timer) clearTimeout(pending.timer);
+      pending = null;
+      return;
+    }
+    if (drag && e.pointerId === drag.pointerId) endDrag(false);
+  }
+
+  return {
+    render, createAddFolderButton,
+    createFolder, renameFolder, deleteFolder, setFolderOpen, moveItem, getFolders,
+  };
+})();
+
+/* ===== readingSystem.js ===== */
+/**
+ * readingSystem.js
+ * -----------------------------------------
+ * Phase8：読書記録システム（仕様62章）。学習ゲームの主目的からは外れる
+ * 任意機能のため、日記のように何かを強制したりガチャ解放条件にはしない
+ * （仕様60章「読書していない日でも日記可能。日記は読書を強制しない」に準拠）。
+ *
+ * 1冊 = 1 book レコード：
+ *   { id, title, author, publisher, tags:[], rereadFlag,
+ *     bookSummary,                         // 本の要約（目安150文字）
+ *     chapters: [{ id, name, summary }],   // 章要約（目安30文字）
+ *     quotes: [{ id, text, note }],        // 引用
+ *     ladder: [{ id, kind:"abstract"|"concrete", text }], // 抽象⇄具体（横方向に無限追加）
+ *     criticalQuestions: [{ id, question, answer }],      // 批判的読書テンプレート
+ *     createdAt, updatedAt }
+ *
+ * 【仕様に明記が無く判断した点】
+ *   - 章要約30文字・本要約150文字は「目安」として文字数カウンターを表示するのみで、
+ *     入力を強制的にブロックしない（認知負荷を減らす方針を優先。仕様書冒頭の
+ *     判断優先順位②に基づく）。
+ *   - 批判的読書テンプレートの初期質問6個はcriticalQuestionsに自動で種として
+ *     入る。ユーザーは自由に追加・削除できる（仕様62章「自由追加可能」）。
+ */
+
+const ReadingSystem = (() => {
+  const DEFAULT_CRITICAL_QUESTIONS = ["本当に？", "前提は？", "例外は？", "根拠は？", "他の説明は？", "反証は？"];
+  const CHAPTER_SUMMARY_TARGET = 30;
+  const BOOK_SUMMARY_TARGET = 150;
+
+  /**
+   * 【追加要望対応】読書記録の「章ごとの要約」「抽象」「抽象⇄具体」「批判的読書テンプレート」を
+   * アコーディオン（開閉式、<details>）表示にするための共通ヘルパー。
+   * router.js内のsettingsAccordion()と同じ見た目（css/style.css .settings-accordion）を再利用する。
+   */
+  function readingAccordion(title, children, opts = {}) {
+    const summary = Utils.el("summary", {}, title);
+    const details = Utils.el("details", { class: "settings-accordion" }, [summary, ...children]);
+    if (opts.open) details.setAttribute("open", "");
+    return details;
+  }
+
+  /**
+   * 【追加要望対応】読書記録を「一冊分」書き上げたときに、過去日記チケットを1枚獲得する。
+   * 「一冊分」の判定（仕様に無いため判断した。HANDOFF.md参照）：
+   *   ・タイトルが初期値（無題の本）以外で入力されている
+   *   ・本の要約が記入されている
+   *   ・章ごとの要約が1つ以上記入されている
+   * 1冊につき1回だけ獲得できる（book.diaryTicketGranted）。
+   */
+  function isBookComplete(book) {
+    if (!book) return false;
+    const title = (book.title || "").trim();
+    if (!title || title === "無題の本") return false;
+    if (!(book.bookSummary || "").trim()) return false;
+    return (book.chapters || []).some((c) => (c.summary || "").trim());
+  }
+
+  function awardTicketIfComplete(bookId) {
+    let granted = false;
+    GameState.update((state) => {
+      const b = state.books.find((x) => x.id === bookId);
+      if (!b || b.diaryTicketGranted || !isBookComplete(b)) return;
+      b.diaryTicketGranted = true;
+      state.diaryTickets = (state.diaryTickets || 0) + 1;
+      granted = true;
+    });
+    if (granted) Utils.showToast("🎫 読書記録を一冊分書き上げました！過去の日記を書けるチケットを1枚獲得", "success");
+    return granted;
+  }
+
+  function getAll() {
+    return GameState.getState().books || [];
+  }
+
+  function getById(id) {
+    return getAll().find((b) => b.id === id) || null;
+  }
+
+  function createBook({ title, author, publisher }) {
+    const id = Utils.generateId("book");
+    GameState.update((state) => {
+      state.books.push({
+        id,
+        title: title.trim().slice(0, 100) || "無題の本",
+        author: (author || "").trim().slice(0, 60),
+        publisher: (publisher || "").trim().slice(0, 60),
+        tags: [],
+        rereadFlag: false,
+        folderId: null,
+        diaryTicketGranted: false,
+        bookSummary: "",
+        chapters: [],
+        quotes: [],
+        ladder: [],
+        criticalQuestions: DEFAULT_CRITICAL_QUESTIONS.map((q) => ({ id: Utils.generateId("cq"), question: q, answer: "" })),
+        createdAt: Utils.todayStr(),
+        updatedAt: Utils.todayStr(),
+      });
+    });
+    return id;
+  }
+
+  function updateBook(id, patch) {
+    GameState.update((state) => {
+      const b = state.books.find((x) => x.id === id);
+      if (!b) return;
+      Object.assign(b, patch);
+      b.updatedAt = Utils.todayStr();
+    });
+    awardTicketIfComplete(id);
+  }
+
+  function deleteBook(id) {
+    GameState.update((state) => {
+      state.books = state.books.filter((b) => b.id !== id);
+    });
+  }
+
+  function addChapter(bookId, name) {
+    GameState.update((state) => {
+      const b = state.books.find((x) => x.id === bookId);
+      if (!b) return;
+      b.chapters.push({ id: Utils.generateId("chap"), name: name.trim().slice(0, 60) || `第${b.chapters.length + 1}章`, summary: "" });
+      b.updatedAt = Utils.todayStr();
+    });
+  }
+
+  function updateChapterSummary(bookId, chapterId, summary) {
+    GameState.update((state) => {
+      const b = state.books.find((x) => x.id === bookId);
+      const c = b?.chapters.find((x) => x.id === chapterId);
+      if (c) c.summary = summary.slice(0, 200);
+    });
+    awardTicketIfComplete(bookId);
+  }
+
+  function addQuote(bookId, text, note) {
+    GameState.update((state) => {
+      const b = state.books.find((x) => x.id === bookId);
+      if (!b) return;
+      b.quotes.push({ id: Utils.generateId("quote"), text: text.trim().slice(0, 300), note: (note || "").trim().slice(0, 300) });
+    });
+  }
+
+  /** 抽象⇄具体の鎖に1項目追加する。種類は交互を推奨するがUI側でボタンを分けるのみで強制はしない */
+  function addLadderItem(bookId, kind, text) {
+    GameState.update((state) => {
+      const b = state.books.find((x) => x.id === bookId);
+      if (!b) return;
+      b.ladder.push({ id: Utils.generateId("ladder"), kind, text: text.trim().slice(0, 200) });
+    });
+  }
+
+  function addCriticalQuestion(bookId, question) {
+    GameState.update((state) => {
+      const b = state.books.find((x) => x.id === bookId);
+      if (!b) return;
+      b.criticalQuestions.push({ id: Utils.generateId("cq"), question: question.trim().slice(0, 100), answer: "" });
+    });
+  }
+
+  function updateCriticalAnswer(bookId, questionId, answer) {
+    GameState.update((state) => {
+      const b = state.books.find((x) => x.id === bookId);
+      const q = b?.criticalQuestions.find((x) => x.id === questionId);
+      if (q) q.answer = answer.slice(0, 400);
+    });
+  }
+
+  function setTags(bookId, tagsText) {
+    const tags = tagsText.split(/[,、\s]+/).map((t) => t.trim()).filter(Boolean).slice(0, 20);
+    updateBook(bookId, { tags });
+  }
+
+  /** 検索（仕様62章：タグ・期間・除外・キーワード） */
+  function search({ keyword = "", tag = "", excludeKeyword = "", fromDate = "", toDate = "" } = {}) {
+    return getAll().filter((b) => {
+      if (tag && !b.tags.includes(tag)) return false;
+      if (fromDate && b.updatedAt < fromDate) return false;
+      if (toDate && b.updatedAt > toDate) return false;
+      const haystack = [b.title, b.author, b.bookSummary, ...(b.quotes || []).map((q) => q.text)].join(" ");
+      if (keyword && !haystack.includes(keyword)) return false;
+      if (excludeKeyword && haystack.includes(excludeKeyword)) return false;
+      return true;
+    });
+  }
+
+  function getAllTags() {
+    const set = new Set();
+    getAll().forEach((b) => b.tags.forEach((t) => set.add(t)));
+    return [...set];
+  }
+
+  /* ============================================================
+     画面："books"（一覧・検索）
+     ============================================================ */
+
+  function renderBooksScreen(root) {
+    const wrap = Utils.el("div", { class: "screen-inner" });
+    wrap.appendChild(Utils.el("h2", {}, "読書記録"));
+
+    const state = { keyword: "", tag: "", excludeKeyword: "" };
+    const resultsBox = Utils.el("div", { class: "folder-list-box" });
+
+    const searchPanel = Utils.el("div", { class: "panel" });
+    const kwInput = Utils.el("input", { type: "text", class: "review-typing-input", placeholder: "キーワード検索" });
+    const excludeInput = Utils.el("input", { type: "text", class: "review-typing-input", placeholder: "除外キーワード" });
+    const tagSelect = Utils.el("select", { class: "review-typing-input" }, [
+      Utils.el("option", { value: "" }, "すべてのタグ"),
+      ...getAllTags().map((t) => Utils.el("option", { value: t }, t)),
+    ]);
+    const runSearch = () => {
+      renderResults(currentResults());
+    };
+    const isFiltering = () => !!(kwInput.value.trim() || tagSelect.value || excludeInput.value.trim());
+    const currentResults = () => search({ keyword: kwInput.value.trim(), tag: tagSelect.value, excludeKeyword: excludeInput.value.trim() });
+    [kwInput, excludeInput].forEach((inp) => inp.addEventListener("input", runSearch));
+    tagSelect.addEventListener("change", runSearch);
+    searchPanel.appendChild(Utils.el("h3", {}, "検索"));
+    searchPanel.appendChild(kwInput);
+    searchPanel.appendChild(excludeInput);
+    searchPanel.appendChild(tagSelect);
+    wrap.appendChild(searchPanel);
+
+    // 【追加要望対応】「フォルダを追加」を「新しい本を追加」の上に配置（見た目上のグループ分け）
+    wrap.appendChild(FolderList.createAddFolderButton("bookFolders", () => renderResults(currentResults())));
+    wrap.appendChild(Utils.el("button", {
+      class: "btn btn-primary btn-block folder-add-item-btn",
+      onclick: () => Router.navigate("bookDetail", { bookId: null }),
+    }, "＋ 新しい本を追加"));
+
+    wrap.appendChild(resultsBox);
+
+    function renderResults(list) {
+      FolderList.render(resultsBox, {
+        foldersKey: "bookFolders",
+        itemsKey: "books",
+        items: list,
+        filtering: isFiltering(),
+        emptyMessage: "本がありません。",
+        onChange: () => renderResults(currentResults()),
+        renderItem: (b) => Utils.el("button", { class: "panel book-list-row", onclick: () => Router.navigate("bookDetail", { bookId: b.id }) }, [
+          Utils.el("h3", {}, b.title + (b.rereadFlag ? " 🔁" : "")),
+          Utils.el("p", {}, b.author || "著者未設定"),
+          Utils.el("div", { class: "progress-meta" }, [
+            Utils.el("span", {}, b.tags.length ? `#${b.tags.join(" #")}` : "タグなし"),
+            Utils.el("span", {}, `更新: ${b.updatedAt}`),
+          ]),
+        ]),
+      });
+    }
+
+    renderResults(getAll());
+    root.appendChild(wrap);
+  }
+
+  /* ============================================================
+     画面："bookDetail"（詳細・編集）
+     ============================================================ */
+
+  function renderBookDetailScreen(root, params = {}) {
+    let bookId = params.bookId;
+    if (!bookId) {
+      bookId = createBook({ title: "無題の本", author: "", publisher: "" });
+    }
+    const book = getById(bookId);
+    if (!book) { root.appendChild(Utils.el("p", { class: "empty-state" }, "本が見つかりません")); return; }
+
+    const wrap = Utils.el("div", { class: "screen-inner" });
+    wrap.appendChild(Utils.el("h2", {}, "読書記録の編集"));
+
+    // --- 基本情報 ---
+    const basicPanel = Utils.el("div", { class: "panel" });
+    const titleInput = Utils.el("input", { type: "text", class: "review-typing-input", placeholder: "タイトル" });
+    titleInput.value = book.title;
+    const authorInput = Utils.el("input", { type: "text", class: "review-typing-input", placeholder: "著者" });
+    authorInput.value = book.author;
+    const publisherInput = Utils.el("input", { type: "text", class: "review-typing-input", placeholder: "出版社" });
+    publisherInput.value = book.publisher;
+    const tagInput = Utils.el("input", { type: "text", class: "review-typing-input", placeholder: "タグ（カンマ区切り）" });
+    tagInput.value = book.tags.join(", ");
+    const rereadLabel = Utils.el("label", { class: "settings-row" }, [
+      "再読フラグ",
+      Utils.el("input", { type: "checkbox", checked: book.rereadFlag || undefined }),
+    ]);
+    rereadLabel.querySelector("input").addEventListener("change", (e) => updateBook(bookId, { rereadFlag: e.target.checked }));
+
+    [titleInput, authorInput, publisherInput].forEach((inp) => {
+      inp.addEventListener("change", () => updateBook(bookId, { title: titleInput.value, author: authorInput.value, publisher: publisherInput.value }));
+    });
+    tagInput.addEventListener("change", () => setTags(bookId, tagInput.value));
+
+    basicPanel.appendChild(titleInput);
+    basicPanel.appendChild(authorInput);
+    basicPanel.appendChild(publisherInput);
+    basicPanel.appendChild(tagInput);
+    basicPanel.appendChild(rereadLabel);
+
+    wrap.appendChild(basicPanel);
+
+    // --- 引用 ---
+    wrap.appendChild(renderQuotesSection(book));
+
+    // 【追加要望対応】「章ごとの要約」「抽象」「抽象⇄具体」「批判的読書テンプレート」を
+    // アコーディオン（開閉式）表示にした。既存の各render関数はそのままパネル中身として使う。
+    wrap.appendChild(readingAccordion("章ごとの要約", [renderChaptersSection(book)]));
+    wrap.appendChild(readingAccordion("抽象", [renderAbstractSummarySection(book)]));
+    wrap.appendChild(readingAccordion("抽象⇄具体", [renderLadderSection(book)]));
+    wrap.appendChild(readingAccordion("批判的読書テンプレート", [renderCriticalSection(book)]));
+
+    wrap.appendChild(Utils.el("button", {
+      class: "btn btn-secondary btn-block",
+      onclick: async () => {
+        if (await uiConfirm(`「${book.title}」を削除しますか？`,'削除')) {
+          deleteBook(bookId);
+          Router.navigate("books");
+        }
+      },
+    }, "この本を削除する"));
+
+    wrap.appendChild(Utils.el("button", { class: "btn btn-moss btn-block", onclick: () => Router.navigate("books") }, "一覧に戻る"));
+
+    root.appendChild(wrap);
+
+    function renderAbstractSummarySection(b) {
+      const panel = Utils.el("div", { class: "panel" });
+      const summaryInput = Utils.el("textarea", { class: "review-textarea", placeholder: `本の要約（目安${BOOK_SUMMARY_TARGET}文字）` });
+      summaryInput.value = b.bookSummary;
+      const summaryCounter = Utils.el("div", { class: "char-counter" }, `${b.bookSummary.length} / ${BOOK_SUMMARY_TARGET}（目安）`);
+      summaryInput.addEventListener("input", () => { summaryCounter.textContent = `${summaryInput.value.length} / ${BOOK_SUMMARY_TARGET}（目安）`; });
+      summaryInput.addEventListener("change", () => updateBook(bookId, { bookSummary: summaryInput.value }));
+      panel.appendChild(Utils.el("label", { class: "diary-field-label" }, "本の要約"));
+      panel.appendChild(summaryInput);
+      panel.appendChild(summaryCounter);
+      return panel;
+    }
+
+    function renderChaptersSection(b) {
+      const panel = Utils.el("div", { class: "panel" });
+      b.chapters.forEach((c) => {
+        const row = Utils.el("div", { class: "chapter-row" });
+        row.appendChild(Utils.el("div", { class: "diary-field-label" }, c.name));
+        const input = Utils.el("input", { type: "text", class: "review-typing-input", placeholder: `章の要約（目安${CHAPTER_SUMMARY_TARGET}文字）` });
+        input.value = c.summary;
+        input.addEventListener("change", () => updateChapterSummary(bookId, c.id, input.value));
+        row.appendChild(input);
+        panel.appendChild(row);
+      });
+      const nameInput = Utils.el("input", { type: "text", class: "review-typing-input", placeholder: "新しい章の名前" });
+      panel.appendChild(nameInput);
+      panel.appendChild(Utils.el("button", {
+        class: "btn btn-secondary btn-block",
+        onclick: () => { addChapter(bookId, nameInput.value || `第${b.chapters.length + 1}章`); Router.navigate("bookDetail", { bookId }); },
+      }, "＋ 章を追加"));
+      return panel;
+    }
+
+    function renderQuotesSection(b) {
+      const panel = Utils.el("div", { class: "panel" }, [Utils.el("h3", {}, "引用")]);
+      b.quotes.forEach((q) => {
+        panel.appendChild(Utils.el("div", { class: "quote-row" }, [
+          Utils.el("p", { class: "quote-text" }, `「${q.text}」`),
+          q.note ? Utils.el("p", { class: "quote-note" }, q.note) : null,
+        ]));
+      });
+      const textInput = Utils.el("textarea", { class: "review-textarea", placeholder: "引用文" });
+      const noteInput = Utils.el("input", { type: "text", class: "review-typing-input", placeholder: "メモ（任意）" });
+      panel.appendChild(textInput);
+      panel.appendChild(noteInput);
+      panel.appendChild(Utils.el("button", {
+        class: "btn btn-secondary btn-block",
+        onclick: () => {
+          if (!textInput.value.trim()) return;
+          addQuote(bookId, textInput.value, noteInput.value);
+          Router.navigate("bookDetail", { bookId });
+        },
+      }, "＋ 引用を追加"));
+      return panel;
+    }
+
+    function renderLadderSection(b) {
+      const panel = Utils.el("div", { class: "panel" }, [
+        Utils.el("p", {}, "抽象的な考えと、その具体例を交互に並べて思考を広げます。"),
+      ]);
+      const chain = Utils.el("div", { class: "ladder-chain" });
+      b.ladder.forEach((item) => {
+        chain.appendChild(Utils.el("div", { class: "ladder-item ladder-" + item.kind }, [
+          Utils.el("span", { class: "ladder-kind-badge" }, item.kind === "abstract" ? "抽象" : "具体"),
+          Utils.el("span", {}, item.text),
+        ]));
+      });
+      panel.appendChild(chain);
+      const ladderInput = Utils.el("input", { type: "text", class: "review-typing-input", placeholder: "内容を入力してから、抽象 or 具体を選んで追加" });
+      panel.appendChild(ladderInput);
+      const btnRow = Utils.el("div", { class: "quiz-choice-row" }, [
+        Utils.el("button", { class: "btn btn-secondary", onclick: () => addLadderAndRefresh("abstract") }, "＋ 抽象として追加"),
+        Utils.el("button", { class: "btn btn-secondary", onclick: () => addLadderAndRefresh("concrete") }, "＋ 具体として追加"),
+      ]);
+      panel.appendChild(btnRow);
+      function addLadderAndRefresh(kind) {
+        if (!ladderInput.value.trim()) return;
+        addLadderItem(bookId, kind, ladderInput.value);
+        Router.navigate("bookDetail", { bookId });
+      }
+      return panel;
+    }
+
+    function renderCriticalSection(b) {
+      const panel = Utils.el("div", { class: "panel" });
+      b.criticalQuestions.forEach((q) => {
+        const row = Utils.el("div", { class: "critical-question-row" });
+        row.appendChild(Utils.el("div", { class: "diary-field-label" }, q.question));
+        const answerInput = Utils.el("textarea", { class: "review-textarea", placeholder: "考えたことを書く" });
+        answerInput.value = q.answer;
+        answerInput.addEventListener("change", () => updateCriticalAnswer(bookId, q.id, answerInput.value));
+        row.appendChild(answerInput);
+        panel.appendChild(row);
+      });
+      const newQInput = Utils.el("input", { type: "text", class: "review-typing-input", placeholder: "自分の問いを追加する" });
+      panel.appendChild(newQInput);
+      panel.appendChild(Utils.el("button", {
+        class: "btn btn-secondary btn-block",
+        onclick: () => {
+          if (!newQInput.value.trim()) return;
+          addCriticalQuestion(bookId, newQInput.value);
+          Router.navigate("bookDetail", { bookId });
+        },
+      }, "＋ 問いを追加"));
+      return panel;
+    }
+  }
+
+  Router.registerScreen("books", renderBooksScreen);
+  Router.registerScreen("bookDetail", renderBookDetailScreen);
+
+  return {
+    getAll, getById, createBook, updateBook, deleteBook,
+    addChapter, updateChapterSummary, addQuote, addLadderItem,
+    addCriticalQuestion, updateCriticalAnswer, setTags, search, getAllTags,
+    DEFAULT_CRITICAL_QUESTIONS, isBookComplete,
+  };
+})();
+
+/* ===== dictationSystem.js ===== */
+/**
+ * dictationSystem.js
+ * -----------------------------------------
+ * 【追加要望対応】外国語の音読用ディクテーション機能。
+ * 「霧晴れの開拓日誌」から「読書記録」と並べて入れる、学習ゲームの主目的からは
+ * 独立した任意機能（readingSystem.jsと同じ位置づけ。ガチャ解放条件等には関与しない）。
+ *
+ * 1セット = 1つの音読教材：
+ *   { id, title,
+ *     sentences: [{ id, text, audio: { fileId, start, end } | null }],
+ *     audioFiles: [{ id, name, dataUrl }],   // フォルダ単位でまとめてアップロードした音源
+ *     createdAt, updatedAt }
+ *
+ * 【追加要望対応（HANDOFF.md 19章）】
+ *   ・画面：dictationList（一覧＋フォルダ＋ZIPバックアップ）／dictationDetail（編集）／
+ *     dictationListen（▶ 練習する：分割文の一覧と音声）／dictationPractice（ディクテーション）
+ *   ・コイン報酬：練習する（分割前の音声を最後まで再生）5個、ディクテーション（最後まで解答）5個、
+ *     全問正解20個。いずれも「編集画面に戻る」を押したときに付与（同じ教材・同じ種類は1日1回まで）。
+ *
+ * 【仕様に明記が無く判断した点（要レビュー。HANDOFF.md参照）】
+ *   - 「自動でテキストを参照して音声を分割」は、音声認識・音素解析を伴う本格的な
+ *     自動分割はブラウザ内の範囲を超えるため、「1つの音源ファイルの総再生時間を、
+ *     各文の文字数の比率で按分する」という簡易的な仮分割（ヒューリスティック）とした。
+ *     結果はあくまで「たたき台」であり、その後の「手動での音声カットと対応」で
+ *     利用者が実際の音声を聞きながら開始・終了位置を修正する運用を想定している。
+ *   - 音源はdataURL（Base64）としてIndexedDBに保存する（assetManager.jsの画像保存と
+ *     同じ方式）。音声ファイルは画像より容量が大きくなりやすいため、大量・長時間の
+ *     音源を扱う場合はバックアップJSONの肥大化に注意（HANDOFF.mdに記載）。
+ */
+
+const DictationSystem = (() => {
+
+  // 【追加要望対応】コイン報酬（仕様に金額の指定があるもの）。
+  const REWARD_LISTEN = 5;             // 「練習する」で分割前の音声を最後まで再生
+  const REWARD_DICTATION = 5;          // 「ディクテーション」を最後の問題まで解いた
+  const REWARD_DICTATION_PERFECT = 20; // 上記のうち全問正解
+  // 仕様に明記が無く判断した点：コインの無限取得（同じ教材の周回）を防ぐため、
+  // 「同じ教材・同じ種類の報酬は1日に1回まで」とした。falseにすると毎回受け取れる。
+  const REWARD_ONCE_PER_DAY = true;
+
+  function getAll() {
+    return GameState.getState().dictationSets || [];
+  }
+
+  /**
+   * 報酬を受け取る。kind: "listen" | "dictation"。
+   * 同じ日に同じ種類を受け取り済みの場合は、差額だけ付与（例：5個受取済み→全問正解で+15個）。
+   * @returns {number} 実際に付与したコイン数（0なら受取済み）
+   */
+  function claimReward(setId, kind, amount) {
+    const today = Utils.todayStr();
+    let granted = amount;
+    GameState.update((state) => {
+      if (!state.dictationRewards) state.dictationRewards = {};
+      if (!state.dictationRewards[setId]) state.dictationRewards[setId] = {};
+      const rec = state.dictationRewards[setId][kind];
+      if (REWARD_ONCE_PER_DAY && rec && rec.date === today) granted = Math.max(0, amount - rec.amount);
+      if (granted > 0) {
+        const prev = (rec && rec.date === today) ? rec.amount : 0;
+        state.dictationRewards[setId][kind] = { date: today, amount: prev + granted };
+      }
+    });
+    if (granted > 0) RewardSystem.grantCompass(granted);
+    return granted;
+  }
+
+  /** 教材内の音源のうち、分割前の「元の音声」とみなすもの（文に最も多く割り当てられている音源、無ければ先頭） */
+  function getOriginalAudioFile(set) {
+    if (!set || !set.audioFiles || set.audioFiles.length === 0) return null;
+    const counts = new Map();
+    (set.sentences || []).forEach((sent) => {
+      if (sent.audio) counts.set(sent.audio.fileId, (counts.get(sent.audio.fileId) || 0) + 1);
+    });
+    let bestId = null;
+    let best = 0;
+    counts.forEach((n, id) => { if (n > best) { best = n; bestId = id; } });
+    return set.audioFiles.find((f) => f.id === bestId) || set.audioFiles[0];
+  }
+
+  /** ディクテーション用の音源が再生されたらstage.m4aを止める（探索画面に戻るまで） */
+  function watchAudio(audioEl) {
+    audioEl.addEventListener("play", () => {
+      Bgm.hold(audioEl);
+    });
+    return audioEl;
+  }
+
+  /**
+   * 1つの<audio>で「音源全体」や「文ごとの範囲」を再生するプレーヤー。
+   * 終了位置の監視は約40msごとに行い、範囲を大きくはみ出さないようにする。
+   */
+  function createPlayer(audioEl) {
+    let timer = null;
+    let seq = 0;
+
+    function clearTimer() { if (timer) { clearInterval(timer); timer = null; } }
+
+    function ensureFile(file) {
+      if (audioEl.dataset.fileId === file.id && audioEl.readyState >= 1) return Promise.resolve();
+      return new Promise((resolve, reject) => {
+        audioEl.dataset.fileId = file.id;
+        const done = () => { audioEl.removeEventListener("loadedmetadata", onOk); audioEl.removeEventListener("error", onErr); };
+        const onOk = () => { done(); resolve(); };
+        const onErr = () => { done(); reject(new Error("音声を読み込めませんでした")); };
+        audioEl.addEventListener("loadedmetadata", onOk);
+        audioEl.addEventListener("error", onErr);
+        audioEl.src = file.dataUrl;
+      });
+    }
+
+    /** end が null なら最後まで再生する */
+    async function playRange(file, start, end, onEnd) {
+      const mySeq = ++seq;
+      clearTimer();
+      audioEl.pause();
+      try {
+        await ensureFile(file);
+        if (mySeq !== seq) return;
+        audioEl.currentTime = start || 0;
+        await audioEl.play();
+      } catch (err) {
+        console.error("[dictationSystem] 音声の再生に失敗しました", err);
+        Utils.showToast("音声を再生できませんでした", "error");
+        return;
+      }
+      if (mySeq !== seq || end == null) return;
+      timer = setInterval(() => {
+        if (audioEl.currentTime >= end || audioEl.ended) {
+          clearTimer();
+          audioEl.pause();
+          if (onEnd) onEnd();
+        }
+      }, 40);
+    }
+
+    function stop() { seq += 1; clearTimer(); audioEl.pause(); }
+
+    return { playRange, stop };
+  }
+
+  function getById(id) {
+    return getAll().find((s) => s.id === id) || null;
+  }
+
+  function createSet(title) {
+    const id = Utils.generateId("dictset");
+    GameState.update((state) => {
+      if (!state.dictationSets) state.dictationSets = [];
+      state.dictationSets.push({
+        id,
+        title: (title || "").trim().slice(0, 100) || "無題の教材",
+        sentences: [],
+        audioFiles: [],
+        folderId: null,
+        createdAt: Utils.todayStr(),
+        updatedAt: Utils.todayStr(),
+      });
+    });
+    return id;
+  }
+
+  function updateSet(id, patch) {
+    GameState.update((state) => {
+      const s = state.dictationSets.find((x) => x.id === id);
+      if (!s) return;
+      Object.assign(s, patch);
+      s.updatedAt = Utils.todayStr();
+    });
+  }
+
+  function deleteSet(id) {
+    GameState.update((state) => {
+      state.dictationSets = state.dictationSets.filter((s) => s.id !== id);
+    });
+  }
+
+  /**
+   * テキストを文単位に分割する（。！？.!? および改行を区切りとする簡易分割）。
+   * 既存のsentencesがある場合は呼び出し側で確認（上書き注意）を行うこと。
+   */
+  function splitTextToSentences(text) {
+    const normalized = text.replace(/\r\n/g, "\n").trim();
+    if (!normalized) return [];
+    const rough = normalized.split(/\n+/).flatMap((line) =>
+      line.split(/(?<=[。！？.!?])/).map((s) => s.trim()).filter(Boolean)
+    );
+    return rough.filter(Boolean);
+  }
+
+  function setSentencesFromText(setId, text) {
+    const sentences = splitTextToSentences(text).map((t) => ({
+      id: Utils.generateId("sent"), text: t, audio: null,
+    }));
+    updateSet(setId, { sentences });
+    return sentences.length;
+  }
+
+  function addAudioFiles(setId, files) {
+    return Promise.all(files.map((file) => new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve({ id: Utils.generateId("audio"), name: file.name, dataUrl: reader.result });
+      reader.onerror = () => resolve(null);
+      reader.readAsDataURL(file);
+    }))).then((results) => {
+      const valid = results.filter(Boolean);
+      GameState.update((state) => {
+        const s = state.dictationSets.find((x) => x.id === setId);
+        if (!s) return;
+        s.audioFiles.push(...valid);
+        s.updatedAt = Utils.todayStr();
+      });
+      return valid.length;
+    });
+  }
+
+  /**
+   * 【追加要望対応】自動での仮分割（ヒューリスティック）。
+   * 指定した音源ファイル1つの総再生時間を、各文の文字数の比率で按分して
+   * sentence.audio = { fileId, start, end } を仮に割り当てる。
+   * @param {string} setId
+   * @param {string} audioFileId 分割の元にする音源ファイルID
+   * @param {number} durationSec 音源の総再生時間（秒）
+   */
+  function autoSplitByCharCount(setId, audioFileId, durationSec) {
+    const set = getById(setId);
+    if (!set || set.sentences.length === 0 || !durationSec) return 0;
+    const totalChars = set.sentences.reduce((sum, s) => sum + Math.max(1, s.text.length), 0);
+    let cursor = 0;
+    const updated = set.sentences.map((s) => {
+      const share = Math.max(1, s.text.length) / totalChars;
+      const dur = durationSec * share;
+      const start = cursor;
+      const end = Math.min(durationSec, cursor + dur);
+      cursor = end;
+      return { ...s, audio: { fileId: audioFileId, start: round2(start), end: round2(end) } };
+    });
+    updateSet(setId, { sentences: updated });
+    return updated.length;
+  }
+
+  function round2(n) { return Math.round(n * 100) / 100; }
+
+  function setSentenceAudio(setId, sentenceId, fileId, start, end) {
+    GameState.update((state) => {
+      const s = state.dictationSets.find((x) => x.id === setId);
+      const sent = s?.sentences.find((x) => x.id === sentenceId);
+      if (sent) sent.audio = { fileId, start: round2(start), end: round2(end) };
+      if (s) s.updatedAt = Utils.todayStr();
+    });
+  }
+
+  /* ============================================================
+     ZIPバックアップ（音源・分割情報・フォルダをまとめて保存／復元）
+     ============================================================ */
+
+  const BACKUP_FORMAT = "gakushu-dictation-backup";
+
+  function mimeOfDataUrl(dataUrl) {
+    const m = /^data:([^;,]+)/.exec(dataUrl || "");
+    return m ? m[1] : "application/octet-stream";
+  }
+
+  function extOfName(name, mime) {
+    const m = /\.([A-Za-z0-9]{1,5})$/.exec(name || "");
+    if (m) return "." + m[1].toLowerCase();
+    if (mime === "audio/mpeg") return ".mp3";
+    if (mime === "audio/mp4" || mime === "audio/x-m4a") return ".m4a";
+    return ".bin";
+  }
+
+  async function dataUrlToBytes(dataUrl) {
+    try {
+      const res = await fetch(dataUrl);
+      return new Uint8Array(await res.arrayBuffer());
+    } catch (err) {
+      // fetchでdata URLを扱えない環境向けのフォールバック
+      const base64 = (dataUrl || "").split(",")[1] || "";
+      const bin = atob(base64);
+      const bytes = new Uint8Array(bin.length);
+      for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+      return bytes;
+    }
+  }
+
+  function bytesToDataUrl(bytes, mime) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = () => reject(new Error("音源の変換に失敗しました"));
+      reader.readAsDataURL(new Blob([bytes], { type: mime || "application/octet-stream" }));
+    });
+  }
+
+  function downloadBlob(filename, blob) {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }
+
+  /** すべての教材（音源・文の分割位置・フォルダ）をZIPで書き出す */
+  async function exportBackupZip() {
+    const sets = getAll();
+    if (sets.length === 0) { Utils.showToast("書き出す教材がありません", "error"); return; }
+    try {
+      const entries = [];
+      const manifestSets = [];
+      for (const set of sets) {
+        const audioMeta = [];
+        for (const f of set.audioFiles || []) {
+          const bytes = await dataUrlToBytes(f.dataUrl);
+          const mime = mimeOfDataUrl(f.dataUrl);
+          const path = `audio/${set.id}/${f.id}${extOfName(f.name, mime)}`;
+          entries.push({ name: path, data: bytes });
+          audioMeta.push({ id: f.id, name: f.name, mime, path });
+        }
+        manifestSets.push({
+          id: set.id, title: set.title, folderId: set.folderId || null,
+          sentences: set.sentences || [], audioFiles: audioMeta,
+          createdAt: set.createdAt, updatedAt: set.updatedAt,
+        });
+      }
+      const manifest = {
+        format: BACKUP_FORMAT, version: 1, exportedAt: new Date().toISOString(),
+        folders: GameState.getState().dictationFolders || [],
+        sets: manifestSets,
+      };
+      entries.unshift({ name: "manifest.json", data: JSON.stringify(manifest, null, 2) });
+      downloadBlob(`dictation_backup_${Utils.todayStr()}.zip`, ZipUtil.create(entries));
+      Utils.showToast(`${sets.length}件の教材をZIPで書き出しました`, "success");
+    } catch (err) {
+      console.error("[dictationSystem] ZIPの書き出しに失敗しました", err);
+      Utils.showToast("ZIPの書き出しに失敗しました: " + err.message, "error");
+    }
+  }
+
+  /**
+   * ZIPバックアップを読み込む。同じIDの教材は上書き、無いIDの教材は追加（他の教材は消えない）。
+   * @returns {Promise<boolean>} 読み込みを実行したか（キャンセル・失敗はfalse）
+   */
+  async function importBackupZip(file) {
+    try {
+      const files = await ZipUtil.read(await file.arrayBuffer());
+      const manifestBytes = files.get("manifest.json");
+      if (!manifestBytes) throw new Error("manifest.json が見つかりません（このアプリで書き出したZIPではありません）");
+      let manifest;
+      try { manifest = JSON.parse(ZipUtil.textOf(manifestBytes)); }
+      catch (e) { throw new Error("manifest.json の形式が正しくありません"); }
+      if (manifest.format !== BACKUP_FORMAT || !Array.isArray(manifest.sets)) {
+        throw new Error("音読ディクテーションのバックアップではありません");
+      }
+
+      const existingIds = new Set(getAll().map((x) => x.id));
+      const overwriteCount = manifest.sets.filter((x) => existingIds.has(x.id)).length;
+      if (overwriteCount > 0 && !(await uiConfirm(`同じ教材が${overwriteCount}件あります。ZIPの内容で上書きします。よろしいですか？`,'上書き'))) return false;
+
+      const rebuilt = [];
+      let missingAudio = 0;
+      for (const m of manifest.sets) {
+        if (!m || typeof m.id !== "string" || !Array.isArray(m.sentences)) throw new Error("教材データの形式が正しくありません");
+        const audioFiles = [];
+        for (const a of m.audioFiles || []) {
+          const bytes = files.get(a.path);
+          if (!bytes) { missingAudio += 1; continue; }
+          audioFiles.push({ id: a.id, name: a.name, dataUrl: await bytesToDataUrl(bytes, a.mime) });
+        }
+        rebuilt.push({
+          id: m.id, title: String(m.title || "無題の教材"), folderId: m.folderId || null,
+          sentences: m.sentences, audioFiles,
+          createdAt: m.createdAt || Utils.todayStr(), updatedAt: Utils.todayStr(),
+        });
+      }
+
+      GameState.update((state) => {
+        if (!state.dictationSets) state.dictationSets = [];
+        if (!state.dictationFolders) state.dictationFolders = [];
+        (Array.isArray(manifest.folders) ? manifest.folders : []).forEach((f) => {
+          if (f && f.id && !state.dictationFolders.some((x) => x.id === f.id)) {
+            state.dictationFolders.push({ id: f.id, name: String(f.name || "フォルダ"), open: f.open !== false });
+          }
+        });
+        rebuilt.forEach((set) => {
+          if (set.folderId && !state.dictationFolders.some((f) => f.id === set.folderId)) set.folderId = null;
+          const idx = state.dictationSets.findIndex((x) => x.id === set.id);
+          if (idx >= 0) state.dictationSets[idx] = set; else state.dictationSets.push(set);
+        });
+      });
+      await GameState.persist();
+      Utils.showToast(`${rebuilt.length}件の教材を読み込みました` + (missingAudio ? `（音源${missingAudio}件はZIP内に見つかりませんでした）` : ""), missingAudio ? "info" : "success");
+      return true;
+    } catch (err) {
+      console.error("[dictationSystem] ZIPの読み込みに失敗しました", err);
+      Utils.showToast("ZIPの読み込みに失敗しました: " + err.message, "error");
+      return false;
+    }
+  }
+
+  /* ============================================================
+     画面："dictationList"
+     ============================================================ */
+
+  function renderListScreen(root) {
+    const wrap = Utils.el("div", { class: "screen-inner" });
+    wrap.appendChild(Utils.el("h2", {}, "音読ディクテーション"));
+    wrap.appendChild(Utils.el("p", { class: "explore-desc" }, "外国語の音読用テキストと音源を登録し、一文ずつのディクテーション練習ができます（任意機能）。"));
+
+    const listBox = Utils.el("div", { class: "folder-list-box" });
+    const refresh = () => {
+      FolderList.render(listBox, {
+        foldersKey: "dictationFolders",
+        itemsKey: "dictationSets",
+        items: getAll(),
+        emptyMessage: "まだ教材がありません。",
+        onChange: refresh,
+        renderItem: (s) => Utils.el("button", { class: "panel book-list-row", onclick: () => Router.navigate("dictationDetail", { setId: s.id }) }, [
+          Utils.el("h3", {}, s.title),
+          Utils.el("p", {}, `文の数: ${s.sentences.length} ／ 音源ファイル数: ${s.audioFiles.length}`),
+        ]),
+      });
+    };
+
+    wrap.appendChild(FolderList.createAddFolderButton("dictationFolders", refresh));
+    wrap.appendChild(Utils.el("button", {
+      class: "btn btn-primary btn-block folder-add-item-btn",
+      onclick: () => {
+        const id = createSet("無題の教材");
+        Router.navigate("dictationDetail", { setId: id });
+      },
+    }, "＋ 新しい教材を追加"));
+    wrap.appendChild(listBox);
+    refresh();
+
+    // --- ZIPバックアップ ---
+    const zipPanel = Utils.el("div", { class: "panel", style: "margin-top:20px;" }, [
+      Utils.el("h3", {}, "ZIPバックアップ（音声つき）"),
+      Utils.el("p", { class: "explore-desc" }, "教材・音源ファイル・分割した音声の位置・フォルダをまとめて保存／復元できます。読み込むと、同じ教材は上書き、新しい教材は追加されます。"),
+    ]);
+    zipPanel.appendChild(Utils.el("button", { class: "btn btn-secondary btn-block", onclick: () => exportBackupZip() }, "ZIPで出力する"));
+    const zipInput = Utils.el("input", { type: "file", accept: ".zip,application/zip", style: "margin-top:10px; width:100%;" });
+    zipInput.addEventListener("change", async () => {
+      const f = zipInput.files[0];
+      if (!f) return;
+      const done = await importBackupZip(f);
+      zipInput.value = "";
+      if (done) Router.navigate("dictationList");
+    });
+    zipPanel.appendChild(Utils.el("label", { class: "diary-field-label", style: "margin-top:10px;" }, "ZIPを読み込む"));
+    zipPanel.appendChild(zipInput);
+    wrap.appendChild(zipPanel);
+
+    root.appendChild(wrap);
+  }
+
+  /* ============================================================
+     画面："dictationDetail"（編集）
+     ============================================================ */
+
+  function renderDetailScreen(root, params = {}) {
+    const set = getById(params.setId);
+    if (!set) { root.appendChild(Utils.el("p", { class: "empty-state" }, "教材が見つかりません")); return; }
+
+    const wrap = Utils.el("div", { class: "screen-inner" });
+    wrap.appendChild(Utils.el("h2", {}, "教材の編集"));
+
+    const titleInput = Utils.el("input", { type: "text", class: "review-typing-input", placeholder: "教材名" });
+    titleInput.value = set.title;
+    titleInput.addEventListener("change", () => updateSet(set.id, { title: titleInput.value }));
+    wrap.appendChild(titleInput);
+
+    // 【追加要望対応】「▶ 練習する」（分割文の一覧＋音声）を追加し、従来の「練習する」は「ディクテーション」へ改名
+    wrap.appendChild(Utils.el("button", {
+      class: "btn btn-moss btn-block", style: "margin:8px 0;",
+      onclick: () => Router.navigate("dictationListen", { setId: set.id }),
+    }, "▶ 練習する"));
+    wrap.appendChild(Utils.el("button", {
+      class: "btn btn-moss btn-block", style: "margin:8px 0;",
+      onclick: () => Router.navigate("dictationPractice", { setId: set.id }),
+    }, "ディクテーション"));
+
+    // --- テキスト読み込み・分割 ---
+    const textPanel = Utils.el("div", { class: "panel" }, [Utils.el("h3", {}, "音読用テキスト")]);
+    const textarea = Utils.el("textarea", { class: "review-textarea", rows: "6", placeholder: "音読するテキストを貼り付け（またはファイルを読み込み）" });
+    const textFileInput = Utils.el("input", { type: "file", accept: ".txt,text/plain" });
+    textFileInput.addEventListener("change", () => {
+      const file = textFileInput.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => { textarea.value = reader.result; };
+      reader.readAsText(file, "utf-8");
+    });
+    textPanel.appendChild(textFileInput);
+    textPanel.appendChild(textarea);
+    textPanel.appendChild(Utils.el("button", {
+      class: "btn btn-secondary btn-block",
+      onclick: async () => {
+        if (set.sentences.length > 0 && !(await uiConfirm("既存の一文分割・音声対応データを上書きします。よろしいですか？",'上書き'))) return;
+        const count = setSentencesFromText(set.id, textarea.value);
+        Utils.showToast(`${count}文に分割しました`, "success");
+        Router.navigate("dictationDetail", { setId: set.id });
+      },
+    }, "この文章を一文ごとに分割する"));
+    wrap.appendChild(textPanel);
+
+    // --- 音源フォルダのアップロード ---
+    const audioPanel = Utils.el("div", { class: "panel" }, [
+      Utils.el("h3", {}, "音源のアップロード"),
+      Utils.el("p", { class: "explore-desc" }, "フォルダごと、または複数ファイルをまとめて選択できます。"),
+    ]);
+    const audioInput = Utils.el("input", { type: "file", accept: "audio/*", multiple: "true", webkitdirectory: "true" });
+    const audioInputSingle = Utils.el("input", { type: "file", accept: "audio/*", multiple: "true" });
+    audioInput.addEventListener("change", () => handleAudioUpload(audioInput.files));
+    audioInputSingle.addEventListener("change", () => handleAudioUpload(audioInputSingle.files));
+    function handleAudioUpload(fileList) {
+      const files = Array.from(fileList || []);
+      if (files.length === 0) return;
+      addAudioFiles(set.id, files).then((count) => {
+        Utils.showToast(`${count}件の音源を追加しました`, "success");
+        Router.navigate("dictationDetail", { setId: set.id });
+      });
+    }
+    audioPanel.appendChild(Utils.el("label", { class: "diary-field-label" }, "フォルダを選択"));
+    audioPanel.appendChild(audioInput);
+    audioPanel.appendChild(Utils.el("label", { class: "diary-field-label" }, "または複数ファイルを選択"));
+    audioPanel.appendChild(audioInputSingle);
+
+    const fileListBox = Utils.el("div", {});
+    set.audioFiles.forEach((f) => fileListBox.appendChild(Utils.el("div", { class: "settings-row" }, [
+      Utils.el("span", {}, f.name),
+    ])));
+    audioPanel.appendChild(fileListBox);
+    wrap.appendChild(audioPanel);
+
+    // --- 自動仮分割 ---
+    if (set.audioFiles.length > 0 && set.sentences.length > 0) {
+      const autoPanel = Utils.el("div", { class: "panel" }, [
+        Utils.el("h3", {}, "自動で仮分割する（目安）"),
+        Utils.el("p", { class: "explore-desc" }, "選んだ音源1つの長さを、各文の文字数の比率で仮に割り振ります。その後「手動での音声カットと対応」で調整してください。"),
+      ]);
+      const fileSelect = Utils.el("select", { class: "review-typing-input" },
+        set.audioFiles.map((f) => Utils.el("option", { value: f.id }, f.name)));
+      const previewAudio = watchAudio(Utils.el("audio", { controls: "true", style: "width:100%; margin-top:6px;" }));
+      previewAudio.src = set.audioFiles[0].dataUrl;
+      fileSelect.addEventListener("change", () => {
+        const f = set.audioFiles.find((x) => x.id === fileSelect.value);
+        if (f) previewAudio.src = f.dataUrl;
+      });
+      autoPanel.appendChild(fileSelect);
+      autoPanel.appendChild(previewAudio);
+      autoPanel.appendChild(Utils.el("button", {
+        class: "btn btn-secondary btn-block",
+        onclick: () => {
+          const duration = previewAudio.duration;
+          if (!duration || !isFinite(duration)) {
+            Utils.showToast("音源の長さを取得できませんでした。一度再生してから試してください", "error");
+            return;
+          }
+          autoSplitByCharCount(set.id, fileSelect.value, duration);
+          Utils.showToast("仮分割しました。下の一覧で確認・調整してください", "success");
+          Router.navigate("dictationDetail", { setId: set.id });
+        },
+      }, "この音源の長さで仮分割する"));
+      wrap.appendChild(autoPanel);
+    }
+
+    // --- 手動での音声カットと対応 ---
+    const sentPanel = Utils.el("div", { class: "panel" }, [
+      Utils.el("h3", {}, "手動での音声カットと対応"),
+      Utils.el("p", { class: "explore-desc" }, "文ごとに、対応する音源ファイルと開始・終了（秒）を指定します。再生してから「今の位置を開始/終了にする」で微調整できます。"),
+    ]);
+    set.sentences.forEach((sent, idx) => {
+      sentPanel.appendChild(renderSentenceRow(set, sent, idx));
+    });
+    if (set.sentences.length === 0) {
+      sentPanel.appendChild(Utils.el("p", { class: "empty-state" }, "まだ一文分割されていません。上の「音読用テキスト」で分割してください。"));
+    }
+    wrap.appendChild(sentPanel);
+
+    wrap.appendChild(Utils.el("button", {
+      class: "btn btn-secondary btn-block",
+      onclick: async () => {
+        if (await uiConfirm(`「${set.title}」を削除しますか？`,'削除')) {
+          deleteSet(set.id);
+          Router.navigate("dictationList");
+        }
+      },
+    }, "この教材を削除する"));
+    // 【追加要望対応】「この教材を削除する」と「一覧に戻る」の間に余白
+    wrap.appendChild(Utils.el("button", { class: "btn btn-moss btn-block dict-btn-gap", onclick: () => Router.navigate("dictationList") }, "一覧に戻る"));
+
+    root.appendChild(wrap);
+  }
+
+  function renderSentenceRow(set, sent, idx) {
+    const row = Utils.el("div", { class: "chapter-row" });
+    row.appendChild(Utils.el("div", { class: "diary-field-label" }, `${idx + 1}. ${sent.text}`));
+
+    if (set.audioFiles.length === 0) {
+      row.appendChild(Utils.el("p", { class: "explore-desc" }, "先に音源をアップロードしてください"));
+      return row;
+    }
+
+    const fileSelect = Utils.el("select", { class: "review-typing-input" },
+      set.audioFiles.map((f) => Utils.el("option", { value: f.id }, f.name)));
+    if (sent.audio) fileSelect.value = sent.audio.fileId;
+
+    const audioEl = watchAudio(Utils.el("audio", { controls: "true", style: "width:100%;" }));
+    const currentFile = set.audioFiles.find((f) => f.id === fileSelect.value) || set.audioFiles[0];
+    audioEl.src = currentFile.dataUrl;
+    fileSelect.addEventListener("change", () => {
+      const f = set.audioFiles.find((x) => x.id === fileSelect.value);
+      if (f) audioEl.src = f.dataUrl;
+    });
+
+    const startInput = Utils.el("input", { type: "number", step: "0.1", min: "0", class: "review-typing-input", placeholder: "開始（秒）" });
+    const endInput = Utils.el("input", { type: "number", step: "0.1", min: "0", class: "review-typing-input", placeholder: "終了（秒）" });
+    if (sent.audio) { startInput.value = sent.audio.start; endInput.value = sent.audio.end; }
+
+    const markStartBtn = Utils.el("button", { class: "btn btn-secondary", onclick: () => { startInput.value = round2(audioEl.currentTime); } }, "今の位置を開始にする");
+    const markEndBtn = Utils.el("button", { class: "btn btn-secondary", onclick: () => { endInput.value = round2(audioEl.currentTime); } }, "今の位置を終了にする");
+    const previewBtn = Utils.el("button", {
+      class: "btn btn-secondary",
+      onclick: () => {
+        const s = parseFloat(startInput.value) || 0;
+        const e = parseFloat(endInput.value) || (s + 3);
+        audioEl.currentTime = s;
+        audioEl.play();
+        const onTime = () => {
+          if (audioEl.currentTime >= e) { audioEl.pause(); audioEl.removeEventListener("timeupdate", onTime); }
+        };
+        audioEl.addEventListener("timeupdate", onTime);
+      },
+    }, "この範囲を試し再生");
+    const saveBtn = Utils.el("button", {
+      class: "btn btn-primary",
+      onclick: () => {
+        const s = parseFloat(startInput.value) || 0;
+        const e = parseFloat(endInput.value) || 0;
+        if (e <= s) { Utils.showToast("終了は開始より後にしてください", "error"); return; }
+        setSentenceAudio(set.id, sent.id, fileSelect.value, s, e);
+        Utils.showToast("この文の音声位置を保存しました", "success");
+      },
+    }, "保存");
+
+    row.appendChild(fileSelect);
+    row.appendChild(audioEl);
+    row.appendChild(Utils.el("div", { class: "quiz-choice-row" }, [startInput, endInput]));
+    row.appendChild(Utils.el("div", { class: "quiz-choice-row" }, [markStartBtn, markEndBtn]));
+    // 【追加要望対応】「今の位置を開始にする」行と「この範囲を試し再生」「保存」行の間に余白
+    row.appendChild(Utils.el("div", { class: "quiz-choice-row dict-row-spaced" }, [previewBtn, saveBtn]));
+    return row;
+  }
+
+  /* ============================================================
+     画面："dictationListen"（▶ 練習する：分割された文を一文ずつ聞く）
+     ============================================================ */
+
+  function renderListenScreen(root, params = {}) {
+    const set = getById(params.setId);
+    if (!set) { root.appendChild(Utils.el("p", { class: "empty-state" }, "教材が見つかりません")); return; }
+
+    const wrap = Utils.el("div", { class: "screen-inner" });
+    wrap.appendChild(Utils.el("h2", {}, set.title));
+
+    const audioEl = watchAudio(Utils.el("audio", { controls: "true", style: "width:100%;" }));
+    const player = createPlayer(audioEl);
+    const originalFile = getOriginalAudioFile(set);
+
+    let mode = null;      // "full"（分割前の音声）| "segment"（一文ずつ）
+    let listened = 0;     // 分割前の音声を実際に聞いた秒数（シークで飛ばした分は数えない）
+    let lastTime = 0;
+    let fullCompleted = false;
+    const rewardNote = Utils.el("p", { class: "explore-desc dict-reward-note" }, "");
+
+    audioEl.addEventListener("timeupdate", () => {
+      if (mode !== "full") return;
+      const d = audioEl.currentTime - lastTime;
+      if (d > 0 && d < 1.5) listened += d;
+      lastTime = audioEl.currentTime;
+    });
+    audioEl.addEventListener("ended", () => {
+      if (mode !== "full") return;
+      // 通しで聞いた実時間が全体の9割以上のときだけ「最後まで再生した」と扱う
+      if (audioEl.duration && listened >= audioEl.duration * 0.9) {
+        fullCompleted = true;
+        rewardNote.textContent = `最後まで聞きました。「編集画面に戻る」を押すと🪙${REWARD_LISTEN}個もらえます。`;
+      }
+    });
+
+    const lineButtons = [];
+    function highlight(activeBtn) {
+      lineButtons.forEach((b) => b.classList.toggle("is-playing", b === activeBtn));
+    }
+
+    const topBtn = Utils.el("button", {
+      class: "btn btn-moss btn-block",
+      onclick: () => {
+        if (!originalFile) { Utils.showToast("音源が登録されていません。編集画面でアップロードしてください", "error"); return; }
+        mode = "full"; listened = 0; lastTime = 0; fullCompleted = false;
+        rewardNote.textContent = "";
+        highlight(null);
+        player.playRange(originalFile, 0, null);
+      },
+    }, "▶ 練習する");
+    wrap.appendChild(topBtn);
+    wrap.appendChild(Utils.el("p", { class: "explore-desc" }, "上のボタンで分割前の音声を最初から再生します。下の文をタップすると、その一文だけを再生します。"));
+    wrap.appendChild(audioEl);
+    wrap.appendChild(rewardNote);
+
+    const listBox = Utils.el("div", { class: "dict-listen-list" });
+    if (set.sentences.length === 0) {
+      listBox.appendChild(Utils.el("p", { class: "empty-state" }, "まだ一文分割されていません。編集画面で分割してください。"));
+    }
+    set.sentences.forEach((sent, idx) => {
+      const file = sent.audio ? set.audioFiles.find((f) => f.id === sent.audio.fileId) : null;
+      const playable = !!(sent.audio && file);
+      const btn = Utils.el("button", {
+        class: "panel dict-sentence-btn" + (playable ? "" : " is-disabled"),
+        disabled: !playable || undefined,
+        onclick: () => {
+          mode = "segment";
+          highlight(btn);
+          player.playRange(file, sent.audio.start, sent.audio.end, () => highlight(null));
+        },
+      }, [
+        Utils.el("span", { class: "dict-sentence-no" }, `${idx + 1}`),
+        Utils.el("span", { class: "dict-sentence-text" }, sent.text),
+        playable ? null : Utils.el("span", { class: "dict-sentence-note" }, "（音声未設定）"),
+      ]);
+      lineButtons.push(btn);
+      listBox.appendChild(btn);
+    });
+    wrap.appendChild(listBox);
+
+    wrap.appendChild(Utils.el("button", {
+      class: "btn btn-moss btn-block dict-btn-gap",
+      onclick: () => {
+        player.stop();
+        if (fullCompleted) {
+          const granted = claimReward(set.id, "listen", REWARD_LISTEN);
+          if (granted > 0) Utils.showToast(`🪙 コインを${granted}個獲得しました`, "success");
+          else Utils.showToast("この教材の「練習する」の報酬は、今日はすでに受け取り済みです", "info");
+        }
+        Router.navigate("dictationDetail", { setId: set.id });
+      },
+    }, "編集画面に戻る"));
+
+    root.appendChild(wrap);
+  }
+
+  /* ============================================================
+     画面："dictationPractice"（ディクテーション：一文ずつ聞き取って入力）
+     ============================================================ */
+
+  function renderPracticeScreen(root, params = {}) {
+    const set = getById(params.setId);
+    if (!set) { root.appendChild(Utils.el("p", { class: "empty-state" }, "教材が見つかりません")); return; }
+    const playable = set.sentences.filter((s) => s.audio);
+    if (playable.length === 0) {
+      root.appendChild(Utils.el("p", { class: "empty-state" }, "音声が対応付けられた文がありません。先に教材の編集で音声を設定してください。"));
+      return;
+    }
+
+    const wrap = Utils.el("div", { class: "screen-inner" });
+    wrap.appendChild(Utils.el("h2", {}, set.title));
+
+    let index = 0;
+    let showingText = false;
+    // 各文の「最初の答え合わせ」の結果（全問正解の判定に使う）。答えを見てから答え合わせした文は不正解扱い。
+    const results = new Map();   // sentenceId → correct(boolean)
+    const peeked = new Set();    // 答え合わせ前に「答えを見る」を使った文
+
+    const audioEl = watchAudio(Utils.el("audio", { controls: "true", style: "width:100%;" }));
+    const player = createPlayer(audioEl);
+    const counter = Utils.el("div", { class: "flashcard-counter" }, "");
+    const progress = Utils.el("p", { class: "explore-desc dict-reward-note" }, "");
+    const textBox = Utils.el("div", { class: "panel" });
+    const answerInput = Utils.el("input", { type: "text", class: "review-typing-input", placeholder: "聞き取った内容を入力" });
+    const judgeBox = Utils.el("div", {});
+
+    function isAllAnswered() { return results.size >= playable.length; }
+    function isAllCorrect() { return isAllAnswered() && [...results.values()].every(Boolean); }
+
+    function updateProgress() {
+      let text = `解答済み ${results.size} / ${playable.length}`;
+      if (isAllAnswered()) {
+        text += isAllCorrect()
+          ? `　全問正解です！「編集画面に戻る」を押すと🪙${REWARD_DICTATION_PERFECT}個もらえます。`
+          : `　最後まで解きました。「編集画面に戻る」を押すと🪙${REWARD_DICTATION}個もらえます。`;
+      }
+      progress.textContent = text;
+    }
+
+    function render() {
+      const sent = playable[index];
+      counter.textContent = `${index + 1} / ${playable.length}`;
+      textBox.innerHTML = "";
+      textBox.appendChild(Utils.el("p", {}, showingText ? sent.text : "（再生して聞き取ってください。「答えを見る」で表示）"));
+      answerInput.value = "";
+      judgeBox.innerHTML = "";
+      updateProgress();
+    }
+
+    const playBtn = Utils.el("button", {
+      class: "btn btn-moss",
+      onclick: () => {
+        const sent = playable[index];
+        const file = set.audioFiles.find((f) => f.id === sent.audio.fileId);
+        if (!file) { Utils.showToast("この文の音源が見つかりません", "error"); return; }
+        player.playRange(file, sent.audio.start, sent.audio.end);
+      },
+    }, "▶ この文を再生");
+
+    const checkBtn = Utils.el("button", {
+      class: "btn btn-secondary",
+      onclick: () => {
+        const sent = playable[index];
+        const isCorrect = answerInput.value.trim() === sent.text.trim();
+        if (!results.has(sent.id)) results.set(sent.id, isCorrect && !peeked.has(sent.id));
+        judgeBox.innerHTML = "";
+        judgeBox.appendChild(Utils.el("p", {}, isCorrect ? "正解！" : `正しくは: ${sent.text}`));
+        updateProgress();
+      },
+    }, "答え合わせ");
+
+    const showBtn = Utils.el("button", {
+      class: "btn btn-secondary",
+      onclick: () => {
+        const sent = playable[index];
+        if (!showingText && !results.has(sent.id)) peeked.add(sent.id);
+        showingText = !showingText;
+        render();
+      },
+    }, "答えを見る");
+
+    const navRow = Utils.el("div", { class: "quiz-choice-row" }, [
+      Utils.el("button", { class: "btn btn-secondary", onclick: () => { index = (index - 1 + playable.length) % playable.length; showingText = false; render(); } }, "← 前の文"),
+      Utils.el("button", { class: "btn btn-secondary", onclick: () => { index = (index + 1) % playable.length; showingText = false; render(); } }, "次の文 →"),
+    ]);
+
+    wrap.appendChild(counter);
+    wrap.appendChild(progress);
+    wrap.appendChild(Utils.el("p", { class: "explore-desc" }, "全問正解の判定は、各文の最初の答え合わせで決まります。答えを見てから答え合わせした文は不正解として扱われます。"));
+    wrap.appendChild(audioEl);
+    wrap.appendChild(Utils.el("div", { class: "quiz-choice-row" }, [playBtn, showBtn]));
+    wrap.appendChild(textBox);
+    wrap.appendChild(answerInput);
+    wrap.appendChild(checkBtn);
+    wrap.appendChild(judgeBox);
+    wrap.appendChild(navRow);
+    wrap.appendChild(Utils.el("button", {
+      class: "btn btn-moss btn-block", style: "margin-top:16px;",
+      onclick: () => {
+        player.stop();
+        if (isAllAnswered()) {
+          const amount = isAllCorrect() ? REWARD_DICTATION_PERFECT : REWARD_DICTATION;
+          const granted = claimReward(set.id, "dictation", amount);
+          if (granted > 0) Utils.showToast(`🪙 コインを${granted}個獲得しました`, "success");
+          else Utils.showToast("この教材のディクテーション報酬は、今日はすでに受け取り済みです", "info");
+        }
+        Router.navigate("dictationDetail", { setId: set.id });
+      },
+    }, "編集画面に戻る"));
+
+    render();
+    root.appendChild(wrap);
+  }
+
+  Router.registerScreen("dictationList", renderListScreen);
+  Router.registerScreen("dictationDetail", renderDetailScreen);
+  Router.registerScreen("dictationListen", renderListenScreen);
+  Router.registerScreen("dictationPractice", renderPracticeScreen);
+
+  return {
+    getAll, getById, createSet, updateSet, deleteSet,
+    splitTextToSentences, setSentencesFromText, addAudioFiles,
+    autoSplitByCharCount, setSentenceAudio,
+    exportBackupZip, importBackupZip, getOriginalAudioFile,
+  };
+})();
+
+
+let TM=null;
+function donut(parts,sz,ctr,col){const r=sz/2-14,c=2*Math.PI*r;let o=0,tot=parts.reduce((a,b)=>a+b[0],0)||1;
+return `<svg width="${sz}" height="${sz}" viewBox="0 0 ${sz} ${sz}"><circle cx="${sz/2}" cy="${sz/2}" r="${r}" fill="none" stroke="#e5e7eb" stroke-width="16"/>`+parts.map(p=>{const l=p[0]/tot*c;const s=`<circle cx="${sz/2}" cy="${sz/2}" r="${r}" fill="none" stroke="${p[1]}" stroke-width="16" stroke-dasharray="${l} ${c-l}" stroke-dashoffset="${-o}" transform="rotate(-90 ${sz/2} ${sz/2})"/>`;o+=l;return s}).join('')+`<text x="50%" y="52%" text-anchor="middle" dominant-baseline="middle" font-size="${sz/4.5}" font-weight="700" fill="${col||'currentColor'}">${ctr}</text></svg>`}
+const top3=()=>[...S.R].sort((a,b)=>b.st-a.st).slice(0,3).map(r=>r.id);
+const fmt=s=>String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0');
+function stage(){if(!TM)return 0;const p=TM.kind=='sw'?Math.min(TM.t/1800,1):1-TM.t/TM.tot;return Math.min(4,Math.floor(p*5))}
+function treeEm(i){return STG[i]||S.sel}
+function render(){const sc=$('#m').scrollTop;
+$('#nv').innerHTML=[['home','🏠','ホーム'],['team','👥','チーム'+(rvUnread()?' 🔴'+rvUnread():'')],['my','👤','マイページ'],['grow','🌳','育成・森']].map(a=>`<button class="${S.tab==a[0]?'on':''}" onclick="S.tab='${a[0]}';S.ed=0;render()"><span>${a[1]}</span>${a[2]}</button>`).join('');
+renderMini();$('#m').innerHTML=({home,team,my,grow}[S.tab])();
+$('#ov').innerHTML=S.modal||'';$('#m').scrollTop=sc}
+/* addT/addR/saveR/タイマー群は末尾の拡張ブロックで再定義 */
+/* my page */
+function my(){const y=today.getFullYear(),mo=today.getMonth(),first=new Date(y,mo,1).getDay(),n=new Date(y,mo+1,0).getDate();let days=0,green=0;
+let cells='日月火水木金土'.split('').map(x=>`<div class="sm">${x}</div>`).join('')+'<div></div>'.repeat(first);
+for(let i=1;i<=n;i++){const d=new Date(y,mo,i),h=dayInfo(d);let bg='#e9ecea',c='#555';if(h&&h.d>0){days++;if(h.d>=h.t){bg='#22c55e';c='#fff';green++}else{bg='#facc15';c='#333'}}
+cells+=`<div onclick="S.selDay=${i};render()"><b style="background:${bg};color:${c};${S.selDay==i?'outline:2px solid var(--pri)':''}">${i}</b></div>`}
+let det='';if(S.selDay){const dd=new Date(y,mo,S.selDay),k=kd(dd),sd=dayInfo(dd),ids=sd?(k==kd(today)?S.R.filter(r=>r.done).map(r=>r.id):dayIds(k,sd)):[];
+det=`<div class="sm" style="margin-top:8px"><b>${mo+1}月${S.selDay}日</b>：${sd?sd.d+'/'+sd.t+' 達成':'記録なし'}</div>`+(sd?S.R.map(r=>`<div class="sm">${ids.includes(r.id)?'✅':'⬜'} ${esc(r.n)}</div>`).join(''):'')}
+const dn=Object.keys(S.diary).filter(isRec).length,tb=['mo','wk','cu'].includes(S.st)?S.st:'mo';
+const body=tb=='mo'?`<div class="row" style="text-align:center"><div class="sp">✔ ルーティン<br><b style="font-size:26px">${days}</b>日</div><div class="sp">🟢 青信号<br><b style="font-size:26px">${green}</b>回</div><div class="sp">✍ 日記<br><b style="font-size:26px">${dn}</b>日</div></div>
+<div class="card" style="margin-top:10px"><b>月間信号機カレンダー</b> <span class="sm">${y}年${mo+1}月</span><div class="cal" style="margin-top:8px">${cells}</div>${det}</div>`:tb=='wk'?weekRank():cumHtml();
+return `<h3 style="margin:4px 0">統計</h3><div class="tabs">${[['mo','月間'],['wk','週間'],['cu','累計']].map(t=>`<button class="${tb==t[0]?'on':''}" onclick="S.st='${t[0]}';render()">${t[1]}</button>`).join('')}</div>${body}
+
+${settingsHtml()}`}
+function ics(){const t=new Date(),p=n=>String(n).padStart(2,'0'),z=''+t.getFullYear()+p(t.getMonth()+1)+p(t.getDate()),st=t.toISOString().replace(/[-:]/g,'').slice(0,15)+'Z',e=s=>String(s).replace(/([,;\\])/g,'\\$1').replace(/\n/g,'\\n');
+const L=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Habit Forest//JA','CALSCALE:GREGORIAN'];
+S.R.forEach(r=>L.push('BEGIN:VEVENT','UID:'+r.id+'@habit-forest','DTSTAMP:'+st,'SUMMARY:'+e(r.n),'DESCRIPTION:'+e(r.w),'DTSTART:'+z+'T070000','DURATION:PT'+(r.m=='check'?10:(r.min||10))+'M','RRULE:FREQ=DAILY','END:VEVENT'));
+L.push('END:VCALENDAR');dl('habits.ics',L.join('\r\n'),'text/calendar')}
+/* grow */
+function grow(){return forestCard()+`<div class="row"><h3 class="sp" style="margin:4px 0">育成・森</h3><b>🪙 ${S.coins}</b><button class="btn" onclick="lock()">🔒 ロック画面</button></div>
+<div class="card"><div class="tree">${treeEm(stage())}</div><div class="row" style="justify-content:center;font-size:28px;margin-top:6px">${STG.map((x,i)=>`<span style="opacity:${i<=stage()&&TM?1:.35}">${x||S.sel}</span>`).join('→')}</div><p class="sm" style="text-align:center">種→若木→成長→つぼみ→満開。途中放棄で🪵枯れ木に</p></div>
+<div class="card"><b>樹種選択（図鑑・ショップ）</b><div class="shop" style="margin-top:8px">${trees().map(t=>{const o=S.own.includes(t[0]);return `<button class="${S.sel==t[0]?'on':''}" onclick="buy('${t[0]}',${t[2]})"><em>${t[0]}</em>${t[1]}<br>${o?'所持':'🪙'+t[2]}</button>`}).join('')}</div></div>`}
+function buy(e,c){if(!S.own.includes(e)){if(S.coins<c)return uiAlert('コインが足りません');S.coins-=c;S.own.push(e)}S.sel=e;save();render()}
+const pad=n=>String(n).padStart(2,'0');
+const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const iso=k=>{const[a,b,c]=k.split('-');return a+'-'+pad(b)+'-'+pad(c)};
+const unIso=v=>{const[a,b,c]=v.split('-');return a+'-'+(+b)+'-'+(+c)};
+const ykey=()=>{const d=new Date(today);d.setDate(d.getDate()-1);return kd(d)};
+const isRec=k=>{const e=S.diary[k];return !!(e&&(e.c||e.f||e.e))};
+const isOld=k=>{const[a,b,c]=k.split('-').map(Number);return new Date(a,b-1,c)<new Date(today.getFullYear(),today.getMonth(),today.getDate()-1)};
+const snap=()=>{const o={};for(const k in S)if(!['modal','ed','dd','dv','selDay'].includes(k))o[k]=S[k];return o};
+const prog=()=>TM.kind=='sw'?Math.min(TM.t/1800,1):1-TM.t/TM.tot;
+const isLock=()=>!!S.modal&&S.modal.includes('class="lock"');
+function toast(m){const d=document.createElement('div');d.textContent=m;d.className='toast';document.body.appendChild(d);setTimeout(()=>d.remove(),2200)}
+function dl(n,t,m){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([t],{type:m}));a.download=n;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),1500)}
+function bars7(){const a=weekData().map(d=>[d.rt+d.tk+d.td,WD[d.w]]);const mx=Math.max(S.R.length,...a.map(x=>x[0]),1);
+return `<div class="bars">`+a.map(b=>`<div class="bc"><span>${b[0]}</span><i style="height:${Math.max(4,b[0]/mx*90)}px"></i><small>${b[1]}</small></div>`).join('')+`</div>`}
+function edBtns(k,id){const e=f=>`event.stopPropagation();${f}`;return `<button class="btn g" onclick="${e(`edit('${k}',${id})`)}">✏️</button><button class="btn g" onclick="${e(`mv('${k}',${id},-1)`)}">↑</button><button class="btn g" onclick="${e(`mv('${k}',${id},1)`)}">↓</button><button class="btn" style="background:#d9534f" onclick="${e(`del('${k}',${id})`)}">🗑️</button>`}
+const edBar=()=>`<div class="card row"><span class="sp sm">✏️ 編集モード：✏️編集／↑↓並び替え／🗑️削除</span><button class="btn" onclick="S.ed=0;render()">完了</button></div>`;
+function mv(k,id,d){const a=S[k],i=a.findIndex(v=>v.id==id),j=i+d;if(j<0||j>=a.length)return;[a[i],a[j]]=[a[j],a[i]];save();render()}
+/* diary */
+function dOpen(v,k){S.dv=v;if(k)S.dd=k;S.modal=dHtml();render()}
+function dDate(v){if(!v)return;let k=unIso(v);if(!isOld(k)&&k!=ykey())k=ykey();S.dd=k;S.modal=dHtml();render()}
+function dHtml(){const k=S.dd||ykey();let b;
+if(S.dv=='l'){const ks=Object.keys(S.diary).filter(isRec).sort((a,b)=>iso(a)<iso(b)?1:-1);
+b=ks.length?ks.map(k=>{const e=S.diary[k];return `<div class="card"><div class="row"><b class="sp">${k.replace(/-/g,'/')}</b><button class="btn g" onclick="dOpen('w','${k}')">編集</button></div>${[['前日の変化記録',e.c],['一日の流れ',e.f],['感じたこと',e.e]].map(x=>x[1]?`<div class="sm" style="margin-top:6px">${x[0]}</div><div class="txt">${esc(x[1])}</div>`:'').join('')}</div>`}).join(''):'<p class="sm">まだ記録がありません</p>'}
+else{const e=S.diary[k]||{},rec=isRec(k),note=rec?'記録済み：編集は無料です':isOld(k)?(S.diaryTickets>0?'🎫 過去日記チケットを1枚使います（所持'+S.diaryTickets+'枚）':'⚠ 2日前以前の新規記録は保存時に🪙10枚を消費します'):'新規保存で🪙+5獲得';
+b=`<label>対象日（基本は昨日）</label><input type="date" id="dt" max="${iso(ykey())}" value="${iso(k)}" onchange="dDate(this.value)"><div class="sm" style="margin:4px 0">${note}（所持🪙${S.coins}）</div>
+<label>前日の変化記録</label><textarea id="d1" rows="3" maxlength="400" placeholder="何ができるようになった？何が変わった？">${esc(e.c)}</textarea><label>一日の流れ</label><textarea id="d2" rows="3" maxlength="400" placeholder="どんな一日だった？">${esc(e.f)}</textarea><label>感じたこと</label><textarea id="d3" rows="3" maxlength="400">${esc(e.e)}</textarea>
+<p class="sm">3つのうち1つでも書けば達成です。</p><button class="btn" style="width:100%;padding:10px" onclick="dSave()">保存する</button>`}
+return `<div class="modal"><div><div class="row"><b class="sp">📔 霧晴れの開拓日誌</b><button class="btn g" onclick="S.modal='';render()">閉じる</button></div><div class="tabs t4"><button class="${S.dv=='l'?'':'on'}" onclick="dOpen('w',ykey())">日記を書く</button><button class="${S.dv=='l'?'on':''}" onclick="dOpen('l')">これまでの日記を見る</button><button onclick="openScreen('books')">📖 読書記録をつける</button><button onclick="openScreen('dictationList')">🎧 音読ディクテーション</button></div>${b}</div></div>`}
+function dSave(){checkDay();const k=S.dd||ykey(),c=$('#d1').value.trim(),f=$('#d2').value.trim(),e=$('#d3').value.trim();
+if(!c&&!f&&!e)return uiAlert('いずれか1つは記入してください');const nw=!isRec(k),cost=nw&&isOld(k);
+const tk=cost&&S.diaryTickets>0;if(cost&&!tk&&S.coins<10)return uiAlert('コインが足りません（10枚必要）');
+let msg='日記を更新しました';if(tk){S.diaryTickets--;msg='保存しました（🎫-1）'}else if(cost){S.coins-=10;msg='保存しました（🪙-10）'}else if(nw){S.coins+=5;msg='保存しました（🪙+5）'}
+S.diary[k]={c:c.slice(0,400),f:f.slice(0,400),e:e.slice(0,400),at:kd(today)};save();S.dv='l';S.modal=dHtml();render();toast(msg)}
+/* timer */
+/* team */
+/* my page */
+function dayIds(k,h){if(h.ids)return h.ids;const hs=id=>{let x=0;for(const c of k+id)x=(x*31+c.charCodeAt(0))%1009;return x};return [...S.R].sort((a,b)=>hs(a.id)-hs(b.id)).slice(0,h.d).map(r=>r.id)}
+function weekRank(){const cnt={};for(let i=0;i<7;i++){const d=new Date(today);d.setDate(d.getDate()-i);const k=kd(d),h=S.hist[k];(i?(h?dayIds(k,h):[]):S.R.filter(r=>r.done).map(r=>r.id)).forEach(id=>cnt[id]=(cnt[id]||0)+1)}
+const L=S.R.map(r=>({r,n:cnt[r.id]||0})).filter(x=>x.n>0).sort((a,b)=>b.n-a.n||b.r.st-a.r.st);
+return `<div class="card"><b>🏆 週間ルーティーン ランキング</b> <span class="sm">直近7日</span>${L.length?L.map((x,i)=>`<div class="row" style="margin:10px 0"><span style="font-size:${i<3?26:14}px;width:40px;text-align:center">${['🥇','🥈','🥉'][i]||(i+1)+'位'}</span><div class="sp"><b>${esc(x.r.n)}</b><div class="sm">#${esc(x.r.tag)}</div></div><div style="text-align:right"><b>${x.n}回</b><div class="sm">🔥 ${x.r.st}日連続</div></div></div>`).join(''):'<p class="sm">まだ達成したルーティーンがありません</p>'}</div>`}
+/* =====================================================================
+   ② 編集モード／編集・削除
+   原因：長押し検出が pointerleave/pointercancel でキャンセルされていた（タッチ端末では長押し中に
+   ブラウザが pointercancel→pointerleave を発火するため500msに届かない）／編集ボタンが無く長押しだけが入口／
+   名称変更・削除が同期 prompt/confirm 依存。→ 修正：タッチ移動・スクロールのみでキャンセル、
+   contextmenu(長押し)でも突入、専用「編集モード」ボタン、独自ダイアログ、stopPropagation 済みボタン。
+   ===================================================================== */
+function addR(){rModal(null)}
+function addT(){tModal(null)}
+async function del(k,id){const x=S[k].find(v=>v.id==id);if(!x)return;if(k=='R'&&TM&&TM.id==id)return uiAlert('計測中のため削除できません');
+if(!await uiConfirm('「'+x.n+'」を削除しますか？','削除'))return;S[k]=S[k].filter(v=>v.id!=id);if(k=='R')delete S.rem[id];syncToday();save();render()}
+(()=>{const m=$('#m');let tm=null,sx=0,sy=0,lpAt=0;const cl=()=>{clearTimeout(tm);tm=null};
+const go=()=>{cl();lpAt=Date.now();if(!S.ed){S.ed=1;try{navigator.vibrate(40)}catch(_){}render()}};
+m.addEventListener('pointerdown',e=>{cl();const c=e.target.closest('[data-lp]');if(!c||S.ed||e.target.closest('button,input,select'))return;sx=e.clientX;sy=e.clientY;tm=setTimeout(go,500)});
+const mv=(x,y)=>{if(tm&&Math.hypot(x-sx,y-sy)>10)cl()};
+m.addEventListener('pointermove',e=>{if(e.pointerType=='mouse')mv(e.clientX,e.clientY)});
+m.addEventListener('touchmove',e=>{const t=e.touches[0];if(t)mv(t.clientX,t.clientY)},{passive:true});
+['pointerup','touchend'].forEach(t=>m.addEventListener(t,cl));m.addEventListener('scroll',cl);
+m.addEventListener('contextmenu',e=>{if(e.target.closest('[data-lp]')){e.preventDefault();if(!e.target.closest('button,input,select'))go()}});
+m.addEventListener('click',e=>{if(Date.now()-lpAt<700){e.stopPropagation();e.preventDefault()}},true)})();
+
+/* =====================================================================
+   ③④ タイマー／ストップウォッチ ＋ 音声(Media Session)
+   ③原因：停止が同期 confirm() 依存（iframe/WebView等で抑止されると止められない）／計測中バーが
+   スクロールする<main>内にあり、ロック解除後に消える・🔒ボタンが無い／setInterval 1秒カウントのずれ。
+   → 計測中バーを画面上部に固定表示し、一時停止/再開・停止(完了・中断)・🔒を常設。経過時間は時刻ベースで計算。
+   ===================================================================== */
+const BG=new Audio();BG.loop=true;BG.preload='auto';
+const Bgm={held:0,self:0,warned:0,src:'',
+play(){if(!(S.pomo&&S.pomo.bgm))return;this.self=Date.now();try{const p=BG.play();if(p&&p.catch)p.catch(()=>this.fail())}catch(e){this.fail()}},
+pause(){this.self=Date.now();try{BG.pause()}catch(e){}},
+fail(){if(!this.warned){this.warned=1;toast('音声を再生できません（計測は続きます）')}},
+load(kind){try{const u=new URL(Assets.url(kind=='rest'?'rest':'task'),location.href).href;if(this.src!=u){this.self=Date.now();this.src=u;BG.src=u;BG.load()}}catch(e){this.fail()}},
+hold(a){if(a&&!a._bh){a._bh=1;const r=()=>Bgm.release();a.addEventListener('pause',r);a.addEventListener('ended',r)}if(TM&&!TM.pa&&!BG.paused){this.held=1;this.pause()}},
+release(){if(this.held){this.held=0;if(TM&&!TM.pa)this.play()}}};
+BG.addEventListener('error',()=>{if(TM)Bgm.fail()});
+BG.addEventListener('pause',()=>{if(TM&&!TM.pa&&!Bgm.held&&Date.now()-Bgm.self>600)pause()});   // OS側の一時停止にも追従
+BG.addEventListener('play',()=>{if(TM&&TM.pa&&!Bgm.held&&Date.now()-Bgm.self>600)pause()});
+const nowMs=()=>Date.now();
+const elapsed=()=>TM.acc+(TM.last?nowMs()-TM.last:0);
+function calc(){const e=Math.floor(elapsed()/1000);TM.t=TM.kind=='sw'?e:Math.max(0,TM.tot-e)}
+function msMeta(){try{const ms=navigator.mediaSession;if(!ms||!TM)return;ms.metadata=new MediaMetadata({title:TM.name,artist:'習慣の森',album:TM.pomo?'ポモドーロ':'作業用'});ms.playbackState=TM.pa?'paused':'playing'}catch(e){}}
+function msBind(on){try{const ms=navigator.mediaSession;if(!ms)return;
+const h={play:()=>{if(TM&&TM.pa)pause()},pause:()=>{if(TM&&!TM.pa)pause()},stop:()=>{if(TM)endT(TM.ph=='rest'?'rest':'done')}};
+for(const k in h){try{ms.setActionHandler(k,on?h[k]:null)}catch(e){}}if(!on){ms.metadata=null;ms.playbackState='none'}}catch(e){}}
+function ntf(m){try{if(window.Notification&&Notification.permission=='granted')new Notification('習慣の森',{body:m})}catch(e){}}
+function tick(){if(!TM||TM.pa)return;calc();if(TM.kind=='cd'&&TM.t<=0)return fin();
+const s=(i,f)=>{const e=$(i);if(e)f(e)},tx=fmt(TM.t),g=treeEm(stage());
+s('#tt',e=>e.textContent=tx);s('#lt',e=>e.textContent=tx);s('#lg',e=>e.textContent=g);s('#mg',e=>e.textContent=g);s('#lb',e=>e.style.width=Math.round(prog()*100)+'%');s('#lc',e=>e.textContent=new Date().toTimeString().slice(0,5));
+const st=stage();if(st!==TM.ls){TM.ls=st;if(S.tab=='grow'&&!S.modal&&!SC.n)render()}}
+function pause(){if(!TM)return;if(TM.pa){TM.pa=0;TM.last=nowMs();Bgm.play()}else{TM.acc+=nowMs()-TM.last;TM.last=null;TM.pa=1;calc();Bgm.pause()}
+msMeta();if(isLock())lock();else render()}
+const SENT={};
+function remind(){const n=new Date(),hm=pad(n.getHours())+':'+pad(n.getMinutes());
+S.R.forEach(r=>{const m=/^(\d{1,2}):(\d{2})/.exec(r.w||'');if(!m||!S.rem[r.id]||r.done||pad(m[1])+':'+m[2]!=hm)return;const k=kd(n)+'_'+r.id;if(SENT[k])return;SENT[k]=1;ntf('⏰ '+r.n+' の時間です');toast('⏰ '+r.n+' の時間です')})}
+
+/* ===== ⑤ 森（マイページ／育成・森で共通） ===== */
+const trees=()=>[...BASE_TREES,...(S.customTrees||[])];
+
+/* ===== ⑥ 設定・連携（アコーディオン） ===== */
+const ACC={};
+function settingsHtml(){const g=AssetManager.getGithubConfig(),pm=window.Notification?{granted:'許可済み',denied:'ブロック中（ブラウザ設定で変更）',default:'未設定'}[Notification.permission]:'このブラウザは未対応';
+const a=(k,t,b)=>`<details class="acc" ${ACC[k]?'open':''} ontoggle="ACC.${k}=this.open"><summary>${t}</summary><div class="accb">${b}</div></details>`;
+return `<div class="card"><b>⚙ 設定・連携</b><div style="margin-top:6px">`
++a('p','⏱ ポモドーロ設定',`<p class="sm" style="margin:0">集中・休憩の時間は、ポモドーロのルーティーンの「▶」を押したときに設定します。</p>
+<div class="row" style="margin:10px 0"><span class="sp">🎵 BGM（作業用・休憩用の音楽）</span><input type="checkbox" style="width:auto" ${S.pomo.bgm?'checked':''} onchange="togBgm()"></div>
+<div class="row" style="margin:10px 0"><span class="sp">🔁 ループ（集中→休憩を自動で繰り返す）</span><input type="checkbox" style="width:auto" ${S.pomo.loop?'checked':''} onchange="setPomo({loop:this.checked});render()"></div>
+<p class="sm">時間は習慣ごとに前回の設定を覚えています。<br>今日の途中停止：${stopToday()}回（${PEN_FREE+1}回目以降は${PEN_MIN}分間タイマーをロック／${PEN_COST}🪙で解除）</p>`)
++a('n','🔔 通知設定',(S.R.length?S.R.map(r=>`<div class="row" style="margin:6px 0"><span class="sp">🔔 ${esc(r.n)}</span><input type="checkbox" ${S.rem[r.id]?'checked':''} onchange="S.rem[${r.id}]=this.checked;save()"></div>`).join(''):'<p class="sm">ルーティーンがありません</p>')
++`<p class="sm">リマインダーは、タイミングを「07:30」形式にした習慣で、その時刻に通知されます（アプリを開いている間）。</p><button class="btn g" style="width:100%" onclick="askNotif()">🔔 ブラウザ通知を許可する</button><div class="sm" style="margin-top:4px">現在の状態：${pm}</div>`)
++a('c','🔗 連携（Google・GitHub）',`<div class="row"><button class="btn g sp" onclick="uiAlert('Googleカレンダーとの直接連携にはOAuth設定（クライアントID）が必要です。現在は「.ics出力」をGoogleカレンダーの「インポート」で取り込めます。')">Googleカレンダー連携</button><button class="btn g sp" onclick="ics()">.ics出力</button></div>
+<div class="sm" style="margin:10px 0 4px"><b>GitHub連携</b>（画像を assets/img/ に自動保存）</div><label class="sm">owner</label><input id="gho" value="${esc(g.owner)}" autocapitalize="off"><label class="sm">repo</label><input id="ghr" value="${esc(g.repo)}" autocapitalize="off"><label class="sm">branch</label><input id="ghb" value="${esc(g.branch||'main')}" autocapitalize="off"><label class="sm">token（Personal Access Token）</label><input id="ght" type="password" value="${esc(g.token)}" autocomplete="off">
+<p class="sm">トークンはこの端末内にのみ保存され、バックアップ（JSON/ZIP）には含まれません。未設定の場合、画像は端末内に保存されます。</p><button class="btn" style="width:100%" onclick="saveGh()">GitHub設定を保存</button>`)
++a('b','💾 バックアップの入力と出力（JSON・ZIP）',`<div class="sm"><b>JSON</b>（音源は含まれません）</div><textarea id="js" rows="3" placeholder="JSONバックアップ" style="margin-top:4px"></textarea>
+<div class="row" style="margin-top:6px"><button class="btn sp" onclick="$('#js').value=JSON.stringify(snapExport())">書き出し</button><button class="btn g sp" onclick="restore($('#js').value)">復元</button></div>
+<div class="row" style="margin-top:6px"><button class="btn sp" onclick="dl('habit-forest-'+iso(kd(new Date()))+'.json',JSON.stringify(snapExport(),null,1),'application/json')">⬇ JSONファイル保存</button><button class="btn g sp" onclick="$('#jf').click()">⬆ JSONファイル読込</button><input type="file" id="jf" accept=".json,application/json" hidden onchange="rdAny(this)"></div>
+<div class="sm" style="margin-top:12px"><b>ZIP</b>（音読ディクテーションの音源・読書記録・日記・ルーティーン・森・設定をすべて含む）</div>
+<div class="row" style="margin-top:6px"><button class="btn sp" onclick="exportZip()">⬇ ZIPで出力</button><button class="btn g sp" onclick="$('#zf').click()">⬆ ZIPから復元</button><input type="file" id="zf" accept=".zip,application/zip,.json,application/json" hidden onchange="rdAny(this)"></div>`)
++a('t','🌱 樹種の絵文字追加',`<label class="sm">絵文字</label><input id="te" placeholder="🌿" maxlength="8"><label class="sm">樹種名</label><input id="tn" placeholder="シダ" maxlength="12"><label class="sm">必要コイン数（0で無料）</label><input id="tc" type="number" min="0" value="0"><button class="btn" style="width:100%;margin-top:8px" onclick="addTree()">樹種を追加</button><p class="sm">追加した樹種は「育成・森」の図鑑・ショップに並びます（現在 ${S.customTrees.length} 件）。</p>`)
++`</div></div>`}
+function askNotif(){if(!window.Notification)return uiAlert('このブラウザは通知に対応していません');Notification.requestPermission().then(()=>render()).catch(()=>render())}
+function saveGh(){AssetManager.setGithubConfig({owner:$('#gho').value,repo:$('#ghr').value,branch:$('#ghb').value,token:$('#ght').value});toast('GitHub設定を保存しました')}
+function addTree(){const e=$('#te').value.replace(/['"\\<>&\s]/g,'').slice(0,8),n=$('#tn').value.trim().slice(0,12),c=Math.max(0,Math.floor(+$('#tc').value||0));
+if(!e||!n)return uiAlert('絵文字と樹種名を入力してください');if(trees().some(t=>t[0]==e))return uiAlert('その絵文字はすでに登録されています');
+S.customTrees.push([e,n,c]);save();render();toast('樹種「'+n+'」を追加しました')}
+
+/* ===== バックアップ：JSON／ZIP（backup.json＋audio/） ===== */
+const snapExport=()=>{const o=JSON.parse(JSON.stringify(snap(),(k,v)=>k==='dataUrl'?undefined:v));try{delete o.user.settings.github.token}catch(e){}try{delete o.team.pw}catch(e){}return o};
+async function dataUrlBytes(u){try{return new Uint8Array(await(await fetch(u)).arrayBuffer())}catch(e){const b=atob((u||'').split(',')[1]||''),a=new Uint8Array(b.length);for(let i=0;i<b.length;i++)a[i]=b.charCodeAt(i);return a}}
+const bytesDataUrl=(b,m)=>new Promise((ok,ng)=>{const r=new FileReader();r.onload=()=>ok(r.result);r.onerror=()=>ng(new Error('音源の変換に失敗しました'));r.readAsDataURL(new Blob([b],{type:m||'application/octet-stream'}))});
+async function exportZip(){try{const ent=[],aud=[];
+for(const s of S.dictationSets)for(const f of s.audioFiles||[]){if(!f.dataUrl)continue;const mime=(/^data:([^;,]+)/.exec(f.dataUrl)||[])[1]||'application/octet-stream',ext=(/\.[A-Za-z0-9]{1,5}$/.exec(f.name||'')||['.bin'])[0].toLowerCase(),p=`audio/${s.id}/${f.id}${ext}`;
+ent.push({name:p,data:await dataUrlBytes(f.dataUrl)});aud.push({id:f.id,setId:s.id,path:p,mime})}
+const o=snapExport();o.__audio=aud;o.__format='shukan-no-mori-backup';o.__v=1;ent.unshift({name:'backup.json',data:JSON.stringify(o)});
+dl('shukan_no_mori_backup_'+iso(kd(new Date()))+'.zip',ZipUtil.create(ent),'application/zip');toast('ZIPを書き出しました（音源'+aud.length+'件）')}
+catch(e){console.error(e);uiAlert('ZIPの書き出しに失敗しました: '+e.message)}}
+async function restore(t,files){try{const o=typeof t=='string'?JSON.parse(t):t;if(!o||typeof o!='object'||Array.isArray(o)||(o.R&&!Array.isArray(o.R)))throw new Error('形式が不正です');
+if(!await uiConfirm('現在のデータをバックアップの内容で上書きします。よろしいですか？','復元する'))return;
+const aud=o.__audio;delete o.__audio;delete o.__format;delete o.__v;const tk=((S.user||{}).settings||{}).github;const oldTok=tk&&tk.token;
+const oldPw=S.team&&S.team.pw,oldTid=S.team&&S.team.tid;Object.assign(S,o);ensure();const g=S.user.settings.github;if(!g.token&&oldTok)g.token=oldTok;if(!S.team.pw&&oldPw&&S.team.tid==oldTid)S.team.pw=oldPw;pomoSaveLS();
+if(aud&&files)for(const a of aud){const b=files.get(a.path);if(!b)continue;const du=await bytesDataUrl(b,a.mime);for(const s of S.dictationSets)for(const f of s.audioFiles||[])if(f.id==a.id)f.dataUrl=du}
+await hydrateAudio();await flush();render();toast('復元しました')}catch(e){console.error(e);uiAlert('バックアップを読み込めません：'+e.message)}}
+async function rdAny(i){const f=i.files[0];i.value='';if(!f)return;
+try{if(/\.zip$/i.test(f.name)||f.type=='application/zip'){const fl=await ZipUtil.read(await f.arrayBuffer()),b=fl.get('backup.json');if(!b)throw new Error('ZIP内に backup.json がありません');await restore(ZipUtil.textOf(b),fl)}
+else await restore(await f.text())}catch(e){uiAlert('読み込みに失敗しました：'+e.message)}}
+
+/* =====================================================================
+   要望書 追加仕様（1〜5章）
+   1 ポモドーロ拡張 / 2 効果音・BGM・オフライン / 3 途中停止ペナルティ /
+   4 タスク3分類 / 5 木とタスクの紐づけ
+   （旧実装の home / tog / startT などはこのブロックの定義に置き換え済み）
+   ===================================================================== */
+const WD='日月火水木金土',WDO=[1,2,3,4,5,6,0];
+const PEN_FREE=2,PEN_MIN=5,PEN_COST=5;   // 3回目以降の中断で5分ロック／5コインで解除
+const CAT={rt:['ルーティーン','#2e7d4f'],tk:['ToDo','#f59e0b']};
+const clampInt=(v,a,b,d)=>{v=Math.round(+v);return isFinite(v)?Math.min(b,Math.max(a,v)):d};
+const hmNow=()=>new Date().toTimeString().slice(0,5);
+const isDue=(r,d)=>!r.days||!r.days.length||r.days.includes((d||today).getDay());
+const due=()=>S.R.filter(r=>isDue(r,today));
+const daysLabel=r=>!r.days||!r.days.length||r.days.length>=7?'毎日':WDO.filter(w=>r.days.includes(w)).map(w=>WD[w]).join('・');
+const tagsOf=x=>x&&x.tags&&x.tags.length?x.tags:['未分類'];
+const allTags=()=>[...new Set([...S.R,...S.T].flatMap(tagsOf))];
+const MULTI_TAG='継続',STUDY_TAG='勉強';
+const isMulti=r=>!!r&&tagsOf(r).includes(MULTI_TAG);   // ルーティーンは「継続」タグ付きだけ1日に複数回達成できる
+const isStudy=x=>!!x&&tagsOf(x).includes(STUDY_TAG);   // 「勉強」タグ付きは完了時にグループへ自動投稿
+function plantTree(x,kind,isT){S.forest.push({e:S.sel,n:x.n,tags:tagsOf(x),rid:isT?null:x.id,tid:isT?x.id:null,at:Date.now(),kind})}   // 達成＝木を1本植える
+function unplant(key,id){for(let i=S.forest.length-1;i>=0;i--){const f=S.forest[i];if(f&&typeof f=='object'&&f[key]==id&&f.kind!='abort'){S.forest.splice(i,1);return}}}
+function cumAdd(kind,x,n){const c=S.cum;for(const t of tagsOf(x))c[kind][t]=Math.max(0,(c[kind][t]||0)+n);c.n[kind]=Math.max(0,(c.n[kind]||0)+n)}
+function tagPicker(sel,pin){const all=[...new Set([...(pin||[]),...allTags(),...sel])];
+return `<div class="row" id="tgp" style="flex-wrap:wrap;gap:6px;margin-bottom:6px">${all.map(t=>`<button type="button" class="chip ${sel.includes(t)?'on':''}" data-t="${esc(t)}" onclick="this.classList.toggle('on')">${esc(t)}</button>`).join('')}</div><input id="tgn" placeholder="新しいタグを追加（「、」や空白で区切って複数OK）">`}
+function readTags(){const on=[...document.querySelectorAll('#tgp .chip.on')].map(b=>b.dataset.t),nw=($('#tgn').value||'').split(/[、,，\s]+/).map(s=>s.trim().slice(0,12)).filter(Boolean),t=[...new Set([...on,...nw])].slice(0,6);return t.length?t:['未分類']}
+function setTagF(k,t){S[k]=t;render()}
+function tagChips(key,items){const tags=['すべて',...new Set(items.flatMap(tagsOf))],cur=tags.includes(S[key])?S[key]:'すべて';
+return `<div class="chips">${tags.map(t=>`<button class="chip ${cur==t?'on':''}" data-t="${esc(t)}" onclick="setTagF('${key}',this.dataset.t)">${esc(t)}</button>`).join('')}</div>`}
+const tagCur=(key,items)=>{const tags=new Set(items.flatMap(tagsOf));return tags.has(S[key])?S[key]:'すべて'};
+const fE=x=>typeof x=='string'?x:(x&&x.e)||'🌳';
+function actInc(kind,n,min){const k=kd(today),a=S.act[k]||(S.act[k]={rt:0,tk:0,td:0,m:0});
+if(kind)a[kind]=Math.max(0,(a[kind]||0)+(n==null?1:n));if(min)a.m=Math.max(0,(a.m||0)+min)}
+function weekData(){const o=[];for(let i=6;i>=0;i--){const d=new Date(today);d.setDate(d.getDate()-i);const k=kd(d),a=S.act[k],h=S.hist[k],md=(d.getMonth()+1)+'/'+d.getDate();
+o.push(a?{k,w:d.getDay(),md,rt:a.rt||0,tk:(a.tk||0)+(a.td||0),td:0,m:a.m||0}:{k,w:d.getDay(),md,rt:h?h.d||0:0,tk:0,td:0,m:h?h.m||0:0})}return o}
+
+/* ---------- 1. ポモドーロ設定（localStorageにも保存） ---------- */
+const PLS='shukan_pomo_settings';
+function pomoNorm(){const p=S.pomo&&typeof S.pomo=='object'?S.pomo:(S.pomo={});p.work=clampInt(p.work,1,180,25);p.rest=clampInt(p.rest,1,60,5);p.loop=!!p.loop;p.bgm=p.bgm!==false}
+function pomoLoadLS(){try{const o=JSON.parse(localStorage.getItem(PLS)||'null');if(o&&typeof o=='object'){S.pomo.work=o.work;S.pomo.rest=o.rest;S.pomo.loop=o.loop;S.pomo.bgm=o.bgm}}catch(e){}pomoNorm()}
+function pomoSaveLS(){try{localStorage.setItem(PLS,JSON.stringify(S.pomo))}catch(e){}}
+function setPomo(p){Object.assign(S.pomo,p);pomoNorm();pomoSaveLS();save()}
+function pomoSaveForm(){const w=$('#pwk').value,r=$('#prs').value;
+if(!(+w>=1&&+w<=180)||!(+r>=1&&+r<=60))return uiAlert('集中は1〜180分、休憩は1〜60分で入力してください');
+setPomo({work:Math.round(+w),rest:Math.round(+r)});render();toast('保存しました（集中'+S.pomo.work+'分／休憩'+S.pomo.rest+'分）')}
+function togBgm(){setPomo({bgm:!S.pomo.bgm});
+if(TM){if(S.pomo.bgm&&!TM.pa)Bgm.play();else Bgm.pause()}
+if(isLock())lock();else render();toast('🎵 BGM '+(S.pomo.bgm?'ON':'OFF'))}
+function togLoop(){setPomo({loop:!S.pomo.loop});if(isLock())lock();else render();toast('🔁 ループ '+(S.pomo.loop?'ON':'OFF'))}
+
+/* ---------- 2. 効果音・BGM・オフライン ----------
+   in.mp3 / out.mp3 / task.mp3 / rest.mp3 を「このHTMLと同じフォルダ」に置く。
+   取得できた音源はIndexedDBにも保存し（オフラインでも再生可）、https配信ならsw.jsもキャッシュする。
+   in/out が見つからない場合だけ、代わりに簡易のビープ音を鳴らす。 */
+const Assets=(()=>{const N={in:'in.mp3',out:'out.mp3',task:'task.mp3',rest:'rest.mp3'},U={},P={};
+const idbGet=k=>new Promise(ok=>{try{if(!DB)return ok(null);const r=DB.transaction('kv').objectStore('kv').get('asset_'+k);r.onsuccess=()=>ok(r.result||null);r.onerror=()=>ok(null)}catch(e){ok(null)}});
+const idbPut=(k,b)=>{try{if(DB)DB.transaction('kv','readwrite').objectStore('kv').put(b,'asset_'+k)}catch(e){}};
+const okType=b=>!!b&&b.size>0&&!/text\/html|json/.test(b.type||'');
+async function net(k,old){try{const r=await fetch(N[k],{cache:'no-cache'});if(!r.ok)return null;const b=await r.blob();if(!okType(b))return null;if(!old||old.size!==b.size)idbPut(k,b);return b}catch(e){return null}}
+function load(k){return P[k]||(P[k]=(async()=>{let b=await idbGet(k);if(okType(b)){net(k,b);}else{b=await net(k,null)}
+U[k]=okType(b)?URL.createObjectURL(b):N[k];return U[k]})())}
+return{load,preload:()=>Promise.all(Object.keys(N).map(load)),url:k=>U[k]||N[k]}})();
+const Sfx=(()=>{let ac=null;const buf={};
+const ctx=()=>{try{ac=ac||new(window.AudioContext||window.webkitAudioContext)();if(ac.state=='suspended')ac.resume();return ac}catch(e){return null}};
+function synth(k){const c=ctx();if(!c)return;try{const t=c.currentTime,o=c.createOscillator(),g=c.createGain(),f=k=='in'?[523,1047]:[1047,523];
+o.type='sine';o.frequency.setValueAtTime(f[0],t);o.frequency.exponentialRampToValueAtTime(f[1],t+.35);
+g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(.25,t+.03);g.gain.exponentialRampToValueAtTime(.0001,t+.5);
+o.connect(g);g.connect(c.destination);o.start(t);o.stop(t+.55)}catch(e){}}
+async function getBuf(k){if(buf[k]!==undefined)return buf[k];const c=ctx();if(!c)return null;
+try{const u=await Assets.load(k);buf[k]=await c.decodeAudioData(await(await fetch(u)).arrayBuffer())}catch(e){buf[k]=null}return buf[k]}
+return{unlock(){ctx()},async play(k){const c=ctx();if(!c)return;const b=await getBuf(k);
+if(b){const s=c.createBufferSource(),g=c.createGain();s.buffer=b;g.gain.value=.9;s.connect(g);g.connect(c.destination);s.start();return}
+try{const a=new Audio(Assets.url(k));a.addEventListener('error',()=>synth(k));const p=a.play();if(p&&p.catch)p.catch(()=>{})}catch(e){synth(k)}}}})();
+function SWreg(){try{if('serviceWorker' in navigator&&/^https?:$/.test(location.protocol))navigator.serviceWorker.register('sw.js').catch(()=>{})}catch(e){}}
+
+/* ---------- 3. 途中停止ペナルティ ---------- */
+const penOn=()=>!!(S.pen&&S.pen.until>Date.now());
+const stopToday=()=>S.stopCnt&&S.stopCnt.d==kd(today)?S.stopCnt.n:0;
+function regStop(){const k=kd(today);if(!S.stopCnt||S.stopCnt.d!=k)S.stopCnt={d:k,n:0};return ++S.stopCnt.n}
+const penLeft=()=>Math.max(0,Math.ceil((S.pen.until-Date.now())/1000));
+function penHtml(){return `<div class="modal"><div class="pnl"><h3 style="margin:0 0 6px">⏳ タイマーはお休み中</h3><p class="sm" style="margin:0">今日の中断が${stopToday()}回になったため、しばらくタイマーを再開できません。</p><div id="plt" style="font-size:46px;text-align:center;font-weight:700;margin:10px 0">${fmt(penLeft())}</div><button class="btn" style="width:100%;padding:12px" onclick="penPay()">🪙 ${PEN_COST}コインを消費して即時再開する</button><div class="sm" style="text-align:center;margin:6px 0 10px">所持コイン 🪙${S.coins}</div><button class="btn g" style="width:100%;padding:10px" onclick="S.modal='';render()">閉じる（待つ）</button></div></div>`}
+function penModal(id){if(id!=null)S.pen.rid=id;S.modal=penHtml();render()}
+function penPay(){if(!penOn())return;if(S.coins<PEN_COST)return uiAlert('コインが足りません（'+PEN_COST+'🪙必要です）');
+const rid=S.pen.rid;S.coins-=PEN_COST;S.pen={until:0,rid:null};S.modal='';save();render();toast('🪙-'+PEN_COST+' ロックを解除しました');
+if(rid!=null&&!TM&&S.R.some(x=>x.id==rid))startT(rid)}
+function penTick(){if(!S.pen||!S.pen.until)return;if(!penOn()){S.pen.until=0;const was=(S.modal||'').includes('class="pnl"');if(was){S.modal='';render()}save();toast('⏰ ロックが解除されました')}
+else{const e=$('#plt');if(e)e.textContent=fmt(penLeft())}}
+
+/* ---------- 4. タスク（ルーティーン／タスク／ToDo） ---------- */
+function rate7(){let d=0,t=0;for(let i=0;i<7;i++){const x=new Date(today);x.setDate(x.getDate()-i);const du=due(),h=i?S.hist[kd(x)]:{d:du.filter(r=>r.done).length,t:du.length};if(h){d+=h.d;t+=h.t}}return t?Math.round(d/t*100):0}
+function dayInfo(d){const k=kd(d);if(k==kd(today)){const du=due();return{d:du.filter(r=>r.done).length,t:du.length,m:0}}return S.hist[k]}
+function nextR(){const du=due();return du.find(r=>!r.done)||du[0]||S.R[0]}
+function syncToday(){const du=due(),dn=du.filter(r=>r.done);S.hist[kd(today)]={d:dn.length,t:du.length,ids:dn.map(r=>r.id),m:(S.hist[kd(today)]||{}).m||0}}
+function checkDay(){const n=new Date(),k=kd(n);if(!S.lastDay){S.lastDay=k;today=n;return 0}if(S.lastDay==k){today=n;return 0}
+const[a,b,c]=S.lastDay.split('-').map(Number),ld=new Date(a,b-1,c),dueL=S.R.filter(r=>isDue(r,ld)),dn=dueL.filter(r=>r.done);
+S.hist[S.lastDay]={d:dn.length,t:dueL.length,ids:dn.map(r=>r.id),m:(S.hist[S.lastDay]||{}).m||0};
+let gap=0;const missed=new Set(),d=new Date(ld);S.R.forEach(r=>{if(isDue(r,ld)&&!r.done)missed.add(r.id)});
+for(;;){d.setDate(d.getDate()+1);if(kd(d)==k||d>n)break;gap=1;S.R.forEach(r=>{if(isDue(r,d))missed.add(r.id)});if(!S.hist[kd(d)])S.hist[kd(d)]={d:0,t:S.R.filter(r=>isDue(r,d)).length,ids:[],m:0}}
+S.R.forEach(r=>{if(missed.has(r.id))r.st=0;r.done=0;r.c=0;r.useAlt=0});                 // ルーティーン：対象曜日に未達成で再表示
+S.T.forEach(t=>{if(gap||!t.done)t.st=0;t.done=0;t.c=0});                                 // タスク（1日リピート）：毎日リセット
+S.stopCnt={d:k,n:0};                                                                      // 途中停止回数は日付が変わるとリセット
+const lim=new Date(n);lim.setDate(lim.getDate()-90);for(const x in S.act){const[y,m2,d2]=x.split('-').map(Number);if(new Date(y,m2-1,d2)<lim)delete S.act[x]}
+S.lastDay=k;today=n;save();return 1}
+function tog(id){if(S.ed)return;checkDay();const r=S.R.find(x=>x.id==id);if(!r||!isDue(r,today))return;
+if(r.done&&!isMulti(r)){toast('✅ 今日はもう達成済みです（1日に複数回達成できるのは「継続」タグの習慣だけ）');return}
+const first=!r.done;r.c=(r.c||0)+1;if(first){r.done=1;r.st++;S.coins+=5}actInc('rt');cumAdd('rt',r,1);plantTree(r,'task');studyPost(r);syncToday();save();render();toast('🌳 木を植えました')}
+function untog(id){const r=S.R.find(x=>x.id==id);if(!r||!(r.c>0))return;r.c--;actInc('rt',-1);cumAdd('rt',r,-1);unplant('rid',r.id);
+if(r.c==0&&r.done){r.done=0;r.st=Math.max(0,r.st-1);S.coins=Math.max(0,S.coins-5)}syncToday();save();render()}
+function togT(id){if(S.ed)return;checkDay();const t=S.T.find(x=>x.id==id);if(!t)return;if(!t.c){t.done=1;t.st++}t.c=(t.c||0)+1;actInc('tk');cumAdd('tk',t,1);plantTree(t,'task',1);studyPost(t);save();render();toast('🌳 木を植えました')}
+function untogT(id){const t=S.T.find(x=>x.id==id);if(!t||!(t.c>0))return;t.c--;actInc('tk',-1);cumAdd('tk',t,-1);unplant('tid',t.id);if(t.c==0){t.done=0;t.st=Math.max(0,t.st-1)}save();render()}
+function r_alt(id){const r=S.R.find(x=>x.id==id);r.useAlt=!r.useAlt;render()}
+function home(){const r=rate7(),c=r<=20?'#EF4444':r<60?'#F59E0B':'#3B82F6',dn=S.vw=='dn',yr=isRec(ykey()),md=['rt','tk'].includes(S.mode)?S.mode:'rt';
+let h=`<div class="card" style="text-align:center"><div class="row"><div class="sm sp" style="text-align:left">${dn?'直近7日間の達成率':'達成数（直近7日）'}</div><div class="seg"><button class="${dn?'':'on'}" onclick="S.vw='bar';save();render()">達成数</button><button class="${dn?'on':''}" onclick="S.vw='dn';save();render()">達成率</button></div></div>${dn?donut([[r,c],[100-r,'#e5e7eb']],170,r+'%',c):bars7()}</div>
+<div class="card row" style="cursor:pointer" onclick="dOpen('w',ykey())"><span style="font-size:26px">📔</span><div class="sp"><b>霧晴れの開拓日誌</b><div class="sm">${yr?'昨日の記録：済み ✔':'昨日の記録がまだです（保存で+5🪙）'}</div></div><span class="sm">›</span></div>
+<div class="tabs">${[['rt','ルーティーン'],['tk','ToDo']].map(t=>`<button class="${md==t[0]?'on':''}" onclick="S.mode='${t[0]}';S.ed=0;render()">${t[1]}</button>`).join('')}</div>
+<div class="sm" style="margin:-2px 0 6px">${{rt:'1日1回の習慣。「継続」タグを付けたものだけ、1日に何度でも達成できます。曜日も選べます（未選択＝毎日）。',tk:'1日に何度でも達成OK。翌日になるとリセットされます。タグでグループ分け・絞り込みできます。'}[md]}</div>`;
+h+=S.ed?edBar():`<div class="row" style="justify-content:flex-end;margin-bottom:6px"><button class="btn g" onclick="S.ed=1;render()">✏️ 編集モード</button></div>`;
+if(md=='rt'){const t3=top3();
+h+=`<div class="row"><select class="s" onchange="S.per=this.value;render()">${['1日','1週間','1ヶ月','1年'].map(p=>`<option ${p==S.per?'selected':''}>${p}</option>`).join('')}</select>${tagChips('tag',S.R)}</div>`;
+const ft=tagCur('tag',S.R),all=S.R.filter(r=>ft=='すべて'||tagsOf(r).includes(ft)),nd=all.filter(r=>isDue(r,today)),shown=all.filter(r=>S.ed||S.showOff||isDue(r,today));
+shown.forEach(r=>{const dn2=isDue(r,today),cnt={'1日':'','1週間':`今週 ${Math.min(7,r.st)}/7`,'1ヶ月':`今月 ${Math.min(30,r.st)}/30`,'1年':`今年 ${r.st*3}日`}[S.per],wk=r.days&&r.days.length&&r.days.length<7;
+h+=`<div class="card rt ${r.done?'done':''} ${S.ed?'ed':''} ${dn2?'':'off'}" data-lp="r" ${!S.ed&&dn2?`onclick="tog(${r.id})"`:''}><div class="chk">${r.done?'✓':''}</div><div class="sp"><div class="sm">${esc(r.w)} ・ ${tagsOf(r).map(t=>'#'+esc(t)).join(' ')}${wk?' ・ 🗓'+daysLabel(r):''}${dn2?'':'（今日は休み）'}</div><b>${esc(r.alt&&r.useAlt?r.alt+'（ミニ）':r.n)}</b><div class="sm">${r.st}日連続${t3.includes(r.id)?' 🔥':''} ${cnt}${(r.c||0)>1?' ・ 今日 ×'+r.c:''}</div></div>
+${S.ed?edBtns('R',r.id):`${(r.c||0)>0&&dn2?`<button class="btn g" title="直近の達成を取り消す" onclick="event.stopPropagation();untog(${r.id})">↩</button>`:''}${r.alt&&dn2?`<button class="btn g" onclick="event.stopPropagation();r_alt(${r.id})">${r.useAlt?'通常に':'ミニ'}</button>`:''}${r.m!='check'&&dn2?`<button class="btn" onclick="event.stopPropagation();startT(${r.id})">▶ ${r.m=='sw'?'計測':(r.pomo?(r.pw||S.pomo.work)+':'+(r.pr||S.pomo.rest):r.min+'分')}</button>`:''}`}</div>`});
+if(!S.ed&&!nd.length&&all.length)h+=`<p class="sm" style="text-align:center">今日が対象のルーティーンはありません</p>`;
+const hid=all.length-nd.length;if(!S.ed&&hid>0)h+=`<button class="chip" style="margin:4px 0" onclick="S.showOff=!S.showOff;render()">${S.showOff?'今日が休みの習慣を隠す':'今日が休みの習慣 '+hid+'件を表示'}</button>`;
+if(!S.ed)h+=`<button class="fab" onclick="addR()">＋</button>`}
+else{const ft=tagCur('tagT',S.T),L=S.T.filter(t=>ft=='すべて'||tagsOf(t).includes(ft)),grp=!S.ed&&ft=='すべて'&&S.grp!==0,
+tile=(t,hd)=>`<div class="tile ${t.done?'ok':''} ${t.st>=10?'top':''} ${S.ed?'ed':''}" data-lp="t" onclick="togT(${t.id})"><div class="ic" style="color:${t.st>=10?'#333':'#fff'}">${t.done&&t.st<10?'✔':t.ic}</div>${esc(t.n)}${(hd?tagsOf(t).slice(1):tagsOf(t)).length?`<div style="font-size:10px;opacity:.85">${(hd?tagsOf(t).slice(1):tagsOf(t)).map(x=>'#'+esc(x)).join(' ')}</div>`:''}${t.c?`<div style="font-size:12px">今日 ×${t.c}</div>`:''}${t.st>=10?`<div style="font-size:12px">${t.st} ★</div>`:''}${t.c&&!S.ed?`<div><button class="btn g" style="margin-top:6px;padding:3px 10px;font-size:11px" onclick="event.stopPropagation();untogT(${t.id})">↩ 取り消し</button></div>`:''}${S.ed?`<div class="row" style="justify-content:center;flex-wrap:wrap;margin-top:8px;gap:4px">${edBtns('T',t.id)}</div>`:''}</div>`;
+h+=`<div class="row">${tagChips('tagT',S.T)}${S.ed?'':`<button class="chip ${S.grp!==0?'on':''}" onclick="S.grp=S.grp===0?1:0;render()">🗂 グループ表示</button>`}</div>`;
+if(grp){const g={};L.forEach(t=>{const k=tagsOf(t)[0];(g[k]=g[k]||[]).push(t)});
+Object.keys(g).forEach(k=>{h+=`<div class="sm" style="margin:12px 0 4px"><b>#${esc(k)}</b>（${g[k].length}）</div><div class="grid">${g[k].map(t=>tile(t,1)).join('')}</div>`})}
+else h+=`<div class="grid">${L.map(t=>tile(t,0)).join('')}</div>`;
+if(!L.length)h+=`<p class="sm" style="text-align:center">該当するToDoがありません</p>`;
+if(!S.ed)h+=`<div class="grid" style="margin-top:10px"><div class="tile" style="background:#999" onclick="addT()"><div class="ic">＋</div>ToDoを追加</div></div>`}
+return h}
+const edit=(k,id)=>k=='R'?rModal(id):tModal(id);
+function rModal(id){const r=id!=null?S.R.find(x=>x.id==id):null;if(id!=null&&!r)return;const kind=r?(r.pomo?'pomo':r.m):'check';
+const op=(v,t)=>`<option value="${v}" ${kind==v?'selected':''}>${t}</option>`;
+S.modal=`<div class="modal"><div><h3>${r?'ルーティーン編集':'ルーティーン追加'}</h3><label>名前</label><input id="a1" value="${esc(r&&r.n)}"><label>タイミング（きっかけ。「07:30」形式なら通知時刻にも使われます）</label><input id="a2" placeholder="朝起きたら" value="${esc(r&&r.w)}"><label>代替行動（ミニ目標）</label><input id="a3" placeholder="5分散歩" value="${esc(r&&r.alt)}"><label>タグ（複数選択OK）</label>${tagPicker(r?tagsOf(r):[],[MULTI_TAG])}<p class="sm" style="margin:0 0 6px">「継続」タグを付けると1日に何度でも達成できます（付けないと1日1回）。「勉強」タグは、完了するとグループに自動投稿されます。</p><label>計測</label><select id="a6">${op('check','なし（チェック式）')}${op('timer','タイマー（カウントダウン）')}${op('pomo','タイマー（ポモドーロ）')}${op('sw','ストップウォッチ')}</select><label>時間（分）※ポモドーロの集中／休憩時間は、▶を押したときに設定します</label><input id="a7" type="number" value="${r?r.min||10:10}">
+<label>繰り返す曜日（未選択＝毎日）</label><div class="row" id="a8" style="flex-wrap:wrap;gap:6px">${WDO.map(w=>`<button type="button" class="chip ${r&&r.days&&r.days.includes(w)?'on':''}" data-w="${w}" onclick="this.classList.toggle('on')">${WD[w]}</button>`).join('')}</div>
+<div class="row" style="margin-top:12px"><button class="btn g sp" onclick="S.modal='';render()">キャンセル</button><button class="btn sp" onclick="saveR(${id==null?'null':id})">${r?'保存':'追加'}</button></div></div></div>`;render()}
+function saveR(id){checkDay();const n=$('#a1').value.trim();if(!n)return uiAlert('名前を入力してください');const k=$('#a6').value;
+let days=[...document.querySelectorAll('#a8 .chip.on')].map(b=>+b.dataset.w);if(days.length>=7)days=[];
+const o={n,w:$('#a2').value.trim()||'いつでも',alt:$('#a3').value.trim(),tags:readTags(),m:k=='pomo'?'timer':k,pomo:k=='pomo'?1:0,min:Math.max(1,+$('#a7').value||10),days};o.tag=o.tags[0];
+if(id!=null){const r=S.R.find(x=>x.id==id);if(!r)return;Object.assign(r,o);if(TM&&TM.id==id)TM.name=o.n}else S.R.push(Object.assign({id:Date.now(),st:0,done:0,c:0},o));
+S.modal='';syncToday();save();render()}
+function tModal(id){const t=id!=null?S.T.find(x=>x.id==id):null;if(id!=null&&!t)return;
+S.modal=`<div class="modal"><div><h3>${t?'ToDo編集':'ToDoを追加'}</h3><p class="sm" style="margin:0">1日に何度でも達成できます。翌日にリセットされます。</p><label>ToDo名</label><input id="t1" value="${esc(t&&t.n)}"><label>アイコン（絵文字）</label><input id="t2" value="${esc(t?t.ic:'⭐')}"><label>タグ（複数選択OK）</label>${tagPicker(t?tagsOf(t):[])}<div class="row" style="margin-top:12px"><button class="btn g sp" onclick="S.modal='';render()">キャンセル</button><button class="btn sp" onclick="saveT(${id==null?'null':id})">${t?'保存':'追加'}</button></div></div></div>`;render()}
+function saveT(id){const n=$('#t1').value.trim();if(!n)return uiAlert('名前を入力してください');const ic=$('#t2').value.trim().slice(0,4)||'⭐';
+const tg=readTags();if(id!=null){const t=S.T.find(x=>x.id==id);if(t){t.n=n;t.ic=ic;t.tags=tg;t.tag=tg[0]}}else S.T.push({id:Date.now(),n,ic,st:0,done:0,c:0,tags:tg,tag:tg[0]});S.modal='';save();render()}
+/* ---------- 1〜3. タイマー本体 ---------- */
+function finish(r,sec){const mn=Math.round((sec||0)/60);
+if(r){if(!r.done||isMulti(r)){r.c=(r.c||0)+1;actInc('rt',1,mn);cumAdd('rt',r,1)}else actInc(null,0,mn);if(!r.done){r.done=1;r.st++}}else actInc(null,0,mn);
+S.coins+=15;S.forest.push({e:S.sel,n:r?r.n:'',tags:r?tagsOf(r):[],rid:r?r.id:null,at:Date.now(),kind:'focus',min:mn});   // 木とタスクの紐づけ
+syncToday();const h=S.hist[kd(today)];if(h&&sec)h.m=(h.m||0)+mn;if(r)studyPost(r,mn)}
+function startT(id,skip){checkDay();if(TM)return uiAlert('計測中のタスクがあります');const r=S.R.find(x=>x.id==id);if(!r)return;
+if(penOn())return penModal(id);
+const sw=r.m=='sw',isP=!!r.pomo&&!r.useAlt&&!sw;if(isP&&!skip)return pomoAsk(id);const mins=r.useAlt?2:(isP?S.pomo.work:r.min);
+TM={id,name:r.n,kind:sw?'sw':'cd',t:sw?0:mins*60,tot:mins*60,acc:0,last:nowMs(),pa:0,ph:'work',pomo:isP,ls:0,cyc:1};
+try{if(window.Notification&&Notification.permission=='default')Notification.requestPermission()}catch(e){}
+Sfx.unlock();Sfx.play('in');Bgm.load('work');Bgm.play();msBind(1);msMeta();TM.iv=setInterval(tick,500);lock()}
+function pomoAsk(id){const r=S.R.find(x=>x.id==id);if(!r)return;const w=r.pw||S.pomo.work,rs=r.pr||S.pomo.rest;
+S.modal=`<div class="modal"><div><h3>🍅 ポモドーロの時間を設定</h3><p class="sm" style="margin:0">「${esc(r.n)}」の集中と休憩の長さを決めて始めます。前回の設定が入っています。</p>
+<div class="row" style="margin-top:8px"><div class="sp"><label class="sm">集中（分）</label><input id="pk_w" type="number" min="1" max="180" value="${w}"></div><div class="sp"><label class="sm">休憩（分）</label><input id="pk_r" type="number" min="1" max="60" value="${rs}"></div></div>
+<div class="chips" style="margin-top:8px">${[[15,3],[25,5],[50,10]].map(q=>`<button type="button" class="chip" onclick="$('#pk_w').value=${q[0]};$('#pk_r').value=${q[1]}">${q[0]}/${q[1]}</button>`).join('')}</div>
+<div class="row" style="margin:10px 0"><span class="sp">🔁 ループ（集中→休憩を自動で繰り返す）</span><input id="pk_l" type="checkbox" style="width:auto" ${S.pomo.loop?'checked':''}></div>
+<div class="row"><button class="btn g sp" onclick="S.modal='';render()">キャンセル</button><button class="btn sp" onclick="pomoGo(${id})">▶ 開始</button></div></div></div>`;render()}
+function pomoGo(id){const r=S.R.find(x=>x.id==id);if(!r)return;const w=$('#pk_w').value,rs=$('#pk_r').value;
+if(!(+w>=1&&+w<=180)||!(+rs>=1&&+rs<=60))return uiAlert('集中は1〜180分、休憩は1〜60分で入力してください');
+r.pw=Math.round(+w);r.pr=Math.round(+rs);setPomo({work:r.pw,rest:r.pr,loop:$('#pk_l').checked});S.modal='';startT(id,1)}
+function fin(){const r=S.R.find(x=>x.id==TM.id);try{navigator.vibrate([500,200,500])}catch(e){}
+if(TM.pomo&&TM.ph=='work'){finish(r,TM.tot);Sfx.play('out');const rs=S.pomo.rest,m='☕ 作業お疲れさま！木を植えました(+15🪙)。'+rs+'分休憩です';ntf(m);
+TM.ph='rest';TM.name=r.n+'（休憩'+rs+'分）';TM.tot=rs*60;TM.acc=0;TM.last=nowMs();TM.t=TM.tot;TM.ls=0;Bgm.load('rest');Bgm.play();msMeta();save();if(isLock())lock();else render();toast(m);return}
+if(TM.pomo&&TM.ph=='rest'&&S.pomo.loop){const w=S.pomo.work,m='🍅 休憩おわり。次の集中（'+w+'分）を始めます';
+TM.cyc=(TM.cyc||1)+1;TM.ph='work';TM.name=r.n;TM.tot=w*60;TM.acc=0;TM.last=nowMs();TM.t=TM.tot;TM.ls=0;Sfx.play('in');Bgm.load('work');Bgm.play();msMeta();ntf(m);if(isLock())lock();else render();toast(m);return}
+endT(TM.ph=='rest'?'rest':'done')}
+function endT(mode){if(!TM)return;const r=S.R.find(x=>x.id==TM.id);calc();const sec=Math.round(elapsed()/1000),sw=TM.kind=='sw';let m='',pen=false;
+clearInterval(TM.iv);Bgm.pause();msBind(0);
+if(mode=='done'){finish(r,sec);Sfx.play('out');m='🌳 完了！森に木を植えました (+15🪙)'+(sw?' 記録 '+fmt(sec):'')}
+else if(mode=='abort'){S.forest.push({e:'🪵',n:r?r.n:TM.name,tags:r?tagsOf(r):[],rid:TM.id,at:Date.now(),kind:'abort',min:Math.round(sec/60)});Sfx.play('out');
+const n=regStop();m='🪵 中断しました。木が枯れました（今日'+n+'回目）';
+if(n>PEN_FREE){S.pen={until:Date.now()+PEN_MIN*60000,rid:TM.id};pen=true}else m+='。'+(n==PEN_FREE?'次の中断から':'あと'+(PEN_FREE+1-n)+'回の中断で')+PEN_MIN+'分間ロックされます'}
+else m='休憩おわり。おつかれさま！';
+const wasLock=isLock();TM=null;if(wasLock)S.modal='';if(pen)S.modal=penHtml();save();render();toast(m);ntf(m)}
+async function stopT(){if(!TM)return;if(TM.ph=='rest')return endT('rest');
+const warn=stopToday()>=PEN_FREE?'\n⚠ 今日'+(stopToday()+1)+'回目の中断：'+PEN_MIN+'分間タイマーがロックされます':'';
+const v=await dlg({msg:'「'+TM.name+'」を終了しますか？'+warn,btns:[{l:'✅ 完了として記録（森に植樹）',v:'done',c:''},{l:'🪵 中断する（木が枯れます）',v:'abort',c:'d'},{l:'続ける',v:null}]});
+if(v&&TM)endT(v)}
+function renderMini(){const e=$('#mini'),a=$('#app');if(!e)return;if(!TM){e.innerHTML='';a.classList.remove('timing');return}a.classList.add('timing');
+e.innerHTML=`<div class="bar"><span id="mg" style="font-size:24px">${treeEm(stage())}</span><div class="sp" style="min-width:0"><b class="ell">${esc(TM.name)}</b><div id="tt" style="font-size:20px">${fmt(TM.t)}</div></div>${TM.pomo?`<button class="btn g" title="ループ ${S.pomo.loop?'ON':'OFF'}" style="${S.pomo.loop?'':'opacity:.45'}" onclick="togLoop()">🔁</button>`:''}<button class="btn g" onclick="pause()">${TM.pa?'▶ 再開':'⏸ 一時停止'}</button><button class="btn" onclick="stopT()">■ 停止</button><button class="btn g" onclick="lock()" title="ロック画面に戻る">🔒</button></div>`}
+function lock(){const n=nextR()||{n:'（ルーティーン未登録）',w:'',st:0};
+S.modal=`<div class="lock"><div id="lc" style="font-size:56px">${new Date().toTimeString().slice(0,5)}</div>
+<div class="w"><div class="sm" style="color:#cde">タスクタイマー${TM&&TM.pomo?' ・ '+(TM.ph=='rest'?'☕ 休憩':'🍅 集中 '+(TM.cyc||1)+'回目'):''}</div>${TM?`<b>${esc(TM.name)}</b><div id="lt" style="font-size:40px;text-align:center">${fmt(TM.t)}</div><div class="tree sway" id="lg">${treeEm(stage())}</div><div class="prog"><i id="lb" style="width:${Math.round(prog()*100)}%"></i></div><div class="row"><button class="btn sp" onclick="pause()">${TM.pa?'▶ 再開':'⏸ 一時停止'}</button><button class="btn sp" onclick="stopT()">■ 停止</button></div><div class="row" style="margin-top:8px"><button class="btn g sp" onclick="togBgm()">🎵 BGM：${S.pomo.bgm?'ON':'OFF'}</button>${TM.pomo?`<button class="btn g sp" onclick="togLoop()">🔁 ループ：${S.pomo.loop?'ON':'OFF'}</button>`:''}</div>`:'計測中のタスクはありません'}</div>
+<div class="w" onclick="S.modal='';S.tab='home';render()"><div class="sm" style="color:#cde">次の習慣 (Next Habit)</div><b>${esc(n.n)}</b><div>${esc(n.w)} ・ ${n.st}日連続</div></div>
+<button class="btn g" onclick="S.modal='';render()">ロック解除</button></div>`;render()}
+
+/* ---------- 5. 森の木 ⇔ 達成タスク ---------- */
+function forestSvg(list,mem,idx){const all=list||S.forest,F=all.slice(-36),off=all.length-F.length;let s='<svg viewBox="0 0 360 230" width="100%"><g>',i=0;const N=6;
+for(let a=0;a<N;a++)for(let b=0;b<N;b++){const x=180+(a-b)*30,y=40+(a+b)*15,pts=`${x},${y} ${x+30},${y+15} ${x},${y+30} ${x-30},${y+15}`;
+s+=`<polygon points="${pts}" fill="${(a+b)%2?'#7bc47f':'#6ab76f'}" stroke="#4e9a55"/>`;
+if(F[i]){s+=`<g style="cursor:pointer" onclick="${mem?'memTree':'treeInfo'}(${idx?idx[off+i]:off+i})"><text x="${x}" y="${y+18}" text-anchor="middle" font-size="24">${esc(fE(F[i]))}</text><polygon points="${pts}" fill="transparent"/></g>`}i++}
+return s+'</g></svg>'}
+const fTags=x=>x&&typeof x=='object'?(x.tags&&x.tags.length?x.tags:(x.tag?[x.tag]:['未分類'])):['未分類'];
+const FPER=[['all','全期間'],['mo','今月'],['wk','7日間']];
+function setFv(t){S.fv=t;save();render()}
+function setFp(q){S.fp=q;save();render()}
+function forestCard(){const all=S.forest.map((x,i)=>({x,i})),tc={};all.forEach(o=>fTags(o.x).forEach(t=>tc[t]=(tc[t]||0)+1));
+const tags=Object.keys(tc).sort((a,b)=>tc[b]-tc[a]),tv=tc[S.fv]?S.fv:'',pr=['mo','wk'].includes(S.fp)?S.fp:'all';
+const mo0=new Date(today.getFullYear(),today.getMonth(),1).getTime(),wk0=new Date(today.getFullYear(),today.getMonth(),today.getDate()).getTime()-6*864e5;
+const inP=x=>{if(pr=='all')return true;const at=x&&typeof x=='object'?x.at:0;return !!at&&at>=(pr=='mo'?mo0:wk0)};
+const sel=all.filter(o=>(!tv||fTags(o.x).includes(tv))&&inP(o.x)),list=sel.map(o=>o.x),idx=sel.map(o=>o.i),dead=list.filter(x=>x&&typeof x=='object'&&(x.kind=='abort'||x.e=='🪵')).length;
+return `<div class="card"><div class="row"><b class="sp">🌳 ${tv?esc(tv)+'の森':'自分の森'}</b><div class="seg">${FPER.map(q=>`<button class="${pr==q[0]?'on':''}" onclick="setFp('${q[0]}')">${q[1]}</button>`).join('')}</div></div>
+<div class="chips" style="margin-top:6px"><button class="chip ${tv?'':'on'}" onclick="setFv('')">🌳 すべて ${all.length}</button>${tags.map(t=>`<button class="chip ${tv==t?'on':''}" data-t="${esc(t)}" onclick="setFv(this.dataset.t)">#${esc(t)} ${tc[t]}</button>`).join('')}</div>
+<div class="sm" style="margin:4px 0">${list.length}本${dead?'（うち枯れ木'+dead+'本）':''} ・ 木をタップすると、達成したタスクがわかります${list.length>36?' ・ 最新36本を表示':''}</div>${list.length?forestSvg(list,0,idx):'<p class="sm" style="text-align:center;padding:30px 0">この条件の木はまだありません</p>'}</div>`}
+function treeModal(x,back){const o=typeof x=='object'&&x?x:null,dead=o?o.kind=='abort'||o.e=='🪵':x=='🪵',dt=o&&o.at?new Date(o.at):null,
+ds=dt?`${dt.getFullYear()}/${dt.getMonth()+1}/${dt.getDate()} ${pad(dt.getHours())}:${pad(dt.getMinutes())}`:'';
+const row=(a,b)=>`<div class="row" style="margin-top:8px"><span class="sm" style="width:84px">${a}</span><b class="sp">${b}</b></div>`;
+const body=o&&o.n?row(dead?'中断したタスク':'達成したタスク',esc(o.n))+(ds?row(dead?'中断日時':'達成日時',ds):'')+(o.kind?row('種類',dead?'中断（枯れ木になりました）':(o.kind=='task'?'タスク達成':'集中完了')):'')+(o.min?row('集中時間',o.min+'分'):'')+(o.tags&&o.tags.length?row('タグ',o.tags.map(t=>'#'+esc(t)).join(' ')):(o.tag?row('タグ','#'+esc(o.tag)):'')):`<p class="sm">この木は、タスクの記録機能ができる前に育ったため、どのタスクで得たかの情報がありません。</p>`;
+return `<div class="modal"><div><div class="row"><b class="sp">🌳 この木について</b><button class="btn g" onclick="${back}">閉じる</button></div><div class="tree" style="margin:8px 0">${esc(fE(x))}</div>${body}</div></div>`}
+function treeInfo(i){const x=S.forest[i];if(x==null)return;S.modal=treeModal(x,"S.modal='';render()");render()}
+function memTree(i){const x=MEMV&&MEMV.forest[i];if(x==null)return;S.modal=treeModal(x,'memberReopen()');render()}
+
+/* ---------- 累計（タグ別の累計達成回数。ルーティーン／ToDoの種別もタグの一種として表示） ---------- */
+function cumHtml(){const f=['all','rt','tk'].includes(S.cuv)?S.cuv:'all',C=S.cum,src=f=='all'?['rt','tk']:[f],m={};
+src.forEach(k=>Object.entries(C[k]||{}).forEach(([t,n])=>{if(n>0)m[t]=(m[t]||0)+n}));
+const kr=src.map(k=>[CAT[k][0],C.n[k]||0,CAT[k][1],1]),tr=Object.entries(m).sort((a,b)=>b[1]-a[1]).map(([t,n])=>[t,n,'#7c8cf8',0]),
+total=src.reduce((a,k)=>a+(C.n[k]||0),0),mx=Math.max(1,...kr.map(r=>r[1]),...tr.map(r=>r[1]));
+const row=r=>`<div style="margin:8px 0"><div class="row"><span class="sp">${r[3]?'🏷 ':'#'}${esc(r[0])}${r[3]?' <span class="sm">（種別）</span>':''}</span><b>${r[1]}</b><span class="sm">回</span></div><div style="height:10px;border-radius:5px;background:var(--bd);overflow:hidden"><div style="height:100%;width:${Math.round(r[1]/mx*100)}%;background:${r[2]}"></div></div></div>`;
+return `<div class="card"><div class="row"><b class="sp">📈 累計達成回数</b><div class="seg">${[['all','すべて'],['rt','ルーティーン'],['tk','ToDo']].map(t=>`<button class="${f==t[0]?'on':''}" onclick="S.cuv='${t[0]}';render()">${t[1]}</button>`).join('')}</div></div>
+<div style="text-align:center;margin:10px 0"><span class="sm">合計</span><br><b style="font-size:34px">${total}</b> <span class="sm">回</span></div>
+<div class="sm">種別</div>${kr.map(row).join('')}<div class="sm" style="margin-top:10px">タグ別</div>${tr.length?tr.map(row).join(''):'<p class="sm">まだ記録がありません</p>'}
+<p class="sm" style="margin:8px 0 0">複数のタグが付いた項目は、付いているすべてのタグに1回ずつ数えます。ルーティーンの回数は過去の記録も含みます。ToDoはこの機能の追加以降の達成から数えます。</p></div>`}
+
+/* =====================================================================
+   6. チーム機能（別端末のメンバーと共有）
+   ・サーバーは Firebase Realtime Database の REST API（SDK不要）。URLを設定画面/チーム画面で入力。
+   ・データはチームのパスワードから作った鍵で端末内で暗号化(AES-GCM)してから送るため、
+     サーバー側ではチームIDを知っていても中身は読めない。
+   ・未参加のときは、従来どおりの1人用デモ表示になる。
+   ===================================================================== */
+const TEAM_DB_DEFAULT='';   // 共通のサーバーURLをここに入れると、参加者はURL入力が不要になります
+let TP=[],TMEM={},TLAST=0,TSIG='',TBUSY=false,TERR='',DRAFT='',MEMV=null,MEMM='n',TPUSHT=null;
+const teamOn=()=>!!(S.team&&S.team.db&&S.team.tid&&S.team.pw&&S.team.uid);
+const safeImg=u=>/^(https?:|data:image\/)/.test(u||'')?u:'';
+const rndId=n=>{const A='abcdefghijklmnopqrstuvwxyz0123456789',a=crypto.getRandomValues(new Uint8Array(n));return [...a].map(x=>A[x%A.length]).join('')};
+const TeamAPI=(()=>{const enc=new TextEncoder(),dec=new TextDecoder(),kc={};
+const b64=u=>{let s='';for(let i=0;i<u.length;i+=8192)s+=String.fromCharCode.apply(null,u.subarray(i,i+8192));return btoa(s)};
+const need=()=>{if(!(window.crypto&&crypto.subtle))throw new Error('この環境では暗号化が使えません（https または localhost で開いてください）')};
+async function key(tid,pw){need();const id=tid+'\n'+pw;if(kc[id])return kc[id];
+const m=await crypto.subtle.importKey('raw',enc.encode(pw),'PBKDF2',false,['deriveKey']);
+return kc[id]=await crypto.subtle.deriveKey({name:'PBKDF2',salt:enc.encode('shukan-no-mori:'+tid),iterations:120000,hash:'SHA-256'},m,{name:'AES-GCM',length:256},false,['encrypt','decrypt'])}
+async function seal(tid,pw,o){const k=await key(tid,pw),iv=crypto.getRandomValues(new Uint8Array(12)),ct=new Uint8Array(await crypto.subtle.encrypt({name:'AES-GCM',iv},k,enc.encode(JSON.stringify(o))));
+const u=new Uint8Array(12+ct.length);u.set(iv);u.set(ct,12);return b64(u)}
+async function unseal(tid,pw,s){const k=await key(tid,pw),u=Uint8Array.from(atob(s),c=>c.charCodeAt(0));
+return JSON.parse(dec.decode(await crypto.subtle.decrypt({name:'AES-GCM',iv:u.slice(0,12)},k,u.slice(12))))}
+async function http(db,path,method,body,qs){const c=new AbortController(),t=setTimeout(()=>c.abort(),10000);
+try{const r=await fetch(db.replace(/\/+$/,'')+path+'.json'+(qs||''),{method:method||'GET',body:body===undefined?undefined:JSON.stringify(body),signal:c.signal,headers:body===undefined?undefined:{'Content-Type':'application/json'}});
+if(!r.ok)throw new Error('サーバーエラー('+r.status+')。URLとデータベースのルールを確認してください');return await r.json()}
+catch(e){if(e.name=='AbortError'||e instanceof TypeError)throw new Error('サーバーに接続できません');throw e}finally{clearTimeout(t)}}
+const gid=n=>{const A='ABCDEFGHJKLMNPQRSTUVWXYZ23456789',a=crypto.getRandomValues(new Uint8Array(n));return [...a].map(x=>A[x%A.length]).join('')};
+const T=()=>S.team,base=()=>'/teams/'+T().tid;
+return{
+async create(db,name){need();const tid='MORI-'+gid(6),pw=gid(8);
+await http(db,'/teams/'+tid+'/meta','PUT',{v:await seal(tid,pw,{ok:'shukan'}),n:await seal(tid,pw,{name})});return{tid,pw}},
+async verify(db,tid,pw){need();const m=await http(db,'/teams/'+tid+'/meta');if(!m||!m.v)throw new Error('そのチームIDは見つかりません');
+try{await unseal(tid,pw,m.v)}catch(e){throw new Error('パスワードが違います')}
+let name='チーム';try{name=(await unseal(tid,pw,m.n)).name||name}catch(e){}return{name}},
+async putMe(obj){const t=T();await http(t.db,base()+'/members/'+t.uid,'PUT',await seal(t.tid,t.pw,obj))},
+async delMe(){const t=T();await http(t.db,base()+'/members/'+t.uid,'DELETE')},
+async members(){const t=T(),o=await http(t.db,base()+'/members')||{},out={};
+for(const u of Object.keys(o)){if(!/^[A-Za-z0-9_]+$/.test(u))continue;try{const m=await unseal(t.tid,t.pw,o[u]);
+out[u]={name:String(m.name||'メンバー').slice(0,12),icon:String(m.icon||'🙂').slice(0,8),week:Array.isArray(m.week)?m.week.slice(0,7):[],forest:Array.isArray(m.forest)?m.forest.slice(-36):[],fc:+m.fc||0,upd:+m.upd||0}}catch(e){}}return out},
+async post(obj){const t=T();return await http(t.db,base()+'/posts','POST',{c:await seal(t.tid,t.pw,obj)})},
+async posts(){const t=T(),o=await http(t.db,base()+'/posts','GET',undefined,'?orderBy=%22%24key%22&limitToLast=120')||{},out=[];
+for(const id of Object.keys(o)){try{const p=await unseal(t.tid,t.pw,o[id].c);
+out.push({id,uid:String(p.u||''),name:String(p.n||'メンバー').slice(0,12),icon:String(p.i||'🙂').slice(0,8),t:String(p.t||''),img:p.img||'',day:p.day||'',tm:p.tm||'',st:Object.values(o[id].st||{}).map(String)})}catch(e){}}
+return out.sort((a,b)=>a.id<b.id?-1:a.id>b.id?1:0)},
+async stamp(pid,e){const t=T();await http(t.db,base()+'/posts/'+pid+'/st','POST',e)}}})();
+function myProfile(){const T=S.team||{};return{name:(T.name||'あなた').slice(0,12),icon:(T.icon||'🙂').slice(0,8),week:weekData().map(d=>[d.k,d.rt,d.tk,d.td,d.m]),
+forest:S.forest.slice(-36).map(x=>typeof x=='string'?{e:x}:{e:x.e,n:x.n||'',at:x.at||0,kind:x.kind||'',min:x.min||0,tags:(x.tags||(x.tag?[x.tag]:[])).slice(0,4)}),fc:S.forest.length,upd:Date.now()}}
+function teamDirty(){clearTimeout(TPUSHT);TPUSHT=setTimeout(teamPush,4000)}
+async function teamPush(){if(!teamOn())return;try{await TeamAPI.putMe(myProfile())}catch(e){}}
+async function teamPull(force){if(!teamOn()||TBUSY)return;if(!force&&Date.now()-TLAST<8000)return;TBUSY=true;
+try{const[ps,ms]=await Promise.all([TeamAPI.posts(),TeamAPI.members()]);TP=ps;TMEM=ms;TERR='';
+const sig=JSON.stringify([ps.map(p=>p.id+':'+p.st.length),Object.keys(ms).map(k=>k+ms[k].upd)]);
+if(sig!=TSIG){TSIG=sig;if(S.tab=='team'&&!S.modal&&!SC.n)render()}}
+catch(e){const was=TERR;TERR=e.message;if(was!=TERR&&S.tab=='team'&&!S.modal&&!SC.n)render()}
+finally{TLAST=Date.now();TBUSY=false}}
+const fromWeek=a=>(a||[]).map(x=>{const[y,mo,dd]=String(x[0]).split('-').map(Number),d=new Date(y,mo-1,dd);return{k:x[0],w:d.getDay(),md:mo+'/'+dd,rt:x[1]|0,tk:(x[2]|0)+(x[3]|0),td:0,m:x[4]|0}});
+function demoMember(name){let h=0;for(const c of name)h=(h*31+c.charCodeAt(0))%9973;const rnd=i=>{const x=Math.sin(h*12.9898+i*78.233)*43758.5453;return x-Math.floor(x)};
+const w=weekData().map((d,i)=>[d.k,Math.floor(rnd(i)*5),Math.floor(rnd(i+9)*4),Math.floor(rnd(i+19)*3),Math.floor(rnd(i+29)*90)]),
+tasks=['英単語','読書','ストレッチ','ジョギング','日記'],trees=['🌸','🍁','🌳','🌲','🎄','🌻'],
+f=[...Array(14+Math.floor(rnd(5)*10))].map((_,i)=>({e:trees[Math.floor(rnd(i+40)*trees.length)],n:tasks[Math.floor(rnd(i+60)*tasks.length)],at:Date.now()-i*6e7,kind:'focus',min:25}));
+return{name,icon:'🙂',week:w,forest:f,fc:f.length,upd:Date.now(),demo:1}}
+function memberOpen(uid){let m=null;
+if(uid=='me'||(teamOn()&&uid==S.team.uid))m=myProfile();else if(String(uid).startsWith('demo:'))m=demoMember(uid.slice(5));else if(TMEM[uid])m=TMEM[uid];
+if(!m)return toast('このメンバーのデータはまだありません');
+MEMV={name:m.name,icon:m.icon,week:fromWeek(m.week),forest:m.forest||[],fc:m.fc||0,upd:m.upd,demo:!!m.demo};MEMM='n';memberReopen()}
+function memberReopen(){S.modal=memberHtml();render()}
+function weekBars(w,mt){const mx=Math.max(1,...w.map(d=>mt=='m'?d.m:d.rt+d.tk)),W=330,H=130,bw=30,gap=(W-7*bw)/8;
+let s=`<svg viewBox="0 0 ${W} ${H+38}" width="100%" style="color:var(--tx)">`;
+w.forEach((d,i)=>{const x=gap+i*(bw+gap),segs=mt=='m'?[[d.m,'#8e6bbf']]:[[d.rt,CAT.rt[1]],[d.tk,CAT.tk[1]]],tot=segs.reduce((a,b)=>a+b[0],0);let y=H;
+segs.forEach(sg=>{if(!sg[0])return;const h=sg[0]/mx*(H-20);y-=h;s+=`<rect x="${x}" y="${y}" width="${bw}" height="${h}" rx="3" fill="${sg[1]}"/>`});
+s+=`<text x="${x+bw/2}" y="${y-4}" text-anchor="middle" font-size="11" fill="currentColor">${tot?tot+(mt=='m'?'分':''):''}</text><text x="${x+bw/2}" y="${H+14}" text-anchor="middle" font-size="12" fill="currentColor">${WD[d.w]}</text><text x="${x+bw/2}" y="${H+27}" text-anchor="middle" font-size="9" style="fill:var(--sub)">${d.md}</text>`});
+return s+`<line x1="0" y1="${H}" x2="${W}" y2="${H}" stroke="currentColor" stroke-opacity=".25"/></svg>`}
+function memberHtml(){const m=MEMV;if(!m)return '';const w=m.week,tot={rt:0,tk:0,td:0,m:0};w.forEach(d=>{tot.rt+=d.rt;tot.tk+=d.tk;tot.td+=d.td;tot.m+=d.m});
+const sum=tot.rt+tot.tk,keys=['rt','tk'],ago=m.upd?Math.max(0,Math.round((Date.now()-m.upd)/60000)):null;
+return `<div class="modal"><div><div class="row"><span style="font-size:34px">${esc(m.icon)}</span><div class="sp"><b>${esc(m.name)}</b><div class="sm">直近1週間の記録${m.demo?'（デモデータ）':ago!=null?' ・ '+(ago<1?'いま更新':ago<60?ago+'分前に更新':Math.round(ago/60)+'時間前に更新'):''}</div></div><button class="btn g" onclick="S.modal='';render()">閉じる</button></div>
+<div class="card" style="margin-top:10px"><div class="row"><b class="sp">📊 達成グラフ</b><div class="seg"><button class="${MEMM=='n'?'on':''}" onclick="MEMM='n';memberReopen()">達成数</button><button class="${MEMM=='m'?'on':''}" onclick="MEMM='m';memberReopen()">集中時間</button></div></div>${weekBars(w,MEMM)}
+<div class="sm" style="text-align:center">${MEMM=='m'?'棒の上の数字は集中した分数':keys.map(k=>`<span style="color:${CAT[k][1]}">■</span> ${CAT[k][0]}`).join('　')}</div></div>
+<div class="card"><b>🥧 内訳（7日間）</b><div class="row">${donut(keys.map(k=>[tot[k],CAT[k][1]]),150,sum+'件')}<div class="sm">${keys.map(k=>`<div><span style="color:${CAT[k][1]}">●</span> ${CAT[k][0]} <b>${tot[k]}</b>件</div>`).join('')}<div style="margin-top:6px">⏱ 集中 合計 <b>${tot.m}</b>分</div></div></div></div>
+<div class="card"><b>🌳 ${esc(m.name)}の森</b> <span class="sm">${m.fc}本 ・ 木をタップで達成タスクを表示</span>${forestSvg(m.forest,1)}</div></div></div>`}
+function copyText(t){const fb=()=>{const a=document.createElement('textarea');a.value=t;a.style.cssText='position:fixed;opacity:0';document.body.appendChild(a);a.select();try{document.execCommand('copy');toast('コピーしました')}catch(e){uiAlert(t)}a.remove()};
+try{if(navigator.clipboard&&navigator.clipboard.writeText)return navigator.clipboard.writeText(t).then(()=>toast('コピーしました')).catch(fb)}catch(e){}fb()}
+const inviteText=()=>`「習慣の森」のチームに参加しよう！\nチームID：${S.team.tid}\nパスワード：${S.team.pw}`+(TEAM_DB_DEFAULT?'':`\nサーバーURL：${S.team.db}`)+`\n（アプリの「チーム」タブ →「チーム」ボタンから参加）`;
+function teamSetup(){S.modal=teamHtml();render()}
+function teamHtml(){const T=S.team;
+if(teamOn())return `<div class="modal"><div><div class="row"><b class="sp">👥 チーム設定</b><button class="btn g" onclick="S.modal='';render()">閉じる</button></div>
+<div class="card" style="margin-top:10px"><div class="sm">チーム名</div><b>${esc(T.tname||'チーム')}</b><div class="sm" style="margin-top:8px">チームID</div><div class="row"><b class="sp" style="font-size:20px;letter-spacing:1px">${esc(T.tid)}</b><button class="btn g" onclick="copyText(S.team.tid)">コピー</button></div>
+<div class="sm" style="margin-top:8px">パスワード</div><div class="row"><b class="sp" style="font-size:20px;letter-spacing:1px">${esc(T.pw)}</b><button class="btn g" onclick="copyText(S.team.pw)">コピー</button></div>
+<button class="btn" style="width:100%;margin-top:10px;padding:10px" onclick="copyText(inviteText())">📨 招待メッセージをコピー</button><p class="sm" style="margin:6px 0 0">このIDとパスワードを仲間に伝えると、別の端末から同じチームに参加できます。</p></div>
+<div class="card"><b>あなたの表示</b><label>表示名</label><input id="tnm" maxlength="12" value="${esc(T.name)}"><label>アイコン（絵文字1つ）</label><input id="tic" maxlength="8" value="${esc(T.icon)}"><button class="btn" style="width:100%;margin-top:8px" onclick="tmSaveProfile()">保存</button></div>
+<div class="row"><button class="btn g sp" onclick="teamPull(true).then(()=>teamPush()).then(()=>toast('同期しました'))">🔄 今すぐ同期</button><button class="btn d sp" onclick="tmLeave()">チームを抜ける</button></div>
+<p class="sm">チームに共有される情報：表示名・アイコン・直近7日の達成数と集中時間・森の木（達成したタスク名つき）・投稿。内容はチームのパスワードで暗号化されます。</p></div></div>`;
+return `<div class="modal"><div><div class="row"><b class="sp">👥 チームに参加・作成</b><button class="btn g" onclick="S.modal='';render()">閉じる</button></div>
+${TEAM_DB_DEFAULT?'':`<label>サーバーURL（Firebase Realtime Database）</label><input id="tdb" placeholder="https://xxxx-default-rtdb.firebaseio.com" value="${esc(T.db)}" autocapitalize="off">
+<details class="acc"><summary>サーバーの用意のしかた（最初の1人だけ）</summary><div class="accb sm">1. Firebaseコンソールでプロジェクトを作り、Realtime Databaseを作成<br>2. 「ルール」を下記にして公開<br><code style="user-select:all">{"rules":{"teams":{"$tid":{".read":true,".write":true}}}}</code><br>3. 画面上部のデータベースURLをここに貼り付け<br>※チームIDを知らない人は一覧を取得できず、中身はパスワードで暗号化されます。</div></details>`}
+<label>あなたの表示名</label><input id="tnm" maxlength="12" value="${esc(T.name)}" placeholder="例：たろう"><label>アイコン（絵文字1つ）</label><input id="tic" maxlength="8" value="${esc(T.icon||'🙂')}">
+<div class="card" style="margin-top:10px"><b>チームに参加する</b><label>チームID</label><input id="ttid" placeholder="MORI-XXXXXX" autocapitalize="characters" value="${esc(T.tid)}"><label>パスワード</label><input id="tpw" autocapitalize="characters" autocomplete="off"><button class="btn" style="width:100%;margin-top:8px;padding:10px" onclick="tmJoin()">参加する</button></div>
+<div class="card"><b>新しくチームを作る</b><label>チーム名</label><input id="ttn" maxlength="20" value="バランスのいい食事"><button class="btn" style="width:100%;margin-top:8px;padding:10px" onclick="tmCreate()">作成してID・パスワードを発行</button></div></div></div>`}
+function tmForm(){let db=TEAM_DB_DEFAULT||($('#tdb')?$('#tdb').value.trim().replace(/\/+$/,''):S.team.db);
+if(!/^https:\/\/[^\s\/]+/.test(db||''))throw new Error('サーバーURL（https://…）を入力してください');
+return{db,name:($('#tnm').value.trim()||'ゲスト').slice(0,12),icon:([...($('#tic').value.trim()||'🙂')][0]||'🙂')}}
+async function tmCreate(){try{const f=tmForm(),tn=($('#ttn').value.trim()||'チーム').slice(0,20);toast('作成中…');const r=await TeamAPI.create(f.db,tn);
+S.team={db:f.db,tid:r.tid,pw:r.pw,uid:'u_'+rndId(10),name:f.name,icon:f.icon,tname:tn};save();TP=[];TMEM={};TSIG='';await teamPush();S.modal=teamHtml();render();toast('チームを作成しました。IDとパスワードを仲間に共有してください')}
+catch(e){uiAlert(e.message)}}
+async function tmJoin(){try{const f=tmForm(),tid=$('#ttid').value.trim().toUpperCase(),pw=$('#tpw').value.trim().toUpperCase();
+if(!tid||!pw)return uiAlert('チームIDとパスワードを入力してください');toast('確認中…');const r=await TeamAPI.verify(f.db,tid,pw);
+S.team={db:f.db,tid,pw,uid:(S.team.uid&&S.team.tid==tid?S.team.uid:'u_'+rndId(10)),name:f.name,icon:f.icon,tname:r.name};save();TP=[];TMEM={};TSIG='';TLAST=0;
+await teamPush();await teamPull(true);S.modal='';render();toast('「'+r.name+'」に参加しました')}
+catch(e){uiAlert(e.message)}}
+function tmSaveProfile(){S.team.name=($('#tnm').value.trim()||'ゲスト').slice(0,12);S.team.icon=[...($('#tic').value.trim()||'🙂')][0]||'🙂';save();teamPush().then(()=>teamPull(true)).then(()=>render());toast('保存しました')}
+async function tmLeave(){if(!await uiConfirm('このチームを抜けますか？（投稿は残り、自分の記録の共有が止まります）','抜ける'))return;
+try{await TeamAPI.delMe()}catch(e){}const T=S.team;S.team={db:T.db,tid:'',pw:'',uid:'',name:T.name,icon:T.icon,tname:''};TP=[];TMEM={};TSIG='';save();S.modal='';render();toast('チームを抜けました')}
+function team(){const v=S.tdy||'td',on=teamOn();if(on)teamPull();
+const tk=kd(today),yk=ykey(),list=on?TP.map(p=>Object.assign({},p,{d:p.day==tk?'td':p.day==yk?'yd':'old'})):S.P.map((p,i)=>({idx:i,uid:p.bot?'bot':p.u=='あなた'?'me':'demo:'+p.u,name:p.u,icon:p.bot?'🐱':p.u=='あなた'?(S.team.icon||'🙂'):'🙂',t:p.t,img:p.img,tm:p.tm,d:p.d||'td',st:p.st,bot:p.bot,lid:p.lid}));
+const ps=list.filter(p=>p.d==v),n=new Set(ps.filter(p=>!p.bot).map(p=>p.uid)).size,tot=on?Math.max(Object.keys(TMEM).length,n,1):5;
+let h='';
+if(!on)h+=`<div class="card row"><span class="sp sm">🔗 いまは一人用のデモ表示です。別の端末の仲間とチームを組めます。</span><button class="btn" onclick="teamSetup()">チーム</button></div>`;
+else if(TERR)h+=`<div class="card sm" style="color:#d9534f">⚠ 同期できません：${esc(TERR)}</div>`;
+h+=rvCard();h+=`<div class="card"><div class="row"><b class="sp">${esc(on?(S.team.tname||'チーム'):'バランスのいい食事')}</b><select class="s" onchange="S.tdy=this.value;save();render()"><option value="td" ${v=='td'?'selected':''}>今日の達成状況</option><option value="yd" ${v=='yd'?'selected':''}>昨日の達成状況</option></select><b>${n}/${tot}人</b>${on?`<button class="btn g" onclick="teamSetup()">⚙</button>`:''}</div>${on&&Object.keys(TMEM).length?`<div class="chips" style="margin-top:6px">${Object.keys(TMEM).map(u=>`<button class="chip" onclick="memberOpen('${u}')">${esc(TMEM[u].icon)} ${esc(TMEM[u].name)}</button>`).join('')}</div>`:''}</div>`;
+h+=ps.length?ps.map(p=>`<div class="post">${p.bot?`<div style="font-size:28px">🐱</div>`:`<button class="av" onclick="memberOpen('${esc(p.uid)}')" title="${esc(p.name)}のプロフィール">${esc(p.icon)}</button>`}<div class="bub"><div class="sm">${esc(p.name)} ${esc(p.tm)}</div>${safeImg(p.img)?`<img src="${esc(safeImg(p.img))}">`:''}${esc(p.t)}<div style="margin-top:4px">${p.st.map(esc).join(' ')} ${p.bot?'':`<button class="chip" onclick="${on?`teamStamp('${esc(p.id)}')`:`stamp(${p.idx})`}">👍 ❤️</button>`}</div>${rvReplies(p)}</div></div>`).join(''):'<p class="sm" style="text-align:center">この日の投稿はまだありません</p>';
+h+=v=='td'?`<div class="card"><input id="pt" placeholder="達成報告を書く…" value="${esc(DRAFT)}" oninput="DRAFT=this.value"><div class="row" style="margin-top:6px"><input id="pi" type="file" accept="image/*" style="font-size:12px"><button class="btn" onclick="post()">投稿</button></div><label class="row sm" style="margin-top:6px"><input id="pst" type="checkbox" style="width:auto"> 📚 学習報告として投稿（1・3・7・14・28日後に復習の通知）</label></div>`:'<p class="sm" style="text-align:center">投稿は「今日」の表示から行えます</p>';
+return h}
+function stamp(i){S.P[i].st.push(['👍','❤️','👏'][Math.floor(Math.random()*3)]);save();render()}
+function teamStamp(pid){const e=['👍','❤️','👏'][Math.floor(Math.random()*3)],p=TP.find(x=>x.id==pid);if(p)p.st.push(e);render();TeamAPI.stamp(pid,e).then(()=>teamPull(true)).catch(x=>toast(x.message))}
+/* ---------- 学習報告：復習の通知（1・3・7・14・28日後に、自分の投稿への返信として届く） ---------- */
+const RV_DAYS=[1,3,7,14,28],STUDY_RE=/英単語|単語|英語|英文|勉強|学習|暗記|復習|問題集|参考書|リスニング|音読|ディクテーション|読書|資格/;
+function schedRv(pid,t){if(!pid)return;const at=Date.now();RV_DAYS.forEach(n=>S.rv.push({pid:String(pid),t:String(t).slice(0,60),n,due:at+n*864e5}));save()}
+function rvCheck(){if(!ready)return;const now=Date.now(),du=S.rv.filter(v=>v.due<=now);if(!du.length)return;
+du.sort((x,y)=>x.due-y.due).forEach(v=>S.rr.unshift({pid:v.pid,t:v.t,n:v.n,at:now,rd:0}));S.rv=S.rv.filter(v=>v.due>now);S.rr=S.rr.slice(0,60);save();
+const m=du.length==1?'📚 復習のタイミングです（'+du[0].n+'日後）：'+du[0].t.slice(0,30):'📚 復習のタイミングです（'+du.length+'件）';ntf(m);toast('🔔 復習のタイミングです');if(!S.modal&&!SC.n)render()}
+const rvUnread=()=>S.rr.filter(r=>!r.rd).length;
+function rvRead(i){if(S.rr[i]){S.rr[i].rd=1;save();render()}}
+function rvReadAll(){S.rr.forEach(r=>r.rd=1);save();render()}
+function rvCard(){const L=S.rr.map((r,i)=>[r,i]).filter(a=>!a[0].rd);if(!L.length)return '';
+return `<div class="card" style="border-color:#f59e0b"><div class="row"><b class="sp">🔔 通知（${L.length}）</b><button class="btn g" onclick="rvReadAll()">すべて既読</button></div>${L.slice(0,8).map(a=>`<div style="margin-top:8px;padding:8px;border-left:3px solid #f59e0b;background:var(--bg);border-radius:6px"><div class="sm">あなたの投稿「${esc(a[0].t.slice(0,28))}」への返信 ・ ${a[0].n}日後</div><div class="row"><b class="sp">復習のタイミングです</b><button class="btn g" onclick="rvRead(${a[1]})">既読</button></div></div>`).join('')}</div>`}
+function rvReplies(p){const id=teamOn()?p.id:p.lid;if(!id)return '';
+return S.rr.filter(r=>r.pid==id).slice(0,5).map(r=>`<div style="margin-top:6px;padding:6px 8px;border-left:3px solid #f59e0b;background:var(--bg);border-radius:6px"><div class="sm">↩ 返信 ・ ${r.n}日後</div><b>復習のタイミングです</b></div>`).join('')}
+async function sendPost(t,img,study){
+if(teamOn()){const r=await TeamAPI.post({u:S.team.uid,n:S.team.name||'ゲスト',i:S.team.icon||'🙂',t,img,day:kd(today),tm:hmNow()});if(study)schedRv(r&&r.name,t);await teamPull(true);return}
+const lid='l'+Date.now().toString(36)+Math.random().toString(36).slice(2,5);S.P.push({u:'あなた',d:'td',t,img,tm:hmNow(),st:[],lid});if(study)schedRv(lid,t);save();render()}
+/* 「勉強」タグのタスクを完了したら、自動でグループに投稿（学習報告として復習通知も予約） */
+function autoPost(t){sendPost(t,'',true).then(()=>{toast('📚 グループに自動投稿しました');if(S.tab=='team'&&!S.modal&&!SC.n)render()}).catch(e=>toast('グループへの自動投稿に失敗：'+e.message))}
+function studyPost(x,mn){if(!isStudy(x))return;autoPost('📚 「'+x.n+'」を完了しました！'+(mn?'（'+mn+'分）':'')+' #'+STUDY_TAG)}
+function post(){const t=$('#pt').value.trim(),f=$('#pi').files[0];if(!t&&!f)return;const study=!!($('#pst')&&$('#pst').checked)||STUDY_RE.test(t);
+const add=async img=>{
+if(teamOn()){if(img&&/^data:/.test(img)){toast('画像をチームで共有するにはGitHub連携が必要です。テキストのみ投稿します');img=''}if(!t&&!img)return;
+try{await sendPost(t,img,study);DRAFT='';S.coins+=3;save();render();if(study)toast('📚 復習の通知を予約しました（1・3・7・14・28日後）')}catch(e){uiAlert('投稿できませんでした：'+e.message)}return}
+DRAFT='';await sendPost(t,img,study);S.coins+=3;save();if(study)toast('📚 復習の通知を予約しました（1・3・7・14・28日後）');
+setTimeout(()=>{S.P.push({u:'にゃんチャレAI',bot:1,d:'td',t:'素晴らしい継続力ですね！その調子にゃ！🐾',img:'',tm:hmNow(),st:[]});save();render()},700)};
+if(f)AssetManager.uploadImage(f,'post').then(o=>add(o.image));else add('')}
+
+/* ===== 起動 ===== */
+async function boot(){$('#m').innerHTML='<p class="sm" style="text-align:center;margin-top:40px">読み込み中…</p>';
+try{await loadState()}catch(e){console.error(e);ensure()}
+pomoLoadLS();pomoSaveLS();ready=true;checkDay();render();rvCheck();flush();
+setTimeout(()=>{Assets.preload();SWreg()},800);if(teamOn())setTimeout(teamPush,2500);
+setInterval(penTick,1000);setInterval(()=>{if(teamOn()&&S.tab=='team'&&!document.hidden)teamPull()},15000);
+setInterval(()=>{if(checkDay()&&!S.modal&&!SC.n)render();remind();rvCheck()},30000);
+document.addEventListener('visibilitychange',()=>{if(document.hidden)flush();else{rvCheck();if(checkDay()&&!S.modal&&!SC.n)render()}});
+addEventListener('beforeunload',()=>{flush()});
+addEventListener('pagehide',()=>{flush()})}
+boot();
+</script></body></html>
