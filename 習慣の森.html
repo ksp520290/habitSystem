@@ -196,7 +196,7 @@ body.folder-dragging { cursor: grabbing; user-select: none; -webkit-user-select:
 #sc2{display:flex;flex-wrap:wrap;align-items:center;gap:6px;padding:6px 12px;border-bottom:1px solid var(--bd);background:var(--card)}
 #sc2:empty{display:none}
 #sc2 .btn{padding:6px 10px;font-size:13px;white-space:nowrap}
-#sc2 .dtitle{flex:1 1 130px;min-width:0;text-align:left;font-weight:700;border:1px dashed var(--bd);border-radius:8px;background:var(--bg);padding:6px 8px;color:var(--tx);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer}
+#sc2 .dtitle{flex:1 1 65px;min-width:0;text-align:left;font-weight:700;border:1px dashed var(--bd);border-radius:8px;background:var(--bg);padding:6px 8px;color:var(--tx);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer}
 .dpop{position:fixed;inset:0;background:#0007;display:flex;align-items:center;justify-content:center;z-index:30;padding:12px}
 .dpop-box{background:var(--bg);width:100%;max-width:480px;max-height:92%;overflow:auto;border-radius:16px;padding:16px;box-sizing:border-box}
 .dpop-box label{display:block;font-size:12px;color:var(--sub);margin:10px 0 3px}
@@ -233,7 +233,7 @@ const txDone=tx=>new Promise((ok,ng)=>{tx.oncomplete=ok;tx.onerror=()=>ng(tx.err
 function idbOpen(){return new Promise((ok,ng)=>{if(!window.indexedDB)return ng(new Error('IndexedDB非対応'));let q;try{q=indexedDB.open('shukan_no_mori',1)}catch(e){return ng(e)}
 q.onupgradeneeded=()=>{const d=q.result;d.createObjectStore('kv');d.createObjectStore('audio')};q.onsuccess=()=>ok(q.result);q.onerror=()=>ng(q.error);q.onblocked=()=>ng(new Error('blocked'))})}
 function ensure(){const D={books:[],bookFolders:[],dictationSets:[],dictationFolders:[],dictationRewards:{},customTrees:[],diaryTickets:0,
-act:{},rv:[],rr:[],fv:'',fp:'all',cum:{rt:{},tk:{},n:{rt:0,tk:0},ini:0},pomo:{work:25,rest:5,loop:false,bgm:true},stopCnt:{d:'',n:0},pen:{until:0,rid:null},team:{db:'',tid:'',pw:'',uid:'',name:'',icon:'🙂',tname:''}};
+act:{},rv:[],rr:[],fv:'',fp:'all',cum:{rt:{},tk:{},n:{rt:0,tk:0},ini:0},pomo:{work:25,rest:5,loop:false,bgm:true,bgmWork:true,bgmRest:true},rq:[],stopCnt:{d:'',n:0},pen:{until:0,rid:null},team:{db:'',tid:'',pw:'',uid:'',name:'',icon:'🙂',tname:''}};
 for(const k in D)if(S[k]==null||typeof S[k]!=typeof D[k]||Array.isArray(S[k])!=Array.isArray(D[k]))S[k]=D[k];
 if(!S.diary||Array.isArray(S.diary))S.diary={};if(!S.vw)S.vw='bar';if(!S.rem||typeof S.rem!='object')S.rem={};
 if(!S.user||typeof S.user!='object')S.user={};if(!S.user.settings||typeof S.user.settings!='object')S.user.settings={};
@@ -1972,14 +1972,16 @@ const DictationSystem = (() => {
     const rows = [];
     const sentPanel = Utils.el("div", { class: "panel" }, [
       Utils.el("h3", {}, "手動での音声カットと対応"),
-      Utils.el("p", { class: "explore-desc" }, "文ごとに、対応する音源ファイルと開始・終了（秒）を指定します。再生してから「今の位置を開始/終了にする」で微調整でき、上の「一括保存」で全部まとめて保存できます。"),
+      Utils.el("p", { class: "explore-desc" }, "文ごとに、対応する音源ファイルと開始・終了（秒）を指定します。再生してから「今の位置を開始/終了にする」で微調整でき、上の「保存」で全部まとめて保存できます。"),
     ]);
     set.sentences.forEach((sent, idx) => {
-      sentPanel.appendChild(renderSentenceRow(set, sent, idx, rows));
+      sentPanel.appendChild(renderSentenceRow(set, sent, idx, rows, sentPanel));
     });
     if (set.sentences.length === 0) {
       sentPanel.appendChild(Utils.el("p", { class: "empty-state" }, "まだ一文分割されていません。上の教材名をタップして、音読用テキストを入力してください。"));
     }
+    // 文の編集・削除をその場で反映する（他の文に入力中の時間を消さないよう、画面は作り直さない）
+    sentPanel._rows = rows;
     wrap.appendChild(sentPanel);
 
     wrap.appendChild(Utils.el("button", {
@@ -1994,23 +1996,105 @@ const DictationSystem = (() => {
     wrap.appendChild(Utils.el("button", { class: "btn btn-moss btn-block dict-btn-gap", onclick: () => scBack() }, "一覧に戻る"));
     root.appendChild(wrap);
 
-    // --- ヘッダー2行目：教材名（タップで編集）／音読／dictation／一括保存 ---
+    // --- ヘッダー2行目：教材名（タップで編集）／音読／dictation／保存／⚙️ ---
     const bar2 = document.getElementById("sc2");
     if (bar2) {
       bar2.innerHTML = "";
       bar2.appendChild(Utils.el("button", { class: "dtitle", title: "タップで教材名・テキスト・音源を編集", onclick: () => openMaterialPopup(set) }, set.title + " ✎"));
       bar2.appendChild(Utils.el("button", { class: "btn btn-moss", onclick: () => Router.navigate("dictationListen", { setId: set.id }) }, "音読"));
       bar2.appendChild(Utils.el("button", { class: "btn btn-moss", onclick: () => Router.navigate("dictationPractice", { setId: set.id }) }, "dictation"));
-      bar2.appendChild(Utils.el("button", { class: "btn", onclick: () => bulkSaveTimes(set, rows) }, "一括保存"));
+      bar2.appendChild(Utils.el("button", { class: "btn", onclick: () => bulkSaveTimes(set, rows) }, "保存"));
+      bar2.appendChild(Utils.el("button", { class: "btn btn-secondary", title: "教材名・音読用テキスト・音源を編集", "aria-label": "教材の設定", onclick: () => openMaterialPopup(set) }, "⚙️"));
     }
   }
 
-  function renderSentenceRow(set, sent, idx, reg) {
+  /** 文の「編集」ポップアップ：文章の直接編集／この文の削除 */
+  function openSentencePopup(setId, sentId, onDone) {
+    const cur = getById(setId);
+    const target = cur && cur.sentences.find((x) => x.id === sentId);
+    if (!target) { Utils.showToast("文が見つかりません", "error"); return; }
+    const old = document.getElementById("dpop");
+    if (old) old.remove();
+    const ov = Utils.el("div", { id: "dpop", class: "dpop" });
+    const box = Utils.el("div", { class: "dpop-box" });
+    ov.appendChild(box);
+    ov.addEventListener("click", (e) => { if (e.target === ov) ov.remove(); });
+    box.appendChild(Utils.el("h3", { style: "margin:0 0 4px;" }, "文の編集"));
+    box.appendChild(Utils.el("label", {}, "文章"));
+    const ta = Utils.el("textarea", { rows: "5", placeholder: "文章を入力" });
+    ta.value = target.text;
+    box.appendChild(ta);
+    box.appendChild(Utils.el("p", { class: "explore-desc", style: "margin:4px 0 0;" }, "音声の位置（開始・終了）は変わりません。この文を消したいときは「削除」を押してください。"));
+    const delBtn = Utils.el("button", {
+      class: "btn btn-secondary",
+      onclick: async () => {
+        if (!(await uiConfirm("この文を削除しますか？\n「" + target.text.slice(0, 40) + "」", "削除"))) return;
+        GameState.update((state) => {
+          const t = state.dictationSets.find((x) => x.id === setId);
+          if (!t) return;
+          t.sentences = t.sentences.filter((x) => x.id !== sentId);
+          t.updatedAt = Utils.todayStr();
+        });
+        ov.remove();
+        Utils.showToast("文を削除しました", "success");
+        if (onDone) onDone("delete");
+      },
+    }, "🗑 削除");
+    const saveBtn = Utils.el("button", {
+      class: "btn",
+      onclick: () => {
+        const text = ta.value.replace(/\s*\n\s*/g, " ").trim();
+        if (!text) { Utils.showToast("文章が空です。消したい場合は「削除」を押してください", "error"); return; }
+        GameState.update((state) => {
+          const t = state.dictationSets.find((x) => x.id === setId);
+          const sn = t && t.sentences.find((x) => x.id === sentId);
+          if (sn) { sn.text = text; t.updatedAt = Utils.todayStr(); }
+        });
+        ov.remove();
+        Utils.showToast("文を編集しました", "success");
+        if (onDone) onDone("edit", text);
+      },
+    }, "保存");
+    box.appendChild(Utils.el("div", { class: "dpop-btns" }, [
+      Utils.el("button", { class: "btn g", onclick: () => ov.remove() }, "キャンセル"),
+      delBtn,
+      saveBtn,
+    ]));
+    document.body.appendChild(ov);
+    ta.focus();
+  }
+
+  function renderSentenceRow(set, sent, idx, reg, panel) {
     const row = Utils.el("div", { class: "chapter-row" });
-    row.appendChild(Utils.el("div", { class: "diary-field-label" }, `${idx + 1}. ${sent.text}`));
+    const label = Utils.el("div", { class: "diary-field-label" }, `${idx + 1}. ${sent.text}`);
+    label._text = sent.text;
+    row.appendChild(label);
+    const renumber = () => {
+      if (!panel) return;
+      panel.querySelectorAll(".chapter-row").forEach((rw, i) => {
+        const lb = rw.querySelector(".diary-field-label");
+        if (lb) lb.textContent = `${i + 1}. ${lb._text}`;
+      });
+      if (!panel.querySelector(".chapter-row") && !panel.querySelector(".empty-state")) {
+        panel.appendChild(Utils.el("p", { class: "empty-state" }, "まだ一文分割されていません。上の教材名をタップして、音読用テキストを入力してください。"));
+      }
+    };
+    const onEdited = (kind, text) => {
+      if (kind === "edit") { sent.text = text; label._text = text; label.textContent = `${Array.prototype.indexOf.call(panel ? panel.querySelectorAll(".chapter-row") : [row], row) + 1}. ${text}`; }
+      else if (kind === "delete") {
+        if (reg) { const k = reg.findIndex((r) => r.sent.id === sent.id); if (k >= 0) reg.splice(k, 1); }
+        row.remove();
+        renumber();
+      }
+    };
+    const editBtn = Utils.el("button", {
+      class: "btn btn-primary",
+      onclick: () => openSentencePopup(set.id, sent.id, onEdited),
+    }, "編集");
 
     if (set.audioFiles.length === 0) {
       row.appendChild(Utils.el("p", { class: "explore-desc" }, "先に音源をアップロードしてください"));
+      row.appendChild(Utils.el("div", { class: "quiz-choice-row" }, [editBtn]));
       return row;
     }
 
@@ -2046,23 +2130,13 @@ const DictationSystem = (() => {
         audioEl.addEventListener("timeupdate", onTime);
       },
     }, "この範囲を試し再生");
-    const saveBtn = Utils.el("button", {
-      class: "btn btn-primary",
-      onclick: () => {
-        const s = parseFloat(startInput.value) || 0;
-        const e = parseFloat(endInput.value) || 0;
-        if (e <= s) { Utils.showToast("終了は開始より後にしてください", "error"); return; }
-        setSentenceAudio(set.id, sent.id, fileSelect.value, s, e);
-        Utils.showToast("この文の音声位置を保存しました", "success");
-      },
-    }, "保存");
 
     row.appendChild(fileSelect);
     row.appendChild(audioEl);
     row.appendChild(Utils.el("div", { class: "quiz-choice-row" }, [startInput, endInput]));
     row.appendChild(Utils.el("div", { class: "quiz-choice-row" }, [markStartBtn, markEndBtn]));
     // 【追加要望対応】「今の位置を開始にする」行と「この範囲を試し再生」「保存」行の間に余白
-    row.appendChild(Utils.el("div", { class: "quiz-choice-row dict-row-spaced" }, [previewBtn, saveBtn]));
+    row.appendChild(Utils.el("div", { class: "quiz-choice-row dict-row-spaced" }, [previewBtn, editBtn]));
     return row;
   }
 
@@ -2300,6 +2374,7 @@ function treeEm(i){return STG[i]||S.sel}
 function render(){const sc=$('#m').scrollTop;
 $('#nv').innerHTML=[['home','🏠','ホーム'],['team','👥','チーム'+(rvUnread()?' 🔴'+rvUnread():'')],['my','👤','マイページ'],['grow','🌳','育成・森']].map(a=>`<button class="${S.tab==a[0]?'on':''}" onclick="S.tab='${a[0]}';S.ed=0;render()"><span>${a[1]}</span>${a[2]}</button>`).join('');
 renderMini();$('#m').innerHTML=({home,team,my,grow}[S.tab])();
+if(!S.modal&&!SC.n&&S.rq&&S.rq.length)S.modal=rqHtml();
 $('#ov').innerHTML=S.modal||'';$('#m').scrollTop=sc}
 /* addT/addR/saveR/タイマー群は末尾の拡張ブロックで再定義 */
 /* my page */
@@ -2370,7 +2445,10 @@ function dSave(){checkDay();const k=S.dd||ykey(),c=$('#d1').value.trim(),f=$('#d
 if(!c&&!f&&!e)return uiAlert('いずれか1つは記入してください');const nw=!isRec(k),cost=nw&&isOld(k);
 const tk=cost&&S.diaryTickets>0;if(cost&&!tk&&S.coins<10)return uiAlert('コインが足りません（10枚必要）');
 let msg='日記を更新しました';if(tk){S.diaryTickets--;msg='保存しました（🎫-1）'}else if(cost){S.coins-=10;msg='保存しました（🪙-10）'}else if(nw){S.coins+=5;msg='保存しました（🪙+5）'}
-S.diary[k]={c:c.slice(0,400),f:f.slice(0,400),e:e.slice(0,400),at:kd(today)};save();S.dv='l';S.modal=dHtml();render();toast(msg)}
+S.diary[k]={c:c.slice(0,400),f:f.slice(0,400),e:e.slice(0,400),at:kd(today)};const ck=diaryCheck();if(ck)msg+='・ルーティーン「日記」を達成にしました';save();S.dv='l';S.modal=dHtml();render();toast(msg)}
+/* 日記を書いたら、名前に「日記」を含む今日のルーティーン（例：一言日記）に自動でチェックを付ける */
+function diaryCheck(){const L=S.R.filter(r=>/日記/.test(r.n||'')&&isDue(r,today)&&!r.done);if(!L.length)return 0;
+L.forEach(r=>{r.c=(r.c||0)+1;r.done=1;r.st++;S.coins+=5;actInc('rt');cumAdd('rt',r,1)});syncToday();return L.length}
 /* timer */
 /* team */
 /* my page */
@@ -2406,14 +2484,16 @@ m.addEventListener('click',e=>{if(Date.now()-lpAt<700){e.stopPropagation();e.pre
    → 計測中バーを画面上部に固定表示し、一時停止/再開・停止(完了・中断)・🔒を常設。経過時間は時刻ベースで計算。
    ===================================================================== */
 const BG=new Audio();BG.loop=true;BG.preload='auto';
-const Bgm={held:0,self:0,warned:0,src:'',
-play(){if(!(S.pomo&&S.pomo.bgm))return;this.self=Date.now();try{const p=BG.play();if(p&&p.catch)p.catch(()=>this.fail())}catch(e){this.fail()}},
+const Bgm={held:0,self:0,warned:0,src:'',kind:'',fb:0,
+bgmOn(ph){ph=ph=='rest'?'rest':'work';const b=TM&&TM.bgm;return b?b[ph]!==false:(ph=='rest'?S.pomo.bgmRest:S.pomo.bgmWork)!==false},
+cur(){const ph=TM&&TM.ph=='rest'?'rest':'work';if(!this.bgmOn(ph))return 'off';if(ph=='rest')return 'rest';const r=TM?S.R.find(x=>x.id==TM.id):null;return r&&isStudyBgm(r)&&!this.fb?'study':'task'},   // 作業=task.mp3（勉強タグは勉強用.mp3）／休憩=rest.mp3／OFF=off.mp3
+play(){this.self=Date.now();this.load();try{const p=BG.play();if(p&&p.catch)p.catch(()=>{if(this.kind!='off')this.fail()})}catch(e){if(this.kind!='off')this.fail()}},
 pause(){this.self=Date.now();try{BG.pause()}catch(e){}},
 fail(){if(!this.warned){this.warned=1;toast('音声を再生できません（計測は続きます）')}},
-load(kind){try{const u=new URL(Assets.url(kind=='rest'?'rest':'task'),location.href).href;if(this.src!=u){this.self=Date.now();this.src=u;BG.src=u;BG.load()}}catch(e){this.fail()}},
+load(){try{const k=this.cur(),u=new URL(Assets.url(k),location.href).href;this.kind=k;if(this.src!=u){this.self=Date.now();this.src=u;BG.src=u;BG.load()}}catch(e){this.fail()}},
 hold(a){if(a&&!a._bh){a._bh=1;const r=()=>Bgm.release();a.addEventListener('pause',r);a.addEventListener('ended',r)}if(TM&&!TM.pa&&!BG.paused){this.held=1;this.pause()}},
 release(){if(this.held){this.held=0;if(TM&&!TM.pa)this.play()}}};
-BG.addEventListener('error',()=>{if(TM)Bgm.fail()});
+BG.addEventListener('error',()=>{if(!TM)return;if(Bgm.kind=='study'){Bgm.fb=1;Bgm.load();if(!TM.pa&&!Bgm.held)Bgm.play();return}if(Bgm.kind!='off')Bgm.fail()});   // 勉強用.mp3が無ければtask.mp3、off.mp3が無ければ無音
 BG.addEventListener('pause',()=>{if(TM&&!TM.pa&&!Bgm.held&&Date.now()-Bgm.self>600)pause()});   // OS側の一時停止にも追従
 BG.addEventListener('play',()=>{if(TM&&TM.pa&&!Bgm.held&&Date.now()-Bgm.self>600)pause()});
 const nowMs=()=>Date.now();
@@ -2443,7 +2523,9 @@ function settingsHtml(){const g=AssetManager.getGithubConfig(),pm=window.Notific
 const a=(k,t,b)=>`<details class="acc" ${ACC[k]?'open':''} ontoggle="ACC.${k}=this.open"><summary>${t}</summary><div class="accb">${b}</div></details>`;
 return `<div class="card"><b>⚙ 設定・連携</b><div style="margin-top:6px">`
 +a('p','⏱ ポモドーロ設定',`<p class="sm" style="margin:0">集中・休憩の時間は、ポモドーロのルーティーンの「▶」を押したときに設定します。</p>
-<div class="row" style="margin:10px 0"><span class="sp">🎵 BGM（作業用・休憩用の音楽）</span><input type="checkbox" style="width:auto" ${S.pomo.bgm?'checked':''} onchange="togBgm()"></div>
+<div class="row" style="margin:10px 0"><span class="sp">🎵 作業用BGM（集中中）</span><input type="checkbox" style="width:auto" ${S.pomo.bgmWork?'checked':''} onchange="setBgmDef('work',this.checked)"></div>
+<div class="row" style="margin:10px 0"><span class="sp">🎵 休憩用BGM（休憩中）</span><input type="checkbox" style="width:auto" ${S.pomo.bgmRest?'checked':''} onchange="setBgmDef('rest',this.checked)"></div>
+<p class="sm" style="margin:0">ここでの設定が計測のはじめの既定値です。計測中は🔒画面の「BGM」ボタンで、いま流れている段階（集中／休憩）の分だけ切り替えられます（その計測中のみ）。OFFのときは off.mp3 を流します。</p>
 <div class="row" style="margin:10px 0"><span class="sp">🔁 ループ（集中→休憩を自動で繰り返す）</span><input type="checkbox" style="width:auto" ${S.pomo.loop?'checked':''} onchange="setPomo({loop:this.checked});render()"></div>
 <p class="sm">時間は習慣ごとに前回の設定を覚えています。<br>今日の途中停止：${stopToday()}回（${PEN_FREE+1}回目以降は${PEN_MIN}分間タイマーをロック／${PEN_COST}🪙で解除）</p>`)
 +a('n','🔔 通知設定',(S.R.length?S.R.map(r=>`<div class="row" style="margin:6px 0"><span class="sp">🔔 ${esc(r.n)}</span><input type="checkbox" ${S.rem[r.id]?'checked':''} onchange="S.rem[${r.id}]=this.checked;save()"></div>`).join(''):'<p class="sm">ルーティーンがありません</p>')
@@ -2502,6 +2584,7 @@ const tagsOf=x=>x&&x.tags&&x.tags.length?x.tags:['未分類'];
 const allTags=()=>[...new Set([...S.R,...S.T].flatMap(tagsOf))];
 const MULTI_TAG='反復',STUDY_TAG='継続';
 const isMulti=r=>!!r&&tagsOf(r).includes(MULTI_TAG);   // ルーティーンは「反復」タグ付きだけ1日に複数回達成できる
+const isStudyBgm=x=>!!x&&tagsOf(x).some(t=>t==STUDY_TAG||t=='勉強');   // 勉強／継続タグ付きは作業BGMに勉強用.mp3
 const isStudy=x=>!!x&&tagsOf(x).includes(STUDY_TAG);   // 「継続」タグ付きは完了時にグループへ自動投稿
 /* ---------- その日の木：ルーティーン／ToDoの達成率で育ち、日付が変わった時点で確定 ----------
    20%：種 → 40%：若木 → 60%：成長 → 80%：つぼみ → 100%：満開（ルーティーンとToDoで別々に1本ずつ） */
@@ -2534,23 +2617,24 @@ o.push(a?{k,w:d.getDay(),md,rt:a.rt||0,tk:(a.tk||0)+(a.td||0),td:0,m:a.m||0}:{k,
 
 /* ---------- 1. ポモドーロ設定（localStorageにも保存） ---------- */
 const PLS='shukan_pomo_settings';
-function pomoNorm(){const p=S.pomo&&typeof S.pomo=='object'?S.pomo:(S.pomo={});p.work=clampInt(p.work,1,180,25);p.rest=clampInt(p.rest,1,60,5);p.loop=!!p.loop;p.bgm=p.bgm!==false}
-function pomoLoadLS(){try{const o=JSON.parse(localStorage.getItem(PLS)||'null');if(o&&typeof o=='object'){S.pomo.work=o.work;S.pomo.rest=o.rest;S.pomo.loop=o.loop;S.pomo.bgm=o.bgm}}catch(e){}pomoNorm()}
+function pomoNorm(){const p=S.pomo&&typeof S.pomo=='object'?S.pomo:(S.pomo={});p.work=clampInt(p.work,1,180,25);p.rest=clampInt(p.rest,1,60,5);p.loop=!!p.loop;p.bgmWork=p.bgmWork===undefined?p.bgm!==false:p.bgmWork!==false;p.bgmRest=p.bgmRest===undefined?p.bgm!==false:p.bgmRest!==false;p.bgm=p.bgmWork||p.bgmRest}
+function pomoLoadLS(){try{const o=JSON.parse(localStorage.getItem(PLS)||'null');if(o&&typeof o=='object'){S.pomo.work=o.work;S.pomo.rest=o.rest;S.pomo.loop=o.loop;S.pomo.bgm=o.bgm;S.pomo.bgmWork=o.bgmWork;S.pomo.bgmRest=o.bgmRest}}catch(e){}pomoNorm()}
 function pomoSaveLS(){try{localStorage.setItem(PLS,JSON.stringify(S.pomo))}catch(e){}}
 function setPomo(p){Object.assign(S.pomo,p);pomoNorm();pomoSaveLS();save()}
 function pomoSaveForm(){const w=$('#pwk').value,r=$('#prs').value;
 if(!(+w>=1&&+w<=180)||!(+r>=1&&+r<=60))return uiAlert('集中は1〜180分、休憩は1〜60分で入力してください');
 setPomo({work:Math.round(+w),rest:Math.round(+r)});render();toast('保存しました（集中'+S.pomo.work+'分／休憩'+S.pomo.rest+'分）')}
-function togBgm(){setPomo({bgm:!S.pomo.bgm});
-if(TM){if(S.pomo.bgm&&!TM.pa)Bgm.play();else Bgm.pause()}
-if(isLock())lock();else render();toast('🎵 BGM '+(S.pomo.bgm?'ON':'OFF'))}
+function setBgmDef(k,v){setPomo(k=='rest'?{bgmRest:!!v}:{bgmWork:!!v});toast('🎵 '+(k=='rest'?'休憩用':'作業用')+'BGM（既定）'+(v?'ON':'OFF'))}
+function togBgm(){if(!TM)return;if(!TM.bgm)TM.bgm={work:S.pomo.bgmWork!==false,rest:S.pomo.bgmRest!==false};   // 計測中：いま流れている段階（集中／休憩）のBGMだけを、この計測中に限って切り替える
+const k=TM.ph=='rest'?'rest':'work';TM.bgm[k]=!TM.bgm[k];if(!TM.pa&&!Bgm.held)Bgm.play();
+if(isLock())lock();else render();toast('🎵 '+(k=='rest'?'休憩用':'作業用')+'BGM '+(TM.bgm[k]?'ON':'OFF')+'（この計測中のみ）')}
 function togLoop(){setPomo({loop:!S.pomo.loop});if(isLock())lock();else render();toast('🔁 ループ '+(S.pomo.loop?'ON':'OFF'))}
 
 /* ---------- 2. 効果音・BGM・オフライン ----------
-   in.mp3 / out.mp3 / task.mp3 / rest.mp3 を「このHTMLと同じフォルダ」に置く。
+   in.mp3 / out.mp3 / task.mp3 / rest.mp3 / 勉強用.mp3 / off.mp3 を「このHTMLと同じフォルダ」に置く。
    取得できた音源はIndexedDBにも保存し（オフラインでも再生可）、https配信ならsw.jsもキャッシュする。
    in/out が見つからない場合だけ、代わりに簡易のビープ音を鳴らす。 */
-const Assets=(()=>{const N={in:'in.mp3',out:'out.mp3',task:'task.mp3',rest:'rest.mp3'},U={},P={};
+const Assets=(()=>{const N={in:'in.mp3',out:'out.mp3',task:'task.mp3',rest:'rest.mp3',study:'勉強用.mp3',off:'off.mp3'},U={},P={};
 const idbGet=k=>new Promise(ok=>{try{if(!DB)return ok(null);const r=DB.transaction('kv').objectStore('kv').get('asset_'+k);r.onsuccess=()=>ok(r.result||null);r.onerror=()=>ok(null)}catch(e){ok(null)}});
 const idbPut=(k,b)=>{try{if(DB)DB.transaction('kv','readwrite').objectStore('kv').put(b,'asset_'+k)}catch(e){}};
 const okType=b=>!!b&&b.size>0&&!/text\/html|json/.test(b.type||'');
@@ -2654,7 +2738,7 @@ syncToday();const h=S.hist[kd(today)];if(h&&sec)h.m=(h.m||0)+mn;if(r)studyPost(r
 function startT(id,skip){checkDay();if(TM)return uiAlert('計測中のタスクがあります');const r=S.R.find(x=>x.id==id);if(!r)return;
 if(penOn())return penModal(id);
 const sw=r.m=='sw',isP=!!r.pomo&&!r.useAlt&&!sw;if(isP&&!skip)return pomoAsk(id);const mins=r.useAlt?2:(isP?S.pomo.work:r.min);
-TM={id,name:r.n,kind:sw?'sw':'cd',t:sw?0:mins*60,tot:mins*60,acc:0,last:nowMs(),pa:0,ph:'work',pomo:isP,ls:0,cyc:1};
+TM={id,name:r.n,kind:sw?'sw':'cd',t:sw?0:mins*60,tot:mins*60,acc:0,last:nowMs(),pa:0,ph:'work',pomo:isP,ls:0,cyc:1,bgm:{work:S.pomo.bgmWork!==false,rest:S.pomo.bgmRest!==false}};
 try{if(window.Notification&&Notification.permission=='default')Notification.requestPermission()}catch(e){}
 Sfx.unlock();Sfx.play('in');Bgm.load('work');Bgm.play();msBind(1);msMeta();TM.iv=setInterval(tick,500);lock()}
 function pomoAsk(id){const r=S.R.find(x=>x.id==id);if(!r)return;const w=r.pw||S.pomo.work,rs=r.pr||S.pomo.rest;
@@ -2688,7 +2772,7 @@ function renderMini(){const e=$('#mini'),a=$('#app');if(!e)return;if(!TM){e.inne
 e.innerHTML=`<div class="bar"><span id="mg" style="font-size:24px">${treeEm(stage())}</span><div class="sp" style="min-width:0"><b class="ell">${esc(TM.name)}</b><div id="tt" style="font-size:20px">${fmt(TM.t)}</div></div>${TM.pomo?`<button class="btn g" title="ループ ${S.pomo.loop?'ON':'OFF'}" style="${S.pomo.loop?'':'opacity:.45'}" onclick="togLoop()">🔁</button>`:''}<button class="btn g" onclick="pause()">${TM.pa?'▶ 再開':'⏸ 一時停止'}</button><button class="btn" onclick="stopT()">■ 停止</button><button class="btn g" onclick="lock()" title="ロック画面に戻る">🔒</button></div>`}
 function lock(){const n=nextR()||{n:'（ルーティーン未登録）',w:'',st:0};
 S.modal=`<div class="lock"><div id="lc" style="font-size:56px">${new Date().toTimeString().slice(0,5)}</div>
-<div class="w"><div class="sm" style="color:#cde">タスクタイマー${TM&&TM.pomo?' ・ '+(TM.ph=='rest'?'☕ 休憩':'🍅 集中 '+(TM.cyc||1)+'回目'):''}</div>${TM?`<b>${esc(TM.name)}</b><div id="lt" style="font-size:40px;text-align:center">${fmt(TM.t)}</div><div class="tree sway" id="lg">${treeEm(stage())}</div><div class="prog"><i id="lb" style="width:${Math.round(prog()*100)}%"></i></div><div class="row"><button class="btn sp" onclick="pause()">${TM.pa?'▶ 再開':'⏸ 一時停止'}</button><button class="btn sp" onclick="stopT()">■ 停止</button></div><div class="row" style="margin-top:8px"><button class="btn g sp" onclick="togBgm()">🎵 BGM：${S.pomo.bgm?'ON':'OFF'}</button>${TM.pomo?`<button class="btn g sp" onclick="togLoop()">🔁 ループ：${S.pomo.loop?'ON':'OFF'}</button>`:''}</div>`:'計測中のタスクはありません'}</div>
+<div class="w"><div class="sm" style="color:#cde">タスクタイマー${TM&&TM.pomo?' ・ '+(TM.ph=='rest'?'☕ 休憩':'🍅 集中 '+(TM.cyc||1)+'回目'):''}</div>${TM?`<b>${esc(TM.name)}</b><div id="lt" style="font-size:40px;text-align:center">${fmt(TM.t)}</div><div class="tree sway" id="lg">${treeEm(stage())}</div><div class="prog"><i id="lb" style="width:${Math.round(prog()*100)}%"></i></div><div class="row"><button class="btn sp" onclick="pause()">${TM.pa?'▶ 再開':'⏸ 一時停止'}</button><button class="btn sp" onclick="stopT()">■ 停止</button></div><div class="row" style="margin-top:8px"><button class="btn g sp" onclick="togBgm()">🎵 ${TM.ph=='rest'?'休憩':'作業'}BGM：${Bgm.bgmOn(TM.ph)?'ON':'OFF'}</button>${TM.pomo?`<button class="btn g sp" onclick="togLoop()">🔁 ループ：${S.pomo.loop?'ON':'OFF'}</button>`:''}</div>`:'計測中のタスクはありません'}</div>
 <div class="w" onclick="S.modal='';S.tab='home';render()"><div class="sm" style="color:#cde">次の習慣 (Next Habit)</div><b>${esc(n.n)}</b><div>${esc(n.w)} ・ ${n.st}日連続</div></div>
 <button class="btn g" onclick="S.modal='';render()">ロック解除</button></div>`;render()}
 
@@ -2771,8 +2855,9 @@ out[u]={name:String(m.name||'メンバー').slice(0,12),icon:icoNorm(m.icon),wee
 async post(obj){const t=T();return await http(t.db,base()+'/posts','POST',{c:await seal(t.tid,t.pw,obj)})},
 async posts(){const t=T(),o=await http(t.db,base()+'/posts','GET',undefined,'?orderBy=%22%24key%22&limitToLast=120')||{},out=[];
 for(const id of Object.keys(o)){try{const p=await unseal(t.tid,t.pw,o[id].c);
-out.push({id,uid:String(p.u||''),name:String(p.n||'メンバー').slice(0,12),icon:icoNorm(p.i),t:String(p.t||''),img:p.img||'',day:p.day||'',tm:p.tm||'',st:Object.values(o[id].st||{}).map(String)})}catch(e){}}
+out.push({id,uid:String(p.u||''),name:String(p.n||'メンバー').slice(0,12),icon:icoNorm(p.i),t:String(p.t||''),img:p.img||'',day:p.day||'',tm:p.tm||'',ed:p.ed?1:0,st:Object.values(o[id].st||{}).map(String)})}catch(e){}}
 return out.sort((a,b)=>a.id<b.id?-1:a.id>b.id?1:0)},
+async editPost(pid,obj){const t=T();await http(t.db,base()+'/posts/'+encodeURIComponent(pid)+'/c','PUT',await seal(t.tid,t.pw,obj))},
 async stamp(pid,e){const t=T();await http(t.db,base()+'/posts/'+pid+'/st','POST',e)}}})();
 function myProfile(){const T=S.team||{};return{name:(T.name||'あなた').slice(0,12),icon:icoNorm(T.icon||'🙂'),week:weekData().map(d=>[d.k,d.rt,d.tk,d.td,d.m]),
 forest:S.forest.slice(-36).map(x=>typeof x=='string'?{e:x}:{e:x.e,n:x.n||'',at:x.at||0,kind:x.kind||'',min:x.min||0,tags:(x.tags||(x.tag?[x.tag]:[])).slice(0,4)}),fc:S.forest.length,upd:Date.now()}}
@@ -2780,7 +2865,7 @@ function teamDirty(){clearTimeout(TPUSHT);TPUSHT=setTimeout(teamPush,4000)}
 async function teamPush(){if(!teamOn())return;try{await TeamAPI.putMe(myProfile())}catch(e){}}
 async function teamPull(force){if(!teamOn()||TBUSY)return;if(!force&&Date.now()-TLAST<8000)return;TBUSY=true;
 try{const[ps,ms]=await Promise.all([TeamAPI.posts(),TeamAPI.members()]);TP=ps;TMEM=ms;TERR='';
-const sig=JSON.stringify([ps.map(p=>p.id+':'+p.st.length),Object.keys(ms).map(k=>k+ms[k].upd)]);
+const sig=JSON.stringify([ps.map(p=>p.id+':'+p.st.length+(p.ed?':e'+p.t:'')),Object.keys(ms).map(k=>k+ms[k].upd)]);
 if(sig!=TSIG){TSIG=sig;if(S.tab=='team'&&!S.modal&&!SC.n)render()}}
 catch(e){const was=TERR;TERR=e.message;if(was!=TERR&&S.tab=='team'&&!S.modal&&!SC.n)render()}
 finally{TLAST=Date.now();TBUSY=false}}
@@ -2841,15 +2926,24 @@ function tmSaveProfile(){S.team.name=($('#tnm').value.trim()||'ゲスト').slice
 async function tmLeave(){if(!await uiConfirm('このチームを抜けますか？（投稿は残り、自分の記録の共有が止まります）','抜ける'))return;
 try{await TeamAPI.delMe()}catch(e){}const T=S.team;S.team={db:T.db,tid:'',pw:'',uid:'',name:T.name,icon:T.icon,tname:''};TP=[];TMEM={};TSIG='';save();S.modal='';render();toast('チームを抜けました')}
 function team(){const v=S.tdy||'td',on=teamOn();if(on)teamPull();
-const tk=kd(today),yk=ykey(),list=on?TP.map(p=>Object.assign({},p,{d:p.day==tk?'td':p.day==yk?'yd':'old'})):S.P.map((p,i)=>({idx:i,uid:p.bot?'bot':p.u=='あなた'?'me':'demo:'+p.u,name:p.u,icon:p.bot?'🐱':p.u=='あなた'?(S.team.icon||'🙂'):'🙂',t:p.t,img:p.img,tm:p.tm,d:p.d||'td',st:p.st,bot:p.bot,lid:p.lid}));
+const tk=kd(today),yk=ykey(),list=on?TP.map(p=>Object.assign({},p,{d:p.day==tk?'td':p.day==yk?'yd':'old'})):S.P.map((p,i)=>({idx:i,uid:p.bot?'bot':p.u=='あなた'?'me':'demo:'+p.u,name:p.u,icon:p.bot?'🐱':p.u=='あなた'?(S.team.icon||'🙂'):'🙂',t:p.t,img:p.img,tm:p.tm,d:p.d||'td',st:p.st,bot:p.bot,lid:p.lid,ed:p.ed}));
 const ps=list.filter(p=>p.d==v),n=new Set(ps.filter(p=>!p.bot).map(p=>p.uid)).size,tot=on?Math.max(Object.keys(TMEM).length,n,1):5;
 let h='';
 if(!on)h+=`<div class="card row"><span class="sp sm">🔗 いまは一人用のデモ表示です。別の端末の仲間とチームを組めます。</span><button class="btn" onclick="teamSetup()">チーム</button></div>`;
 else if(TERR)h+=`<div class="card sm" style="color:#d9534f">⚠ 同期できません：${esc(TERR)}</div>`;
 h+=rvCard();h+=`<div class="card"><div class="row"><b class="sp">${esc(on?(S.team.tname||'チーム'):'バランスのいい食事')}</b><select class="s" onchange="S.tdy=this.value;save();render()"><option value="td" ${v=='td'?'selected':''}>今日の達成状況</option><option value="yd" ${v=='yd'?'selected':''}>昨日の達成状況</option></select><b>${n}/${tot}人</b>${on?`<button class="btn g" onclick="teamSetup()">⚙</button>`:''}</div>${on&&Object.keys(TMEM).length?`<div class="chips" style="margin-top:6px">${Object.keys(TMEM).map(u=>`<button class="chip" onclick="memberOpen('${u}')">${icoHtml(TMEM[u].icon,18)} ${esc(TMEM[u].name)}</button>`).join('')}</div>`:''}</div>`;
-h+=ps.length?ps.map(p=>`<div class="post">${p.bot?`<div style="font-size:28px">🐱</div>`:`<button class="av" onclick="memberOpen('${esc(p.uid)}')" title="${esc(p.name)}のプロフィール">${icoHtml(icOf(p))}</button>`}<div class="bub"><div class="sm">${esc(p.name)} ${esc(p.tm)}</div>${safeImg(p.img)?`<img src="${esc(safeImg(p.img))}">`:''}${esc(p.t)}<div style="margin-top:4px">${p.st.map(esc).join(' ')} ${p.bot?'':`<button class="chip" onclick="${on?`teamStamp('${esc(p.id)}')`:`stamp(${p.idx})`}">👍 ❤️</button>`}</div>${rvReplies(p)}</div></div>`).join(''):'<p class="sm" style="text-align:center">この日の投稿はまだありません</p>';
+h+=ps.length?ps.map(p=>`<div class="post">${p.bot?`<div style="font-size:28px">🐱</div>`:`<button class="av" onclick="memberOpen('${esc(p.uid)}')" title="${esc(p.name)}のプロフィール">${icoHtml(icOf(p))}</button>`}<div class="bub"><div class="sm row"><span class="sp">${esc(p.name)} ${esc(p.tm)}${p.ed?' （編集済み）':''}</span>${(on?(!p.bot&&p.uid&&p.uid==S.team.uid):(!p.bot&&p.uid=='me'))?`<button class="chip" onclick="pEdit(${on?`'${esc(p.id)}'`:p.idx})">✏️ 編集</button>`:''}</div>${safeImg(p.img)?`<img src="${esc(safeImg(p.img))}">`:''}${esc(p.t)}<div style="margin-top:4px">${p.st.map(esc).join(' ')} ${p.bot?'':`<button class="chip" onclick="${on?`teamStamp('${esc(p.id)}')`:`stamp(${p.idx})`}">👍 ❤️</button>`}</div>${rvReplies(p)}</div></div>`).join(''):'<p class="sm" style="text-align:center">この日の投稿はまだありません</p>';
 h+=v=='td'?`<div class="card"><input id="pt" placeholder="達成報告を書く…" value="${esc(DRAFT)}" oninput="DRAFT=this.value"><div class="row" style="margin-top:6px"><input id="pi" type="file" accept="image/*" style="font-size:12px"><button class="btn" onclick="post()">投稿</button></div><label class="row sm" style="margin-top:6px"><input id="pst" type="checkbox" style="width:auto"> 📚 学習報告として投稿（1・3・7・14・28日後に復習の通知）</label></div>`:'<p class="sm" style="text-align:center">投稿は「今日」の表示から行えます</p>';
 return h}
+let PEDIT=null;
+function pEdit(key){const on=teamOn();let t='';
+if(on){const p=TP.find(x=>x.id==key);if(!p||p.uid!=S.team.uid)return;t=p.t}else{const p=S.P[key];if(!p||p.bot||p.u!='あなた')return;t=p.t}
+PEDIT=key;S.modal=`<div class="modal"><div><h3 style="margin:0 0 6px">✏️ メッセージを編集</h3><textarea id="pet" rows="5">${esc(t)}</textarea><p class="sm">画像・スタンプはそのまま残ります。</p><div class="row" style="margin-top:8px"><button class="btn g sp" onclick="S.modal='';PEDIT=null;render()">キャンセル</button><button class="btn sp" onclick="pEditSave()">保存</button></div></div></div>`;render()}
+async function pEditSave(){const t=$('#pet').value.trim();if(!t)return uiAlert('メッセージを入力してください');const key=PEDIT;
+if(teamOn()){const p=TP.find(x=>x.id==key);if(!p||p.uid!=S.team.uid){S.modal='';render();return}
+try{await TeamAPI.editPost(key,{u:p.uid,n:p.name,i:isImgIc(p.icon)?'🙂':p.icon,t,img:p.img||'',day:p.day,tm:p.tm,ed:1});p.t=t;p.ed=1}catch(e){return uiAlert('編集できませんでした：'+e.message)}}
+else{const p=S.P[key];if(!p||p.bot||p.u!='あなた'){S.modal='';render();return}p.t=t;p.ed=1;save()}
+S.modal='';PEDIT=null;render();if(teamOn())teamPull(true);toast('メッセージを編集しました')}
 function stamp(i){S.P[i].st.push(['👍','❤️','👏'][Math.floor(Math.random()*3)]);save();render()}
 function teamStamp(pid){const e=['👍','❤️','👏'][Math.floor(Math.random()*3)],p=TP.find(x=>x.id==pid);if(p)p.st.push(e);render();TeamAPI.stamp(pid,e).then(()=>teamPull(true)).catch(x=>toast(x.message))}
 /* ---------- 学習報告：復習の通知（1・3・7・14・28日後に、自分の投稿への返信として届く） ---------- */
@@ -2870,7 +2964,11 @@ if(teamOn()){const r=await TeamAPI.post({u:S.team.uid,n:S.team.name||'ゲスト'
 const lid='l'+Date.now().toString(36)+Math.random().toString(36).slice(2,5);S.P.push({u:'あなた',d:'td',t,img,tm:hmNow(),st:[],lid});if(study)schedRv(lid,t);save();render()}
 /* 「継続」タグのタスクを完了したら、自動でグループに投稿（学習報告として復習通知も予約） */
 function autoPost(t){sendPost(t,'',true).then(()=>{toast('📚 グループに自動投稿しました');if(S.tab=='team'&&!S.modal&&!SC.n)render()}).catch(e=>toast('グループへの自動投稿に失敗：'+e.message))}
-function studyPost(x,mn){if(!isStudy(x))return;autoPost('📚 「'+x.n+'」を完了しました！'+(mn?'（'+mn+'分）':'')+' #'+STUDY_TAG)}
+function studyPost(x,mn){if(!isStudy(x))return;if(!Array.isArray(S.rq))S.rq=[];S.rq.push({n:x.n,mn:mn||0});save();   // 報告する前に「学習範囲」を入力するポップアップを出す（render()で順番に表示）
+setTimeout(()=>{if(S.rq.length&&!S.modal&&!SC.n)render()},60)}
+function rqHtml(){const q=S.rq[0];return `<div class="modal"><div><h3 style="margin:0 0 6px">🤖 報告bot：学習報告</h3><p class="sm" style="margin:0 0 6px">「${esc(q.n)}」${q.mn?'（'+q.mn+'分）':''}をグループに報告します。今回の学習範囲を入力してください（空欄でもOK）。</p><label>学習範囲</label><input id="rqr" placeholder="例：英単語 p.10〜20 ／ No.101〜150" maxlength="60" autocomplete="off"><div class="row" style="margin-top:10px"><button class="btn g sp" onclick="rqGo(0)">報告しない</button><button class="btn sp" onclick="rqGo(1)">報告する</button></div>${S.rq.length>1?`<p class="sm" style="margin:6px 0 0">ほかに報告待ち：${S.rq.length-1}件</p>`:''}</div></div>`}
+function rqGo(y){const el=$('#rqr'),rg=el?el.value.trim():'',q=S.rq.shift();S.modal='';save();
+if(q&&y)autoPost('📚 「'+q.n+'」を完了しました！'+(q.mn?'（'+q.mn+'分）':'')+(rg?' 範囲：'+rg:'')+' #'+STUDY_TAG);render()}
 function post(){const t=$('#pt').value.trim(),f=$('#pi').files[0];if(!t&&!f)return;const study=!!($('#pst')&&$('#pst').checked)||STUDY_RE.test(t);
 const add=async img=>{
 if(teamOn()){if(img&&/^data:/.test(img)){toast('画像をチームで共有するにはGitHub連携が必要です。テキストのみ投稿します');img=''}if(!t&&!img)return;
