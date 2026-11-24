@@ -54,7 +54,7 @@ select.s{width:auto}
 [data-lp]{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
 .tree.sway{animation:sw 2.4s ease-in-out infinite alternate;transform-origin:50% 90%;font-size:96px}@keyframes sw{from{transform:rotate(-4deg) scale(1)}to{transform:rotate(4deg) scale(1.08)}}
 .prog{height:8px;background:#ffffff33;border-radius:9px;margin:10px 0;overflow:hidden}.prog i{display:block;height:100%;background:#8fe0a0;transition:width 1s linear}
-.toast{position:fixed;left:50%;bottom:100px;transform:translateX(-50%);background:#000c;color:#fff;padding:8px 16px;border-radius:99px;z-index:40;font-size:13px}
+.toast{position:fixed;left:50%;bottom:100px;transform:translateX(-50%);background:#000c;color:#fff;padding:8px 16px;border-radius:99px;z-index:70;font-size:13px}
 .txt{white-space:pre-wrap;margin-bottom:6px}
 
 :root{--spacing-2:8px;--spacing-3:12px;--spacing-4:16px;--radius-sm:8px;--color-moss-dark:#4f6b40;--color-ink:var(--tx);--color-ink-soft:var(--sub);--fs-sm:12px;--border-thin:1px solid var(--bd)}
@@ -205,6 +205,24 @@ body.folder-dragging { cursor: grabbing; user-select: none; -webkit-user-select:
 /* --- 絵文字の代わりに使う画像アイコン --- */
 .icimg{width:1.2em;height:1.2em;border-radius:50%;object-fit:cover;vertical-align:middle}
 .tile .ic .icimg,.av .icimg{width:100%;height:100%}
+/* --- 樹種・成長段階の画像表示（絵文字の代わりに画像ファイルを使える） --- */
+.tvimg{width:1.15em;height:1.15em;object-fit:contain;vertical-align:middle;display:inline-block}
+.shop em .tvimg{width:1em;height:1em}
+.stp{text-align:center;flex:1;min-width:0}.stp .tv{font-size:30px;line-height:1.2;height:38px;display:flex;align-items:center;justify-content:center}
+.stg-row{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin:6px 0;padding:6px;border:1px solid var(--bd);border-radius:10px}
+.stg-row input.stem{width:64px}
+/* --- チュートリアル（スポットライト） --- */
+#tut{position:fixed;inset:0;z-index:50;pointer-events:none}
+.tutb{position:fixed;background:rgba(0,0,0,.72);pointer-events:auto;touch-action:none;transition:top .2s,left .2s,width .2s,height .2s}
+.tuth{position:fixed;border:3px solid #8fe0a0;border-radius:12px;pointer-events:none;box-shadow:0 0 0 4px rgba(143,224,160,.35);transition:top .2s,left .2s,width .2s,height .2s;animation:tutp 1.4s ease-in-out infinite}
+@keyframes tutp{50%{box-shadow:0 0 0 9px rgba(143,224,160,.12)}}
+.tutbub{position:fixed;z-index:51;pointer-events:auto;background:var(--card);color:var(--tx);border:1px solid var(--bd);border-radius:14px;padding:12px;box-shadow:0 8px 28px #0007;width:min(340px,calc(100vw - 24px));max-height:calc(100vh - 16px);overflow:auto;font-size:14px;line-height:1.55}
+.tutbub .tuthd{display:flex;align-items:baseline;gap:8px;margin-bottom:4px}.tutbub .tutch{font-size:11px;color:var(--pri);font-weight:700;white-space:nowrap}
+.tutbub .tuttx{white-space:pre-line;margin:2px 0 8px}.tutbub .tuthint{font-size:11px;color:var(--sub);margin-bottom:6px}
+.tutbub .tutbar{height:4px;background:var(--bd);border-radius:9px;overflow:hidden;margin-bottom:8px}.tutbub .tutbar i{display:block;height:100%;background:var(--pri)}
+.tutbub .tutbtns{display:flex;gap:6px;align-items:center}.tutbub .tutbtns .btn{padding:8px 12px;font-size:13px}
+.tutarr{position:absolute;width:14px;height:14px;background:var(--card);border:1px solid var(--bd);transform:rotate(45deg)}
+.tutarr.dn{top:-8px;border-right:0;border-bottom:0}.tutarr.up{bottom:-8px;border-left:0;border-top:0}
 </style></head><body><div id="app"><div id="mini"></div><main id="m"></main><nav id="nv"></nav><div id="sc" style="display:none"></div></div><div id="ov"></div><div id="dg"></div>
 <script>
 const $=s=>document.querySelector(s);
@@ -227,12 +245,12 @@ forest:['🌸','🌸','🍁','🌳','🌸','🍁','🌳','🌳','🌸','🍁','�
 /* ===== 保存基盤：IndexedDB優先／利用不可時のみlocalStorage =====
    状態本体は 'kv' ストアに、音源(dataUrl)は 'audio' ストアに分けて保存する
    （状態を保存するたびに巨大な音源を書き直さないため）。メモリ上では f.dataUrl として保持する。 */
-let DB=null,IDBok=false,ready=false,svT=null,stored=new Set();
+let DB=null,IDBok=false,ready=false,svT=null,stored=new Set(),TUTSB=false,HAD=false;   // TUTSB：チュートリアル中（保存・送信を止める）／HAD：起動時に保存済みデータがあったか
 const idbReq=r=>new Promise((ok,ng)=>{r.onsuccess=()=>ok(r.result);r.onerror=()=>ng(r.error)});
 const txDone=tx=>new Promise((ok,ng)=>{tx.oncomplete=ok;tx.onerror=()=>ng(tx.error);tx.onabort=()=>ng(tx.error||new Error('abort'))});
 function idbOpen(){return new Promise((ok,ng)=>{if(!window.indexedDB)return ng(new Error('IndexedDB非対応'));let q;try{q=indexedDB.open('shukan_no_mori',1)}catch(e){return ng(e)}
 q.onupgradeneeded=()=>{const d=q.result;d.createObjectStore('kv');d.createObjectStore('audio')};q.onsuccess=()=>ok(q.result);q.onerror=()=>ng(q.error);q.onblocked=()=>ng(new Error('blocked'))})}
-function ensure(){const D={books:[],bookFolders:[],dictationSets:[],dictationFolders:[],dictationRewards:{},customTrees:[],diaryTickets:0,
+function ensure(){const D={books:[],bookFolders:[],dictationSets:[],dictationFolders:[],dictationRewards:{},customTrees:[],stageSet:{},diaryTickets:0,
 act:{},rv:[],rr:[],fv:'',fp:'all',cum:{rt:{},tk:{},n:{rt:0,tk:0},ini:0},pomo:{work:25,rest:5,loop:false,bgm:true,bgmWork:true,bgmRest:true},rq:[],stopCnt:{d:'',n:0},pen:{until:0,rid:null},team:{db:'',tid:'',pw:'',uid:'',name:'',icon:'🙂',tname:''}};
 for(const k in D)if(S[k]==null||typeof S[k]!=typeof D[k]||Array.isArray(S[k])!=Array.isArray(D[k]))S[k]=D[k];
 if(!S.diary||Array.isArray(S.diary))S.diary={};if(!S.vw)S.vw='bar';if(!S.rem||typeof S.rem!='object')S.rem={};
@@ -245,6 +263,12 @@ for(const k of ['rt','tk'])if(!S.cum[k]||typeof S.cum[k]!='object')S.cum[k]={};i
 if(!S.cum.ini){S.cum.ini=1;for(const k in S.hist)((S.hist[k]||{}).ids||[]).forEach(id=>{const r=S.R.find(x=>x.id==id);if(r)cumAdd('rt',r,1)})}
 delete S.D;
 S.R.forEach(r=>{if(r.c==null)r.c=r.done?1:0});S.T.forEach(t=>{if(t.c==null)t.c=t.done?1:0});
+S.customTrees=S.customTrees.filter(t=>Array.isArray(t)&&typeof t[0]=='string'&&t[0]&&typeof t[1]=='string').map(t=>{t=t.slice(0,5);t[2]=Math.max(0,Math.floor(+t[2]||0));
+if(isTreeTok(t[0])){if(!isDataImg(t[3])||t[3].length>IMG_TREE_MAX)t[3]='';t[4]=emojiClean(t[4])||'🌳'}else t.length=3;return t});   // 画像樹種：[id,名前,コイン,画像dataURL,代替絵文字]
+if(!S.stageSet||typeof S.stageSet!='object'||Array.isArray(S.stageSet))S.stageSet={};
+for(const k in S.stageSet){const a=S.stageSet[k];if(!Array.isArray(a)){delete S.stageSet[k];continue}
+S.stageSet[k]=[0,1,2,3].map(i=>{const v=a[i];return typeof v=='string'&&(isDataImg(v)?v.length<=IMG_TREE_MAX:(v.length<=8&&!/['"\\<>&\s]/.test(v)))?v:''});if(S.stageSet[k].every(x=>!x))delete S.stageSet[k]}
+if(!BASE_TREES.concat(S.customTrees).some(t=>t[0]==S.sel))S.sel='🌸';
 delete S.modal;S.ed=0}
 async function hydrateAudio(){for(const s of S.dictationSets)for(const f of s.audioFiles||[]){if(f.dataUrl)continue;
 try{const v=IDBok?await idbReq(DB.transaction('audio').objectStore('audio').get(f.id)):localStorage.getItem('hba_'+f.id);if(v){f.dataUrl=v;stored.add(f.id)}}catch(e){}}}
@@ -252,9 +276,10 @@ async function loadState(){let raw=null;
 try{DB=await idbOpen();IDBok=true;raw=await idbReq(DB.transaction('kv').objectStore('kv').get('state'));stored=new Set(await idbReq(DB.transaction('audio').objectStore('audio').getAllKeys()))}
 catch(e){IDBok=false;DB=null;console.warn('[保存] IndexedDBが使えないためlocalStorageを使います',e)}
 if(raw==null){try{raw=localStorage.getItem('hb')}catch(e){}}   // 旧バージョンのlocalStorageデータも引き継ぐ
+HAD=raw!=null;
 if(raw){try{Object.assign(S,JSON.parse(raw))}catch(e){console.error(e)}}
 ensure();await hydrateAudio()}
-async function doFlush(){if(!ready)return;clearTimeout(svT);
+async function doFlush(){if(!ready||TUTSB)return;clearTimeout(svT);
 const files=[];S.dictationSets.forEach(s=>(s.audioFiles||[]).forEach(f=>files.push(f)));
 const json=JSON.stringify(snap(),(k,v)=>k==='dataUrl'?undefined:v);
 if(IDBok){try{const tx=DB.transaction(['kv','audio'],'readwrite'),kv=tx.objectStore('kv'),au=tx.objectStore('audio');kv.put(json,'state');
@@ -2370,7 +2395,7 @@ return `<svg width="${sz}" height="${sz}" viewBox="0 0 ${sz} ${sz}"><circle cx="
 const top3=()=>[...S.R].sort((a,b)=>b.st-a.st).slice(0,3).map(r=>r.id);
 const fmt=s=>String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0');
 function stage(){if(!TM)return 0;const p=TM.kind=='sw'?Math.min(TM.t/1800,1):1-TM.t/TM.tot;return Math.min(4,Math.floor(p*5))}
-function treeEm(i){return STG[i]||S.sel}
+const treeEm=(i,tr)=>stgTok(i,tr);   // 段階 i(0〜4) の見た目トークン（絵文字／画像）
 function render(){const sc=$('#m').scrollTop;
 $('#nv').innerHTML=[['home','🏠','ホーム'],['team','👥','チーム'+(rvUnread()?' 🔴'+rvUnread():'')],['my','👤','マイページ'],['grow','🌳','育成・森']].map(a=>`<button class="${S.tab==a[0]?'on':''}" onclick="S.tab='${a[0]}';S.ed=0;render()"><span>${a[1]}</span>${a[2]}</button>`).join('');
 renderMini();$('#m').innerHTML=({home,team,my,grow}[S.tab])();
@@ -2387,7 +2412,7 @@ det=`<div class="sm" style="margin-top:8px"><b>${mo+1}月${S.selDay}日</b>：${
 const dn=Object.keys(S.diary).filter(isRec).length,tb=['mo','wk','cu'].includes(S.st)?S.st:'mo';
 const body=tb=='mo'?`<div class="row" style="text-align:center"><div class="sp">✔ ルーティン<br><b style="font-size:26px">${days}</b>日</div><div class="sp">🟢 青信号<br><b style="font-size:26px">${green}</b>回</div><div class="sp">✍ 日記<br><b style="font-size:26px">${dn}</b>日</div></div>
 <div class="card" style="margin-top:10px"><b>月間信号機カレンダー</b> <span class="sm">${y}年${mo+1}月</span><div class="cal" style="margin-top:8px">${cells}</div>${det}</div>`:tb=='wk'?weekRank():cumHtml();
-return `<h3 style="margin:4px 0">統計</h3><div class="tabs">${[['mo','月間'],['wk','週間'],['cu','累計']].map(t=>`<button class="${tb==t[0]?'on':''}" onclick="S.st='${t[0]}';render()">${t[1]}</button>`).join('')}</div>${body}
+return `${tutCard()}<h3 style="margin:4px 0">統計</h3><div class="tabs">${[['mo','月間'],['wk','週間'],['cu','累計']].map(t=>`<button class="${tb==t[0]?'on':''}" onclick="S.st='${t[0]}';render()">${t[1]}</button>`).join('')}</div>${body}
 
 ${settingsHtml()}`}
 function ics(){const t=new Date(),p=n=>String(n).padStart(2,'0'),z=''+t.getFullYear()+p(t.getMonth()+1)+p(t.getDate()),st=t.toISOString().replace(/[-:]/g,'').slice(0,15)+'Z',e=s=>String(s).replace(/([,;\\])/g,'\\$1').replace(/\n/g,'\\n');
@@ -2396,8 +2421,8 @@ S.R.forEach(r=>L.push('BEGIN:VEVENT','UID:'+r.id+'@habit-forest','DTSTAMP:'+st,'
 L.push('END:VCALENDAR');dl('habits.ics',L.join('\r\n'),'text/calendar')}
 /* grow */
 function grow(){return forestCard()+`<div class="row"><h3 class="sp" style="margin:4px 0">育成・森</h3><b>🪙 ${S.coins}</b><button class="btn" onclick="lock()">🔒 ロック画面</button></div>
-<div class="card"><div class="tree">${treeEm(stage())}</div><div class="row" style="justify-content:center;font-size:28px;margin-top:6px">${STG.map((x,i)=>`<span style="opacity:${i<=stage()&&TM?1:.35}">${x||S.sel}</span>`).join('→')}</div><p class="sm" style="text-align:center">種→若木→成長→つぼみ→満開。途中放棄で🪵枯れ木に</p><p class="sm" style="text-align:center">ホームのルーティーン・ToDoの達成率が20%・40%・60%・80%・100%に届くごとに、その日の木（ルーティーン用・ToDo用）が育ちます。日付が変わった時点の達成率で確定します。</p></div>
-<div class="card"><b>樹種選択（図鑑・ショップ）</b><div class="shop" style="margin-top:8px">${trees().map(t=>{const o=S.own.includes(t[0]);return `<button class="${S.sel==t[0]?'on':''}" onclick="buy('${t[0]}',${t[2]})"><em>${t[0]}</em>${t[1]}<br>${o?'所持':'🪙'+t[2]}</button>`}).join('')}</div></div>`}
+<div class="card"><div class="tree">${vHtml(treeEm(stage()))}</div><div class="row" style="justify-content:center;font-size:28px;margin-top:6px">${[0,1,2,3,4].map(i=>`<span style="opacity:${i<=stage()&&TM?1:.35}">${vHtml(treeEm(i))}</span>`).join('→')}</div><p class="sm" style="text-align:center">種→若木→成長→つぼみ→満開。途中放棄で🪵枯れ木に</p><p class="sm" style="text-align:center">ホームのルーティーン・ToDoの達成率が20%・40%・60%・80%・100%に届くごとに、その日の木（ルーティーン用・ToDo用）が育ちます。日付が変わった時点の達成率で確定します。</p></div>
+<div class="card"><b>樹種選択（図鑑・ショップ）</b><div class="shop" style="margin-top:8px">${trees().map(t=>{const o=S.own.includes(t[0]);return `<button class="${S.sel==t[0]?'on':''}" onclick="buy('${t[0]}',${t[2]})"><em>${vHtml(t[0])}</em>${esc(t[1])}<br>${o?'所持':'🪙'+t[2]}</button>`}).join('')}</div></div>`}
 function buy(e,c){if(!S.own.includes(e)){if(S.coins<c)return uiAlert('コインが足りません');S.coins-=c;S.own.push(e)}S.sel=e;save();render()}
 const pad=n=>String(n).padStart(2,'0');
 const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
@@ -2414,6 +2439,30 @@ x.drawImage(im,sx,sy,m,m,0,0,N,N);let u=c.toDataURL('image/webp',.85);if(!/^data
 function icPick(inp,pv){const f=inp.files&&inp.files[0];inp.value='';if(!f)return;imgToIcon(f).then(u=>{ICV[pv]=u;const e=$('#'+pv);if(e)e.innerHTML=icoHtml(u,36)}).catch(e=>uiAlert(e.message))}
 function icClear(pv){ICV[pv]='';const e=$('#'+pv);if(e)e.innerHTML=''}
 const icPickerHtml=(inp,val,pv,mx)=>`<div class="row" style="flex-wrap:wrap"><input id="${inp}" maxlength="${mx}" style="width:72px" value="${esc(isImgIc(val)?'':val)}"><span id="${pv}">${ICV[pv]?icoHtml(ICV[pv],36):''}</span><button type="button" class="btn g" onclick="this.nextElementSibling.click()">🖼 画像を選ぶ</button><input type="file" accept="image/*" style="display:none" onchange="icPick(this,'${pv}')"><button type="button" class="btn g" onclick="icClear('${pv}')">画像を外す</button></div><div class="sm">画像を選ぶと、絵文字より優先して表示されます</div>`;
+/* ---- 樹種・成長段階の見た目：絵文字／画像の両対応 ----
+   トークン：絵文字 ／ 'img:xxxx'（画像樹種のID＝S.customTrees の1要素目）／ 'st:樹種:段階'（チーム共有用の段階画像）／ data:image…（段階に指定した画像）
+   森(SVG)の中では <text> ではなく <image> を使う（vSvg）。HTMLの中では <img class="tvimg">（vHtml）。 */
+const IMG_TREE_MAX=40000;
+const isDataImg=s=>typeof s=='string'&&/^data:image\/(png|jpe?g|webp|gif);base64,[A-Za-z0-9+\/=]+$/.test(s);
+const isTreeTok=t=>typeof t=='string'&&/^(img|st):[\w:-]+$/.test(t);
+const emojiClean=v=>String(v||'').replace(/['"\\<>&\s]/g,'').slice(0,8);
+const treeRec=tok=>(S.customTrees||[]).find(t=>t&&t[0]==tok);
+const treeFb=tok=>{const t=treeRec(tok);return (t&&t[4])||'🌳'};
+const treeImgUrl=(tok,ti)=>{const t=treeRec(tok);if(t&&isDataImg(t[3]))return t[3];const u=ti&&ti[tok];return isDataImg(u)?u:''};
+function visOf(tok,ti){tok=String(tok==null?'':tok);if(isDataImg(tok))return{img:tok};if(isTreeTok(tok)){const u=treeImgUrl(tok,ti);return u?{img:u}:{em:treeFb(tok)}}return{em:tok||'🌳'}}
+const vHtml=(tok,sz,ti)=>{const v=visOf(tok,ti);return v.img?`<img class="tvimg" src="${esc(v.img)}" alt=""${sz?` style="width:${sz}px;height:${sz}px"`:''}>`:esc(v.em)};
+const emTxt=(tok,def,ti)=>{const v=visOf(tok,ti);return v.em||(isTreeTok(tok)?treeFb(tok):(def||'🌳'))};   // 文字だけが使える場所（通知など）用の絵文字
+const vSvg=(tok,x,y,ti)=>{const v=visOf(tok,ti);return v.img?`<image href="${esc(v.img)}" x="${x-14}" y="${y-6}" width="28" height="28" preserveAspectRatio="xMidYMid meet"/>`:`<text x="${x}" y="${y+18}" text-anchor="middle" font-size="24">${esc(v.em)}</text>`};
+function stgTok(i,tr){tr=tr==null?S.sel:tr;if(i>=4||i<0)return tr;const u=((S.stageSet||{})[tr]||[])[i];return u||STG[i]}   // 満開＝樹種そのもの／それ以外＝樹種ごとの指定、なければ共通の絵文字
+function fTok(x){if(typeof x=='string')return x||'🌳';if(!x)return '🌳';if(x.kind=='daily'&&x.tr!=null&&x.stg>=0&&x.stg<4)return stgTok(x.stg,x.tr);return x.e||'🌳'}
+/* 画像（絵文字の代わり）を縮小：樹種・段階用（切り抜かず、透過を保ったまま96px四方に収める） */
+function imgToTreeImg(file){return new Promise((ok,ng)=>{if(!file||!/^image\//.test(file.type))return ng(new Error('画像ファイルを選んでください'));
+const fr=new FileReader();fr.onerror=()=>ng(new Error('画像を読み込めませんでした'));
+fr.onload=()=>{const im=new Image();im.onerror=()=>ng(new Error('この画像は開けませんでした'));
+im.onload=()=>{const enc=(N,q)=>{const c=document.createElement('canvas');c.width=c.height=N;const x=c.getContext('2d'),m=Math.max(im.width,im.height)||N,w=im.width*N/m,h=im.height*N/m;
+x.drawImage(im,(N-w)/2,(N-h)/2,w,h);let u=c.toDataURL('image/webp',q);if(!/^data:image\/webp/.test(u))u=c.toDataURL('image/png');return u};
+let u=enc(96,.85);if(u.length>14000)u=enc(96,.6);if(u.length>14000)u=enc(72,.5);
+if(u.length>IMG_TREE_MAX)return ng(new Error('画像が大きすぎます。シンプルな画像をお使いください'));ok(u)};im.src=fr.result};fr.readAsDataURL(file)})}
 const icOf=p=>(p.uid&&S.team.uid&&p.uid==S.team.uid)?S.team.icon:((typeof TMEM!='undefined'&&TMEM[p.uid]&&TMEM[p.uid].icon)||p.icon);
 const iso=k=>{const[a,b,c]=k.split('-');return a+'-'+pad(b)+'-'+pad(c)};
 const unIso=v=>{const[a,b,c]=v.split('-');return a+'-'+(+b)+'-'+(+c)};
@@ -2428,7 +2477,7 @@ function dl(n,t,m){const a=document.createElement('a');a.href=URL.createObjectUR
 function bars7(){const a=weekData().map(d=>[d.rt+d.tk+d.td,WD[d.w]]);const mx=Math.max(S.R.length,...a.map(x=>x[0]),1);
 return `<div class="bars">`+a.map(b=>`<div class="bc"><span>${b[0]}</span><i style="height:${Math.max(4,b[0]/mx*90)}px"></i><small>${b[1]}</small></div>`).join('')+`</div>`}
 function edBtns(k,id){const e=f=>`event.stopPropagation();${f}`;return `<button class="btn g" onclick="${e(`edit('${k}',${id})`)}">✏️</button><button class="btn g" onclick="${e(`mv('${k}',${id},-1)`)}">↑</button><button class="btn g" onclick="${e(`mv('${k}',${id},1)`)}">↓</button><button class="btn" style="background:#d9534f" onclick="${e(`del('${k}',${id})`)}">🗑️</button>`}
-const edBar=()=>`<div class="card row"><span class="sp sm">✏️編集／↑↓並び替え／🗑️削除</span><button class="btn" onclick="S.ed=0;render()">完了</button></div>`;
+const edBar=()=>`<div class="card row" data-tu="edbar"><span class="sp sm">✏️編集／↑↓並び替え／🗑️削除</span><button class="btn" onclick="S.ed=0;render()">完了</button></div>`;
 function mv(k,id,d){const a=S[k],i=a.findIndex(v=>v.id==id),j=i+d;if(j<0||j>=a.length)return;[a[i],a[j]]=[a[j],a[i]];save();render()}
 /* diary */
 function dOpen(v,k){S.dv=v;if(k)S.dd=k;S.modal=dHtml();render()}
@@ -2505,8 +2554,8 @@ const h={play:()=>{if(TM&&TM.pa)pause()},pause:()=>{if(TM&&!TM.pa)pause()},stop:
 for(const k in h){try{ms.setActionHandler(k,on?h[k]:null)}catch(e){}}if(!on){ms.metadata=null;ms.playbackState='none'}}catch(e){}}
 function ntf(m,title){try{if(window.Notification&&Notification.permission=='granted')new Notification(title||'習慣の森',{body:m})}catch(e){}}
 function tick(){if(!TM||TM.pa)return;calc();if(TM.kind=='cd'&&TM.t<=0)return fin();
-const s=(i,f)=>{const e=$(i);if(e)f(e)},tx=fmt(TM.t),g=treeEm(stage());
-s('#tt',e=>e.textContent=tx);s('#lt',e=>e.textContent=tx);s('#lg',e=>e.textContent=g);s('#mg',e=>e.textContent=g);s('#lb',e=>e.style.width=Math.round(prog()*100)+'%');s('#lc',e=>e.textContent=new Date().toTimeString().slice(0,5));
+const s=(i,f)=>{const e=$(i);if(e)f(e)},tx=fmt(TM.t),g=treeEm(stage()),sv=e=>{if(e._v!==g){e._v=g;e.innerHTML=vHtml(g)}};
+s('#tt',e=>e.textContent=tx);s('#lt',e=>e.textContent=tx);s('#lg',sv);s('#mg',sv);s('#lb',e=>e.style.width=Math.round(prog()*100)+'%');s('#lc',e=>e.textContent=new Date().toTimeString().slice(0,5));
 const st=stage();if(st!==TM.ls){TM.ls=st;if(S.tab=='grow'&&!S.modal&&!SC.n)render()}}
 function pause(){if(!TM)return;if(TM.pa){TM.pa=0;TM.last=nowMs();Bgm.play()}else{TM.acc+=nowMs()-TM.last;TM.last=null;TM.pa=1;calc();Bgm.pause()}
 msMeta();if(isLock())lock();else render()}
@@ -2538,13 +2587,29 @@ return `<div class="card"><b>⚙ 設定・連携</b><div style="margin-top:6px">
 <div class="row" style="margin-top:6px"><button class="btn sp" onclick="dl('habit-forest-'+iso(kd(new Date()))+'.json',JSON.stringify(snapExport(),null,1),'application/json')">⬇ JSONファイル保存</button><button class="btn g sp" onclick="$('#jf').click()">⬆ JSONファイル読込</button><input type="file" id="jf" accept=".json,application/json" hidden onchange="rdAny(this)"></div>
 <div class="sm" style="margin-top:12px"><b>ZIP</b>（音読ディクテーションの音源・読書記録・日記・ルーティーン・森・設定をすべて含む）</div>
 <div class="row" style="margin-top:6px"><button class="btn sp" onclick="exportZip()">⬇ ZIPで出力</button><button class="btn g sp" onclick="$('#zf').click()">⬆ ZIPから復元</button><input type="file" id="zf" accept=".zip,application/zip,.json,application/json" hidden onchange="rdAny(this)"></div>`)
-+a('t','🌱 樹種の絵文字追加',`<label class="sm">絵文字</label><input id="te" placeholder="🌿" maxlength="8"><label class="sm">樹種名</label><input id="tn" placeholder="シダ" maxlength="12"><label class="sm">必要コイン数（0で無料）</label><input id="tc" type="number" min="0" value="0"><button class="btn" style="width:100%;margin-top:8px" onclick="addTree()">樹種を追加</button><p class="sm">追加した樹種は「育成・森」の図鑑・ショップに並びます（現在 ${S.customTrees.length} 件）。</p>`)
++a('t','🌱 樹種の追加・成長段階の指定',`<div class="sm"><b>樹種を追加</b>（絵文字、または画像ファイル）</div><label class="sm">絵文字（画像を選んだ場合は「代替絵文字」。チームへ共有しきれないときなどに使われます）</label>${icPickerHtml('te','','tepv',8)}<label class="sm">樹種名</label><input id="tn" placeholder="シダ" maxlength="12"><label class="sm">必要コイン数（0で無料）</label><input id="tc" type="number" min="0" value="0"><button class="btn" style="width:100%;margin-top:8px" onclick="addTree()">樹種を追加</button><p class="sm">追加した樹種は「育成・森」の図鑑・ショップに並びます（現在 ${S.customTrees.length} 件）。画像は96px四方に縮小して端末内に保存され、バックアップ（JSON/ZIP）にも含まれます。</p>${stageDesignerHtml()}<p class="sm">📤 チームへの共有：森の画像は容量を抑えるため、1枚あたり約10KB以下・合計約26KB以下・最大8種までを画像のまま共有し、それを超える分は代替絵文字（段階の画像は共通の絵文字）で表示されます。</p>`)
 +`</div></div>`}
 function askNotif(){if(!window.Notification)return uiAlert('このブラウザは通知に対応していません');Notification.requestPermission().then(()=>render()).catch(()=>render())}
 function saveGh(){AssetManager.setGithubConfig({owner:$('#gho').value,repo:$('#ghr').value,branch:$('#ghb').value,token:$('#ght').value});toast('GitHub設定を保存しました')}
-function addTree(){const e=$('#te').value.replace(/['"\\<>&\s]/g,'').slice(0,8),n=$('#tn').value.trim().slice(0,12),c=Math.max(0,Math.floor(+$('#tc').value||0));
-if(!e||!n)return uiAlert('絵文字と樹種名を入力してください');if(trees().some(t=>t[0]==e))return uiAlert('その絵文字はすでに登録されています');
-S.customTrees.push([e,n,c]);save();render();toast('樹種「'+n+'」を追加しました')}
+function addTree(){const e=emojiClean($('#te').value),n=$('#tn').value.trim().slice(0,12),c=Math.max(0,Math.floor(+$('#tc').value||0)),img=ICV.tepv||'';
+if(!n)return uiAlert('樹種名を入力してください');
+if(img){if(!isDataImg(img))return uiAlert('画像を読み込み直してください');const id='img:'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);S.customTrees.push([id,n,c,img,e||'🌳'])}   // 画像の樹種
+else{if(!e)return uiAlert('絵文字か画像ファイルを指定してください');if(trees().some(t=>t[0]==e))return uiAlert('その絵文字はすでに登録されています');S.customTrees.push([e,n,c])}
+ICV.tepv='';save();render();toast('樹種「'+n+'」を追加しました')}
+/* ---- 成長段階（種・若木・成長・つぼみ）の見た目を樹種ごとに指定。未指定は共通の絵文字 ---- */
+const STGUI={tr:null};
+function stageDesignerHtml(){const all=trees();let tr=STGUI.tr;if(!all.some(t=>t[0]==tr))tr=STGUI.tr=S.sel;const set=(S.stageSet||{})[tr]||[];
+return `<div class="sm" style="margin-top:14px"><b>成長段階の見た目を指定</b></div><p class="sm" style="margin:4px 0">種・若木・成長・つぼみを、樹種ごとに好きな絵文字または画像に変えられます。未指定の段階は共通の絵文字（${STG.slice(0,4).join('')}）です。満開は、その樹種の見た目になります。</p>
+<label class="sm">樹種</label><select onchange="stPick(this.value)">${all.map(t=>`<option value="${esc(t[0])}" ${t[0]==tr?'selected':''}>${esc(t[1])}${isTreeTok(t[0])?'（画像）':' '+esc(t[0])}</option>`).join('')}</select>
+<div class="row" style="margin:8px 0" data-tu="stgprev">${[0,1,2,3,4].map(i=>`<div class="stp"><div class="tv">${vHtml(treeEm(i,tr))}</div><div class="sm">${DSTG[i]}</div></div>`).join('')}</div>
+${[0,1,2,3].map(i=>{const u=set[i]||'',im=isDataImg(u);return `<div class="stg-row"><b style="width:44px">${DSTG[i]}</b><input class="stem" placeholder="${STG[i]}" maxlength="8" value="${esc(im?'':u)}" onchange="stEmoji(${i},this.value)"><span style="font-size:22px">${im?vHtml(u,26):''}</span><button type="button" class="btn g" onclick="this.nextElementSibling.click()">🖼 画像</button><input type="file" accept="image/*" style="display:none" onchange="stImg(this,${i})"><button type="button" class="btn g" onclick="stSet(${i},'')">戻す</button></div>`}).join('')}
+<button type="button" class="btn g" style="width:100%;margin-top:6px" onclick="stResetAll()">この樹種の指定をすべて戻す</button>`}
+function stSet(i,v){const tr=STGUI.tr||S.sel;if(!S.stageSet||typeof S.stageSet!='object')S.stageSet={};const a=(S.stageSet[tr]||['','','','']).slice(0,4);while(a.length<4)a.push('');a[i]=v||'';
+if(a.every(x=>!x))delete S.stageSet[tr];else S.stageSet[tr]=a;save();render()}
+function stEmoji(i,v){stSet(i,emojiClean(v))}
+function stImg(inp,i){const f=inp.files&&inp.files[0];inp.value='';if(!f)return;imgToTreeImg(f).then(u=>stSet(i,u)).catch(e=>uiAlert(e.message))}
+function stPick(tr){STGUI.tr=tr;render()}
+async function stResetAll(){const tr=STGUI.tr||S.sel;if(!(S.stageSet||{})[tr])return;if(!await uiConfirm('この樹種の段階の指定をすべて元の絵文字に戻しますか？','戻す'))return;delete S.stageSet[tr];save();render()}
 
 /* ===== バックアップ：JSON／ZIP（backup.json＋audio/） ===== */
 const snapExport=()=>{const o=JSON.parse(JSON.stringify(snap(),(k,v)=>k==='dataUrl'?undefined:v));try{delete o.user.settings.github.token}catch(e){}try{delete o.team.pw}catch(e){}return o};
@@ -2593,11 +2658,11 @@ const rateStage=p=>p==null?-1:p>=100?4:p>=80?3:p>=60?2:p>=40?1:p>=20?0:-1;
 const rtRate=(n,t)=>t?Math.round(n/t*100):null;
 function dailyRates(){const du=due();return{rt:rtRate(du.filter(r=>r.done).length,du.length),tk:rtRate(S.T.filter(t=>t.c>0).length,S.T.length)}}
 function dayTrees(rt,tk,at,prov){const o=[];[['rt',rt],['tk',tk]].forEach(a=>{const g=rateStage(a[1]);if(g<0)return;
-o.push({e:treeEm(g),n:CAT[a[0]][0]+' '+a[1]+'%（'+DSTG[g]+'）',tags:[CAT[a[0]][0]],cat:a[0],rate:a[1],stg:g,at,kind:'daily',prov:prov?1:0})});return o}
+const tk=treeEm(g);o.push({e:isDataImg(tk)?STG[g]:tk,tr:S.sel,n:CAT[a[0]][0]+' '+a[1]+'%（'+DSTG[g]+'）',tags:[CAT[a[0]][0]],cat:a[0],rate:a[1],stg:g,at,kind:'daily',prov:prov?1:0})});return o}
 const liveTrees=()=>{const r=dailyRates();return dayTrees(r.rt,r.tk,Date.now(),1)};
-function dailyToast(){const r=dailyRates(),f=(l,p)=>{if(p==null)return '';const g=rateStage(p);return l+' '+p+'%'+(g>=0?'→'+treeEm(g)+DSTG[g]:'')};toast('🌱 '+[f('ルーティーン',r.rt),f('ToDo',r.tk)].filter(Boolean).join(' ／ '))}
+function dailyToast(){const r=dailyRates(),f=(l,p)=>{if(p==null)return '';const g=rateStage(p);return l+' '+p+'%'+(g>=0?'→'+emTxt(treeEm(g),STG[g])+DSTG[g]:'')};toast('🌱 '+[f('ルーティーン',r.rt),f('ToDo',r.tk)].filter(Boolean).join(' ／ '))}
 function dayTreeCard(){const r=dailyRates(),it=[['rt',r.rt],['tk',r.tk]].filter(a=>a[1]!=null);if(!it.length)return '';
-return `<div class="card"><div class="row"><b class="sp">🌱 今日の木</b><span class="sm">日付が変わると確定します</span></div>${it.map(a=>{const g=rateStage(a[1]);return `<div class="row" style="margin-top:6px"><span style="font-size:28px;width:36px;text-align:center">${g>=0?esc(treeEm(g)):'・'}</span><div class="sp"><div class="sm">${CAT[a[0]][0]} ${a[1]}%</div><b>${g>=0?DSTG[g]:'まだ植わっていません（20%で種）'}</b></div><div class="sm">${STG.map((x,i)=>`<span style="opacity:${i<=g?1:.3}">${esc(x||S.sel)}</span>`).join('')}</div></div>`}).join('')}</div>`}
+return `<div class="card" data-tu="daytree"><div class="row"><b class="sp">🌱 今日の木</b><span class="sm">日付が変わると確定します</span></div>${it.map(a=>{const g=rateStage(a[1]);return `<div class="row" style="margin-top:6px"><span style="font-size:28px;width:36px;text-align:center">${g>=0?vHtml(treeEm(g)):'・'}</span><div class="sp"><div class="sm">${CAT[a[0]][0]} ${a[1]}%</div><b>${g>=0?DSTG[g]:'まだ植わっていません（20%で種）'}</b></div><div class="sm" style="font-size:16px;white-space:nowrap">${[0,1,2,3,4].map(i=>`<span style="opacity:${i<=g?1:.3}">${vHtml(treeEm(i))}</span>`).join('')}</div></div>`}).join('')}</div>`}
 function plantTree(x,kind,isT){S.forest.push({e:S.sel,n:x.n,tags:tagsOf(x),rid:isT?null:x.id,tid:isT?x.id:null,at:Date.now(),kind})}   // 達成＝木を1本植える
 function unplant(key,id){for(let i=S.forest.length-1;i>=0;i--){const f=S.forest[i];if(f&&typeof f=='object'&&f[key]==id&&f.kind!='abort'){S.forest.splice(i,1);return}}}
 function cumAdd(kind,x,n){const c=S.cum;for(const t of tagsOf(x))c[kind][t]=Math.max(0,(c[kind][t]||0)+n);c.n[kind]=Math.max(0,(c.n[kind]||0)+n)}
@@ -2697,7 +2762,7 @@ let h=`<div class="card" style="text-align:center"><div class="row"><div class="
 <div class="card row" style="cursor:pointer" onclick="dOpen('w',ykey())"><span style="font-size:26px">📔</span><div class="sp"><b>霧晴れの開拓日誌</b><div class="sm">${yr?'昨日の記録：済み ✔':'昨日の記録がまだです（保存で+5🪙）'}</div></div><span class="sm">›</span></div>
 ${dayTreeCard()}<div class="tabs">${[['rt','ルーティーン'],['tk','ToDo']].map(t=>`<button class="${md==t[0]?'on':''}" onclick="S.mode='${t[0]}';S.ed=0;render()">${t[1]}</button>`).join('')}</div>
 <div class="sm" style="margin:-2px 0 6px">${{rt:'1日1回の習慣。「反復」タグを付けたものだけ、1日に何度でも達成できます。曜日も選べます（未選択＝毎日）。',tk:'1日に何度でも達成OK。翌日になるとリセットされます。タグでグループ分け・絞り込みできます。'}[md]}</div>`;
-h+=S.ed?edBar():`<div class="row" style="justify-content:flex-end;margin-bottom:6px"><button class="btn g" onclick="S.ed=1;render()">✏️ 編集モード</button></div>`;
+h+=S.ed?edBar():`<div class="row" style="justify-content:flex-end;margin-bottom:6px"><button class="btn g" data-tu="edbtn" onclick="S.ed=1;render()">✏️ 編集モード</button></div>`;
 if(md=='rt'){const t3=top3();
 h+=`<div class="row"><select class="s" onchange="S.per=this.value;render()">${['1日','1週間','1ヶ月','1年'].map(p=>`<option ${p==S.per?'selected':''}>${p}</option>`).join('')}</select>${tagChips('tag',S.R)}</div>`;
 const ft=tagCur('tag',S.R),all=S.R.filter(r=>ft=='すべて'||tagsOf(r).includes(ft)),nd=all.filter(r=>isDue(r,today)),shown=all.filter(r=>S.ed||S.showOff||isDue(r,today));
@@ -2769,18 +2834,18 @@ const warn=stopToday()>=PEN_FREE?'\n⚠ 今日'+(stopToday()+1)+'回目の中断
 const v=await dlg({msg:'「'+TM.name+'」を終了しますか？'+warn,btns:[{l:'✅ 完了として記録（森に植樹）',v:'done',c:''},{l:'🪵 中断する（木が枯れます）',v:'abort',c:'d'},{l:'続ける',v:null}]});
 if(v&&TM)endT(v)}
 function renderMini(){const e=$('#mini'),a=$('#app');if(!e)return;if(!TM){e.innerHTML='';a.classList.remove('timing');return}a.classList.add('timing');
-e.innerHTML=`<div class="bar"><span id="mg" style="font-size:24px">${treeEm(stage())}</span><div class="sp" style="min-width:0"><b class="ell">${esc(TM.name)}</b><div id="tt" style="font-size:20px">${fmt(TM.t)}</div></div>${TM.pomo?`<button class="btn g" title="ループ ${S.pomo.loop?'ON':'OFF'}" style="${S.pomo.loop?'':'opacity:.45'}" onclick="togLoop()">🔁</button>`:''}<button class="btn g" onclick="pause()">${TM.pa?'▶ 再開':'⏸ 一時停止'}</button><button class="btn" onclick="stopT()">■ 停止</button><button class="btn g" onclick="lock()" title="ロック画面に戻る">🔒</button></div>`}
+e.innerHTML=`<div class="bar"><span id="mg" style="font-size:24px">${vHtml(treeEm(stage()))}</span><div class="sp" style="min-width:0"><b class="ell">${esc(TM.name)}</b><div id="tt" style="font-size:20px">${fmt(TM.t)}</div></div>${TM.pomo?`<button class="btn g" title="ループ ${S.pomo.loop?'ON':'OFF'}" style="${S.pomo.loop?'':'opacity:.45'}" onclick="togLoop()">🔁</button>`:''}<button class="btn g" onclick="pause()">${TM.pa?'▶ 再開':'⏸ 一時停止'}</button><button class="btn" onclick="stopT()">■ 停止</button><button class="btn g" onclick="lock()" title="ロック画面に戻る">🔒</button></div>`}
 function lock(){const n=nextR()||{n:'（ルーティーン未登録）',w:'',st:0};
 S.modal=`<div class="lock"><div id="lc" style="font-size:56px">${new Date().toTimeString().slice(0,5)}</div>
-<div class="w"><div class="sm" style="color:#cde">タスクタイマー${TM&&TM.pomo?' ・ '+(TM.ph=='rest'?'☕ 休憩':'🍅 集中 '+(TM.cyc||1)+'回目'):''}</div>${TM?`<b>${esc(TM.name)}</b><div id="lt" style="font-size:40px;text-align:center">${fmt(TM.t)}</div><div class="tree sway" id="lg">${treeEm(stage())}</div><div class="prog"><i id="lb" style="width:${Math.round(prog()*100)}%"></i></div><div class="row"><button class="btn sp" onclick="pause()">${TM.pa?'▶ 再開':'⏸ 一時停止'}</button><button class="btn sp" onclick="stopT()">■ 停止</button></div><div class="row" style="margin-top:8px"><button class="btn g sp" onclick="togBgm()">🎵 ${TM.ph=='rest'?'休憩':'作業'}BGM：${Bgm.bgmOn(TM.ph)?'ON':'OFF'}</button>${TM.pomo?`<button class="btn g sp" onclick="togLoop()">🔁 ループ：${S.pomo.loop?'ON':'OFF'}</button>`:''}</div>`:'計測中のタスクはありません'}</div>
+<div class="w"><div class="sm" style="color:#cde">タスクタイマー${TM&&TM.pomo?' ・ '+(TM.ph=='rest'?'☕ 休憩':'🍅 集中 '+(TM.cyc||1)+'回目'):''}</div>${TM?`<b>${esc(TM.name)}</b><div id="lt" style="font-size:40px;text-align:center">${fmt(TM.t)}</div><div class="tree sway" id="lg">${vHtml(treeEm(stage()))}</div><div class="prog"><i id="lb" style="width:${Math.round(prog()*100)}%"></i></div><div class="row"><button class="btn sp" onclick="pause()">${TM.pa?'▶ 再開':'⏸ 一時停止'}</button><button class="btn sp" onclick="stopT()">■ 停止</button></div><div class="row" style="margin-top:8px"><button class="btn g sp" onclick="togBgm()">🎵 ${TM.ph=='rest'?'休憩':'作業'}BGM：${Bgm.bgmOn(TM.ph)?'ON':'OFF'}</button>${TM.pomo?`<button class="btn g sp" onclick="togLoop()">🔁 ループ：${S.pomo.loop?'ON':'OFF'}</button>`:''}</div>`:'計測中のタスクはありません'}</div>
 <div class="w" onclick="S.modal='';S.tab='home';render()"><div class="sm" style="color:#cde">次の習慣 (Next Habit)</div><b>${esc(n.n)}</b><div>${esc(n.w)} ・ ${n.st}日連続</div></div>
 <button class="btn g" onclick="S.modal='';render()">ロック解除</button></div>`;render()}
 
 /* ---------- 5. 森の木 ⇔ 達成タスク ---------- */
-function forestSvg(list,mem,idx){const all=list||S.forest,F=all.slice(-36),off=all.length-F.length;let s='<svg viewBox="0 0 360 230" width="100%"><g>',i=0;const N=6;
+function forestSvg(list,mem,idx,ti){const all=list||S.forest,F=all.slice(-36),off=all.length-F.length;let s='<svg viewBox="0 0 360 230" width="100%"><g>',i=0;const N=6;
 for(let a=0;a<N;a++)for(let b=0;b<N;b++){const x=180+(a-b)*30,y=40+(a+b)*15,pts=`${x},${y} ${x+30},${y+15} ${x},${y+30} ${x-30},${y+15}`;
 s+=`<polygon points="${pts}" fill="${(a+b)%2?'#7bc47f':'#6ab76f'}" stroke="#4e9a55"/>`;
-if(F[i]){s+=`<g style="cursor:pointer" onclick="${mem?'memTree':'treeInfo'}(${idx?idx[off+i]:off+i})"><text x="${x}" y="${y+18}" text-anchor="middle" font-size="24">${esc(fE(F[i]))}</text><polygon points="${pts}" fill="transparent"/></g>`}i++}
+if(F[i]){s+=`<g style="cursor:pointer" onclick="${mem?'memTree':'treeInfo'}(${idx?idx[off+i]:off+i})">${vSvg(fTok(F[i]),x,y,ti)}<polygon points="${pts}" fill="transparent"/></g>`}i++}
 return s+'</g></svg>'}
 const fTags=x=>x&&typeof x=='object'?(x.tags&&x.tags.length?x.tags:(x.tag?[x.tag]:['未分類'])):['未分類'];
 const FPER=[['all','全期間'],['mo','今月'],['wk','7日間']];
@@ -2794,13 +2859,13 @@ const sel=all.filter(o=>(!tv||fTags(o.x).includes(tv))&&inP(o.x)),list=sel.map(o
 return `<div class="card"><div class="row"><b class="sp">🌳 ${tv?esc(tv)+'の森':'自分の森'}</b><div class="seg">${FPER.map(q=>`<button class="${pr==q[0]?'on':''}" onclick="setFp('${q[0]}')">${q[1]}</button>`).join('')}</div></div>
 <div class="chips" style="margin-top:6px"><button class="chip ${tv?'':'on'}" onclick="setFv('')">🌳 すべて ${all.length}</button>${tags.map(t=>`<button class="chip ${tv==t?'on':''}" data-t="${esc(t)}" onclick="setFv(this.dataset.t)">#${esc(t)} ${tc[t]}</button>`).join('')}</div>
 <div class="sm" style="margin:4px 0">${list.length}本${lv.length?'（今日の暫定の木を含む）':''}${dead?'（うち枯れ木'+dead+'本）':''} ・ 木をタップすると、達成したタスクがわかります${list.length>36?' ・ 最新36本を表示':''}</div>${list.length?forestSvg(list,0,idx):'<p class="sm" style="text-align:center;padding:30px 0">この条件の木はまだありません</p>'}</div>`}
-function treeModal(x,back){const o=typeof x=='object'&&x?x:null,dead=o?o.kind=='abort'||o.e=='🪵':x=='🪵',dt=o&&o.at?new Date(o.at):null,
+function treeModal(x,back,ti){const o=typeof x=='object'&&x?x:null,dead=o?o.kind=='abort'||o.e=='🪵':x=='🪵',dt=o&&o.at?new Date(o.at):null,
 ds=dt?`${dt.getFullYear()}/${dt.getMonth()+1}/${dt.getDate()} ${pad(dt.getHours())}:${pad(dt.getMinutes())}`:'';
 const row=(a,b)=>`<div class="row" style="margin-top:8px"><span class="sm" style="width:84px">${a}</span><b class="sp">${b}</b></div>`;
 const body=o&&o.kind=='daily'?row('種類',esc(o.tags[0]||''))+row('達成率',o.rate+'%')+row('段階',esc(DSTG[o.stg]||''))+row('状態',o.prov?'暫定（日付が変わると確定します）':'確定')+(dt?row(o.prov?'現在':'確定した日',`${dt.getFullYear()}/${dt.getMonth()+1}/${dt.getDate()}`+(o.prov?' '+pad(dt.getHours())+':'+pad(dt.getMinutes()):'')):''):o&&o.n?row(dead?'中断したタスク':'達成したタスク',esc(o.n))+(ds?row(dead?'中断日時':'達成日時',ds):'')+(o.kind?row('種類',dead?'中断（枯れ木になりました）':(o.kind=='task'?'タスク達成':'集中完了')):'')+(o.min?row('集中時間',o.min+'分'):'')+(o.tags&&o.tags.length?row('タグ',o.tags.map(t=>'#'+esc(t)).join(' ')):(o.tag?row('タグ','#'+esc(o.tag)):'')):`<p class="sm">この木は、タスクの記録機能ができる前に育ったため、どのタスクで得たかの情報がありません。</p>`;
-return `<div class="modal"><div><div class="row"><b class="sp">🌳 この木について</b><button class="btn g" onclick="${back}">閉じる</button></div><div class="tree" style="margin:8px 0">${esc(fE(x))}</div>${body}</div></div>`}
+return `<div class="modal"><div><div class="row"><b class="sp">🌳 この木について</b><button class="btn g" onclick="${back}">閉じる</button></div><div class="tree" style="margin:8px 0">${vHtml(fTok(x),null,ti)}</div>${body}</div></div>`}
 function treeInfo(i){const x=i<S.forest.length?S.forest[i]:liveTrees()[i-S.forest.length];if(x==null)return;S.modal=treeModal(x,"S.modal='';render()");render()}
-function memTree(i){const x=MEMV&&MEMV.forest[i];if(x==null)return;S.modal=treeModal(x,'memberReopen()');render()}
+function memTree(i){const x=MEMV&&MEMV.forest[i];if(x==null)return;S.modal=treeModal(x,'memberReopen()',MEMV.ti);render()}
 
 /* ---------- 累計（タグ別の累計達成回数。ルーティーン／ToDoの種別もタグの一種として表示） ---------- */
 function cumHtml(){const f=['all','rt','tk'].includes(S.cuv)?S.cuv:'all',C=S.cum,src=f=='all'?['rt','tk']:[f],m={};
@@ -2835,12 +2900,14 @@ async function seal(tid,pw,o){const k=await key(tid,pw),iv=crypto.getRandomValue
 const u=new Uint8Array(12+ct.length);u.set(iv);u.set(ct,12);return b64(u)}
 async function unseal(tid,pw,s){const k=await key(tid,pw),u=Uint8Array.from(atob(s),c=>c.charCodeAt(0));
 return JSON.parse(dec.decode(await crypto.subtle.decrypt({name:'AES-GCM',iv:u.slice(0,12)},k,u.slice(12))))}
-async function http(db,path,method,body,qs){const c=new AbortController(),t=setTimeout(()=>c.abort(),10000);
+async function http(db,path,method,body,qs){if(TUTSB&&method&&method!='GET')return null;   // チュートリアル中はサーバーへ書き込まない
+const c=new AbortController(),t=setTimeout(()=>c.abort(),10000);
 try{const r=await fetch(db.replace(/\/+$/,'')+path+'.json'+(qs||''),{method:method||'GET',body:body===undefined?undefined:JSON.stringify(body),signal:c.signal,headers:body===undefined?undefined:{'Content-Type':'application/json'}});
 if(!r.ok)throw new Error('サーバーエラー('+r.status+')。URLとデータベースのルールを確認してください');return await r.json()}
 catch(e){if(e.name=='AbortError'||e instanceof TypeError)throw new Error('サーバーに接続できません');throw e}finally{clearTimeout(t)}}
 const gid=n=>{const A='ABCDEFGHJKLMNPQRSTUVWXYZ23456789',a=crypto.getRandomValues(new Uint8Array(n));return [...a].map(x=>A[x%A.length]).join('')};
 const T=()=>S.team,base=()=>'/teams/'+T().tid;
+const cleanTi=o=>{const r={};if(o&&typeof o=='object')Object.keys(o).slice(0,12).forEach(k=>{if(/^(img|st):[\w:-]{1,40}$/.test(k)&&isDataImg(o[k])&&o[k].length<=12000)r[k]=o[k]});return r};
 return{
 async create(db,name){need();const tid='MORI-'+gid(6),pw=gid(8);
 await http(db,'/teams/'+tid+'/meta','PUT',{v:await seal(tid,pw,{ok:'shukan'}),n:await seal(tid,pw,{name})});return{tid,pw}},
@@ -2851,7 +2918,7 @@ async putMe(obj){const t=T();await http(t.db,base()+'/members/'+t.uid,'PUT',awai
 async delMe(){const t=T();await http(t.db,base()+'/members/'+t.uid,'DELETE')},
 async members(){const t=T(),o=await http(t.db,base()+'/members')||{},out={};
 for(const u of Object.keys(o)){if(!/^[A-Za-z0-9_]+$/.test(u))continue;try{const m=await unseal(t.tid,t.pw,o[u]);
-out[u]={name:String(m.name||'メンバー').slice(0,12),icon:icoNorm(m.icon),week:Array.isArray(m.week)?m.week.slice(0,7):[],forest:Array.isArray(m.forest)?m.forest.slice(-36):[],fc:+m.fc||0,upd:+m.upd||0}}catch(e){}}return out},
+out[u]={name:String(m.name||'メンバー').slice(0,12),icon:icoNorm(m.icon),week:Array.isArray(m.week)?m.week.slice(0,7):[],forest:Array.isArray(m.forest)?m.forest.slice(-36).map(x=>x&&typeof x=='object'?x:{e:String(x||'🌳').slice(0,8)}):[],ti:cleanTi(m.ti),fc:+m.fc||0,upd:+m.upd||0}}catch(e){}}return out},
 async post(obj){const t=T();return await http(t.db,base()+'/posts','POST',{c:await seal(t.tid,t.pw,obj)})},
 async posts(){const t=T(),o=await http(t.db,base()+'/posts','GET',undefined,'?orderBy=%22%24key%22&limitToLast=120')||{},out=[];
 for(const id of Object.keys(o)){try{const p=await unseal(t.tid,t.pw,o[id].c);
@@ -2859,8 +2926,17 @@ out.push({id,uid:String(p.u||''),name:String(p.n||'メンバー').slice(0,12),ic
 return out.sort((a,b)=>a.id<b.id?-1:a.id>b.id?1:0)},
 async editPost(pid,obj){const t=T();await http(t.db,base()+'/posts/'+encodeURIComponent(pid)+'/c','PUT',await seal(t.tid,t.pw,obj))},
 async stamp(pid,e){const t=T();await http(t.db,base()+'/posts/'+pid+'/st','POST',e)}}})();
-function myProfile(){const T=S.team||{};return{name:(T.name||'あなた').slice(0,12),icon:icoNorm(T.icon||'🙂'),week:weekData().map(d=>[d.k,d.rt,d.tk,d.td,d.m]),
-forest:S.forest.slice(-36).map(x=>typeof x=='string'?{e:x}:{e:x.e,n:x.n||'',at:x.at||0,kind:x.kind||'',min:x.min||0,tags:(x.tags||(x.tag?[x.tag]:[])).slice(0,4)}),fc:S.forest.length,upd:Date.now()}}
+/* チームへ共有する森：画像の樹種・段階は容量が増えすぎないよう、小さいものだけ画像のまま共有し（1枚10KB以下・合計26KB以下・最大8種）、超える分は代替絵文字にする */
+const SHARE_IMG_ONE=10000,SHARE_IMG_TOT=26000,SHARE_IMG_CNT=8;
+function shareForest(){const ti={};let used=0,cnt=0;
+const tokShare=(tok,key,fb)=>{tok=String(tok||'🌳');if(!isTreeTok(tok)&&!isDataImg(tok))return tok.slice(0,8);const k=isTreeTok(tok)?tok:key,u=visOf(tok).img;if(!u||!k)return fb;
+if(ti[k])return k;if(u.length<=SHARE_IMG_ONE&&used+u.length<=SHARE_IMG_TOT&&cnt<SHARE_IMG_CNT){ti[k]=u;used+=u.length;cnt++;return k}return fb};
+const f=S.forest.slice(-36).map(x=>{if(typeof x=='string')return{e:tokShare(x,'','🌳')};
+const tk=fTok(x),sd=isDataImg(tk),key=sd?'st:'+String(x.tr).replace(/\W/g,'').slice(0,14)+':'+x.stg:'',fb=sd?(STG[x.stg]||'🌳'):(isTreeTok(tk)?treeFb(tk):'🌳');
+const o={e:tokShare(tk,key,fb),n:x.n||'',at:x.at||0,kind:x.kind||'',min:x.min||0,tags:(x.tags||(x.tag?[x.tag]:[])).slice(0,4)};
+if(x.kind=='daily'){o.rate=x.rate;o.stg=x.stg;o.prov=x.prov?1:0}return o});return{f,ti}}
+function myProfile(){const T=S.team||{},sf=shareForest();return{name:(T.name||'あなた').slice(0,12),icon:icoNorm(T.icon||'🙂'),week:weekData().map(d=>[d.k,d.rt,d.tk,d.td,d.m]),
+forest:sf.f,ti:sf.ti,fc:S.forest.length,upd:Date.now()}}
 function teamDirty(){clearTimeout(TPUSHT);TPUSHT=setTimeout(teamPush,4000)}
 async function teamPush(){if(!teamOn())return;try{await TeamAPI.putMe(myProfile())}catch(e){}}
 async function teamPull(force){if(!teamOn()||TBUSY)return;if(!force&&Date.now()-TLAST<8000)return;TBUSY=true;
@@ -2878,7 +2954,7 @@ return{name,icon:'🙂',week:w,forest:f,fc:f.length,upd:Date.now(),demo:1}}
 function memberOpen(uid){let m=null;
 if(uid=='me'||(teamOn()&&uid==S.team.uid))m=myProfile();else if(String(uid).startsWith('demo:'))m=demoMember(uid.slice(5));else if(TMEM[uid])m=TMEM[uid];
 if(!m)return toast('このメンバーのデータはまだありません');
-MEMV={name:m.name,icon:m.icon,week:fromWeek(m.week),forest:m.forest||[],fc:m.fc||0,upd:m.upd,demo:!!m.demo};MEMM='n';memberReopen()}
+MEMV={name:m.name,icon:m.icon,week:fromWeek(m.week),forest:m.forest||[],ti:m.ti||{},fc:m.fc||0,upd:m.upd,demo:!!m.demo};MEMM='n';memberReopen()}
 function memberReopen(){S.modal=memberHtml();render()}
 function weekBars(w,mt){const mx=Math.max(1,...w.map(d=>mt=='m'?d.m:d.rt+d.tk)),W=330,H=130,bw=30,gap=(W-7*bw)/8;
 let s=`<svg viewBox="0 0 ${W} ${H+38}" width="100%" style="color:var(--tx)">`;
@@ -2892,7 +2968,7 @@ return `<div class="modal"><div><div class="row"><span style="font-size:34px">${
 <div class="card" style="margin-top:10px"><div class="row"><b class="sp">📊 達成グラフ</b><div class="seg"><button class="${MEMM=='n'?'on':''}" onclick="MEMM='n';memberReopen()">達成数</button><button class="${MEMM=='m'?'on':''}" onclick="MEMM='m';memberReopen()">集中時間</button></div></div>${weekBars(w,MEMM)}
 <div class="sm" style="text-align:center">${MEMM=='m'?'棒の上の数字は集中した分数':keys.map(k=>`<span style="color:${CAT[k][1]}">■</span> ${CAT[k][0]}`).join('　')}</div></div>
 <div class="card"><b>🥧 内訳（7日間）</b><div class="row">${donut(keys.map(k=>[tot[k],CAT[k][1]]),150,sum+'件')}<div class="sm">${keys.map(k=>`<div><span style="color:${CAT[k][1]}">●</span> ${CAT[k][0]} <b>${tot[k]}</b>件</div>`).join('')}<div style="margin-top:6px">⏱ 集中 合計 <b>${tot.m}</b>分</div></div></div></div>
-<div class="card"><b>🌳 ${esc(m.name)}の森</b> <span class="sm">${m.fc}本 ・ 木をタップで達成タスクを表示</span>${forestSvg(m.forest,1)}</div></div></div>`}
+<div class="card"><b>🌳 ${esc(m.name)}の森</b> <span class="sm">${m.fc}本 ・ 木をタップで達成タスクを表示</span>${forestSvg(m.forest,1,null,m.ti)}</div></div></div>`}
 function copyText(t){const fb=()=>{const a=document.createElement('textarea');a.value=t;a.style.cssText='position:fixed;opacity:0';document.body.appendChild(a);a.select();try{document.execCommand('copy');toast('コピーしました')}catch(e){uiAlert(t)}a.remove()};
 try{if(navigator.clipboard&&navigator.clipboard.writeText)return navigator.clipboard.writeText(t).then(()=>toast('コピーしました')).catch(fb)}catch(e){}fb()}
 const inviteText=()=>`「習慣の森」のチームに参加しよう！\nチームID：${S.team.tid}\nパスワード：${S.team.pw}`+(TEAM_DB_DEFAULT?'':`\nサーバーURL：${S.team.db}`)+`\n（アプリの「チーム」タブ →「チーム」ボタンから参加）`;
@@ -2904,7 +2980,7 @@ if(teamOn())return `<div class="modal"><div><div class="row"><b class="sp">👥 
 <button class="btn" style="width:100%;margin-top:10px;padding:10px" onclick="copyText(inviteText())">📨 招待メッセージをコピー</button><p class="sm" style="margin:6px 0 0">このIDとパスワードを仲間に伝えると、別の端末から同じチームに参加できます。</p></div>
 <div class="card"><b>あなたの表示</b><label>表示名</label><input id="tnm" maxlength="12" value="${esc(T.name)}"><label>アイコン（絵文字1つ、または画像ファイル）</label>${icPickerHtml('tic',T.icon,'ticpv',8)}<button class="btn" style="width:100%;margin-top:8px" onclick="tmSaveProfile()">保存</button></div>
 <div class="row"><button class="btn g sp" onclick="teamPull(true).then(()=>teamPush()).then(()=>toast('同期しました'))">🔄 今すぐ同期</button><button class="btn d sp" onclick="tmLeave()">チームを抜ける</button></div>
-<p class="sm">チームに共有される情報：表示名・アイコン・直近7日の達成数と集中時間・森の木（達成したタスク名つき）・投稿。内容はチームのパスワードで暗号化されます。</p></div></div>`;
+<p class="sm">チームに共有される情報：表示名・アイコン・直近7日の達成数と集中時間・森の木（達成したタスク名つき）・投稿。内容はチームのパスワードで暗号化されます。森に画像の樹種を使っている場合、容量を抑えるため小さい画像だけ（1枚約10KB以下・合計約26KB以下・最大8種）が画像のまま共有され、超える分は代替絵文字で表示されます。</p></div></div>`;
 return `<div class="modal"><div><div class="row"><b class="sp">👥 チームに参加・作成</b><button class="btn g" onclick="S.modal='';render()">閉じる</button></div>
 ${TEAM_DB_DEFAULT?'':`<label>サーバーURL（Firebase Realtime Database）</label><input id="tdb" placeholder="https://xxxx-default-rtdb.firebaseio.com" value="${esc(T.db)}" autocapitalize="off">
 <details class="acc"><summary>サーバーの用意のしかた（最初の1人だけ）</summary><div class="accb sm">1. Firebaseコンソールでプロジェクトを作り、Realtime Databaseを作成<br>2. 「ルール」を下記にして公開<br><code style="user-select:all">{"rules":{"teams":{"$tid":{".read":true,".write":true}}}}</code><br>3. 画面上部のデータベースURLをここに貼り付け<br>※チームIDを知らない人は一覧を取得できず、中身はパスワードで暗号化されます。</div></details>`}
@@ -2964,7 +3040,7 @@ if(teamOn()){const r=await TeamAPI.post({u:S.team.uid,n:S.team.name||'ゲスト'
 const lid='l'+Date.now().toString(36)+Math.random().toString(36).slice(2,5);S.P.push({u:'あなた',d:'td',t,img,tm:hmNow(),st:[],lid});if(study)schedRv(lid,t);save();render()}
 /* 「継続」タグのタスクを完了したら、自動でグループに投稿（学習報告として復習通知も予約） */
 function autoPost(t){sendPost(t,'',true).then(()=>{toast('📚 グループに自動投稿しました');if(S.tab=='team'&&!S.modal&&!SC.n)render()}).catch(e=>toast('グループへの自動投稿に失敗：'+e.message))}
-function studyPost(x,mn){if(!isStudy(x))return;if(!Array.isArray(S.rq))S.rq=[];S.rq.push({n:x.n,mn:mn||0});save();   // 報告する前に「学習範囲」を入力するポップアップを出す（render()で順番に表示）
+function studyPost(x,mn){if(TUTSB||!isStudy(x))return;if(!Array.isArray(S.rq))S.rq=[];S.rq.push({n:x.n,mn:mn||0});save();   // 報告する前に「学習範囲」を入力するポップアップを出す（render()で順番に表示）
 setTimeout(()=>{if(S.rq.length&&!S.modal&&!SC.n)render()},60)}
 function rqHtml(){const q=S.rq[0];return `<div class="modal"><div><h3 style="margin:0 0 6px">🤖 報告bot：学習報告</h3><p class="sm" style="margin:0 0 6px">「${esc(q.n)}」${q.mn?'（'+q.mn+'分）':''}をグループに報告します。今回の学習範囲を入力してください（空欄でもOK）。</p><label>学習範囲</label><input id="rqr" placeholder="例：英単語 p.10〜20 ／ No.101〜150" maxlength="60" autocomplete="off"><div class="row" style="margin-top:10px"><button class="btn g sp" onclick="rqGo(0)">報告しない</button><button class="btn sp" onclick="rqGo(1)">報告する</button></div>${S.rq.length>1?`<p class="sm" style="margin:6px 0 0">ほかに報告待ち：${S.rq.length-1}件</p>`:''}</div></div>`}
 function rqGo(y){const el=$('#rqr'),rg=el?el.value.trim():'',q=S.rq.shift();S.modal='';save();
@@ -2977,10 +3053,105 @@ DRAFT='';await sendPost(t,img,study);S.coins+=3;save();if(study)toast('📚 復�
 setTimeout(()=>{S.P.push({u:'にゃんチャレAI',bot:1,d:'td',t:'素晴らしい継続力ですね！その調子にゃ！🐾',img:'',tm:hmNow(),st:[]});save();render()},700)};
 if(f)AssetManager.uploadImage(f,'post').then(o=>add(o.image));else add('')}
 
+/* =====================================================================
+   チュートリアル（スポットライト方式）
+   ・説明したい部分だけ明るく照らし、ほかは暗くする。吹き出しに説明文と「次へ」「スキップ」。
+   ・光っている部分をタップ（または実際に操作）するか、「次へ」で次のステップへ。
+   ・各ステップの pre（事前処理）で、必要なタブ・モーダル・画面を開く。tg は光らせる要素（関数）。
+   ・★説明文は下の TUT_STEPS の t（見出し）と x（本文）を書き換えるだけで差し替えられます。
+   ・実データを汚さない：開始時に状態を退避し、中は保存・チームへの送信を止める。終了（完了／スキップ）で操作前の状態に戻す。
+   ・初回判定：localStorage の shukan_tutorial_done の有無。完了／スキップで保存。
+     保存済みデータがある既存ユーザーには自動表示せず、マイページの案内だけを出す。
+   ===================================================================== */
+const TUT_KEY='shukan_tutorial_done',TUT_AUTO='shukan_tutorial_auto',TUT_N=11,TUT_HEAVY=['dictationSets','books','bookFolders','dictationFolders','dictationRewards'];
+const tutLS={get:k=>{try{return localStorage.getItem(k)}catch(e){return null}},set:(k,v)=>{try{localStorage.setItem(k,v)}catch(e){}},del:k=>{try{localStorage.removeItem(k)}catch(e){}}};
+const qa=s=>[...document.querySelectorAll(s)];
+const TUT={on:0,i:0,n:0,bk:null,iv:null,rect:null,acc0:{}};
+const tH=m=>{S.tab='home';S.mode=m||'rt';render()};
+const tAcc=k=>{for(const a in ACC)ACC[a]=false;if(k)ACC[k]=true};
+
+const TUT_STEPS=[
+{ch:0,t:'ようこそ、習慣の森へ',x:`主な機能を順番にご案内します。\n光っている部分をタップするか、「次へ」を押すと進みます。\n\n※チュートリアル中の操作は保存されません。終わる（完了・スキップ）と、操作前の状態に戻ります。チームへの投稿や通知も送られません。`,pre:()=>tH('rt')},
+{ch:1,t:'達成数・達成率グラフ',x:`ホームの一番上のグラフです。\n「達成数」は直近7日間の達成した数を棒グラフで、「達成率」は直近7日間のルーティーンの達成割合をドーナツで表示します。右上のボタンで切り替えられます。`,pre:()=>tH('rt'),tg:()=>$('#m .card'),pass:1},
+{ch:2,t:'ルーティーンとToDo',x:`ここで「ルーティーン」と「ToDo」を切り替えます。\n・ルーティーン：毎日（または決めた曜日）続ける習慣。基本は1日1回で、連続日数が伸びていきます。\n・ToDo：1日に何度でも達成できるタイル。翌日になるとリセットされます。`,pre:()=>tH('rt'),tg:()=>$('#m .tabs'),pass:1},
+{ch:2,t:'ルーティーン・ToDoを追加する',x:`右下の「＋」でルーティーンを追加します。名前・きっかけ・ミニ目標・タグ・計測方法を決めて保存します。\nToDoは、ToDo画面の「ToDoを追加」タイルから追加します（アイコンは絵文字か画像）。`,pre:()=>tH('rt'),tg:()=>$('#m .fab')},
+{ch:2,t:'曜日を指定する',x:`「繰り返す曜日」で、習慣をやる曜日を決められます。何も選ばなければ毎日です。\n選んだ曜日だけ今日の一覧に出て、ほかの日は「今日は休み」になり、連続日数も途切れません。`,pre:()=>{tH('rt');rModal(null)},tg:()=>$('#a8')},
+{ch:2,t:'「継続」タグ・「反復」タグ',x:`タグは複数つけられます。特別な意味を持つ2つがあります。\n・「反復」：1日に何度でも達成できます（付けないと1日1回）。\n・「継続」：完了すると🤖報告botが学習範囲をたずねて、チームに自動で報告します。作業BGMも勉強用になります。\n右の❓でも説明を見られます。`,pre:()=>{tH('rt');rModal(null);tgHelp()},tg:()=>{const b=qa('.modal .btn').find(x=>x.textContent.trim()=='❓');return [b,$('#tghelp'),$('#tgp')]}},
+{ch:2,t:'削除・編集モード',x:`「✏️ 編集モード」ボタン（または項目の長押し）で編集モードに入ります。\n各項目に ✏️編集・↑↓並び替え・🗑️削除 が出ます。終わったら「完了」を押します。`,pre:()=>{tH('rt');S.ed=1;render()},tg:()=>[$('[data-tu=edbar]'),$('#m .card.rt')]},
+{ch:2,t:'ミニと取り消し',x:`「ミニ」は、気が乗らない日に小さな代替行動（ミニ目標）へ切り替えるボタンです（タイマーも2分に）。\n「↩」は、直近の達成を1回ぶん取り消します。押し間違いの修正に使えます（ToDoにも「↩ 取り消し」があります）。`,pre:()=>tH('rt'),tg:()=>qa('#m .card.rt').find(c=>[...c.querySelectorAll('.btn')].some(b=>b.textContent.trim()=='ミニ'))||$('#m .card.rt')},
+{ch:3,t:'その日の木',x:`ルーティーンとToDoの達成率に応じて、その日の木が育ちます。\n20%で種 → 40%で若木 → 60%で成長 → 80%でつぼみ → 100%で満開。ルーティーン用とToDo用で1本ずつです。\n日中は暫定の表示で、日付が変わった時点の達成率で森に確定します。（各段階の見た目は設定で変えられます）`,pre:()=>tH('rt'),tg:()=>$('[data-tu=daytree]')},
+{ch:4,t:'計測：タイマー・ポモドーロ・ストップウォッチ',x:`ルーティーンの「▶」から計測を始めます（タイマー／ポモドーロ／ストップウォッチ）。ポモドーロは、始めるときに集中・休憩の長さを決めます。\n計測中は🔒ロック画面で木が育ち、BGM（作業用・休憩用）とループをその場で切り替えられます。\n完了すると森に木が植わって🪙+15。途中で中断すると🪵枯れ木になります。`,pre:()=>tH('rt'),tg:()=>qa('#m .card.rt .btn').find(b=>/^▶/.test(b.textContent.trim()))||$('#m .card.rt')},
+{ch:4,t:'BGM・ループ・中断ペナルティ・コイン',x:`ポモドーロ設定では、作業用・休憩用BGMの初期値（ON/OFF）を決めます。ループは集中→休憩を自動で繰り返します。\n中断が今日3回目以降になると、タイマーが5分間ロックされます（🪙5で解除）。\nコインは、習慣の達成（+5）・集中の完了（+15）・日記（+5）などで貯まり、樹種の購入などに使えます。`,pre:()=>{S.tab='my';tAcc('p');render()},tg:()=>qa('#m details.acc').find(d=>/ポモドーロ/.test(d.firstElementChild.textContent))},
+{ch:5,t:'霧晴れの開拓日誌：日記',x:`前日をふり返る日記です。「日記を書く」は、変化の記録・一日の流れ・感じたことのどれか1つ書けばOK。昨日の分の新規保存で🪙+5です（2日前以前は🪙10か過去日記チケット。書いた日記の編集は無料）。\n「これまでの日記」で、書いた日記を新しい順に見返せます。`,pre:()=>{tH('rt');dOpen('w',ykey())},tg:()=>qa('.modal .tabs.t4 button').slice(0,2),pass:1},
+{ch:6,t:'霧晴れの開拓日誌：読書記録をつける',x:`「📖 読書記録をつける」から、読んだ本の記録画面に進みます。`,pre:()=>{tH('rt');dOpen('w',ykey())},tg:()=>qa('.modal .tabs.t4 button')[2]},
+{ch:6,t:'読書記録の画面',x:`本を登録して、要約・章ごとの要約・引用・考えを残す画面です。検索やフォルダ分けもできます。（今回は開くだけです）`,pre:()=>{tH('rt');openScreen('books')},tg:()=>$('#screen-container')},
+{ch:7,t:'霧晴れの開拓日誌：音読ディクテ',x:`「🎧 音読ディクテ」から、音読とディクテーションの練習に進みます。`,pre:()=>{tH('rt');dOpen('w',ykey())},tg:()=>qa('.modal .tabs.t4 button')[3]},
+{ch:7,t:'音読ディクテの画面',x:`教材（音声とテキスト）を登録して、文ごとに練習します。\n・音読：最後まで聞くと🪙5\n・ディクテーション：最後まで解くと🪙5、全問正解で🪙20（どちらも教材ごとに1日1回）`,pre:()=>{tH('rt');openScreen('dictationList')},tg:()=>$('#screen-container')},
+{ch:8,t:'チーム画面：メンバーと達成状況',x:`仲間の達成状況を見る画面です。上のカードで「今日／昨日」を切り替えます。メンバーの名前（アイコン）をタップすると、その人の直近1週間のグラフと森が見られます。⚙からチームの作成・参加もできます（いまは一人用のデモ表示）。`,pre:()=>{S.tab='team';S.tdy='td';render()},tg:()=>qa('#m .card').find(c=>c.querySelector('select.s'))},
+{ch:8,t:'チーム画面：投稿とスタンプ',x:`仲間の投稿が並びます。「👍 ❤️」でスタンプを送って応援できます。自分の投稿は「✏️ 編集」で書き直せます。`,pre:()=>{S.tab='team';S.tdy='td';render()},tg:()=>$('#m .post')},
+{ch:8,t:'チーム画面：投稿・🤖報告bot・復習通知',x:`ここから達成報告を投稿できます（🪙+3）。「📚 学習報告として投稿」にチェックすると、🤖報告botが1・3・7・14・28日後に「復習のタイミングです」と、あなたの投稿への返信で知らせます。\n「継続」タグの習慣を完了したときも、報告botが自動で報告します。`,pre:()=>{S.tab='team';S.tdy='td';render()},tg:()=>$('#pt')&&$('#pt').closest('.card')},
+{ch:9,t:'マイページの統計',x:`マイページの統計は3つのタブです。\n・月間：信号機カレンダー（緑＝全部達成、黄＝一部達成）と日ごとの内訳\n・週間：直近7日のルーティーン達成ランキング\n・累計：タグ別・種別の累計達成回数`,pre:()=>{S.tab='my';S.st='mo';S.selDay=null;render()},tg:()=>[$('#m .tabs'),qa('#m .card').find(c=>c.querySelector('.cal'))],pass:1},
+{ch:10,t:'マイページの設定・連携',x:`設定・連携のまとめです。タップで開きます。\n・🔔通知：ルーティーンごとのリマインダー\n・🔗Google・GitHub連携：.ics出力、GitHubへの画像保存\n・💾バックアップ：JSON／ZIPの書き出しと復元\n・🌱樹種の追加（次のステップ）\n・⏱ポモドーロ設定`,pre:()=>{S.tab='my';tAcc(null);render()},tg:()=>qa('#m .card').find(c=>c.querySelector('details.acc'))},
+{ch:10,t:'樹種の追加・成長段階の指定',x:`絵文字、または画像ファイルで、好きな樹種を追加できます（画像は96px四方に縮小して保存され、バックアップにも入ります）。\nその下で、樹種ごとに種・若木・成長・つぼみの見た目を、絵文字か画像で指定できます。5段階のプレビューを見ながら変更でき、ホーム・森・ロック画面・タイマーバーに反映されます。`,pre:()=>{S.tab='my';tAcc('t');render()},tg:()=>qa('#m details.acc').find(d=>/樹種/.test(d.firstElementChild.textContent))},
+{ch:11,t:'育成・森：あなたの森',x:`あなたの森です。達成のたびに木が1本植わります。全期間／今月／7日間やタグで絞り込めて、木をタップすると、どのタスクで得た木かが分かります。🪵は途中で中断した枯れ木です。`,pre:()=>{S.tab='grow';render()},tg:()=>$('#m .card')},
+{ch:11,t:'育成・森：コインと成長',x:`所持コインと、計測中の木の成長が出ます。計測が進むと、種→若木→成長→つぼみ→満開と育ちます。\nコインは、図鑑・ショップでの樹種の購入や、過去の日記の記録（🪙10）、タイマーのロック解除（🪙5）に使えます。`,pre:()=>{S.tab='grow';render()},tg:()=>{const r=$('#m > .row');return [r,r&&r.nextElementSibling]}},
+{ch:11,t:'育成・森：樹種選択（図鑑・ショップ）',x:`コインで新しい樹種を手に入れて、タップで選びます。選んだ樹種が、以降に植わる木の見た目になります（所持済みの樹種はいつでも切り替えOK）。`,pre:()=>{S.tab='grow';render()},tg:()=>$('#m .shop')&&$('#m .shop').closest('.card')},
+{ch:0,t:'チュートリアルはここまでです',x:`おつかれさまでした。いつでもマイページの「チュートリアルを見る」から見直せます。\n「完了」を押すと、操作前の状態に戻ります。`,pre:()=>{S.tab='my';render()}}
+];
+function tutCard(){const done=tutLS.get(TUT_KEY);
+return `<div class="card" data-tu="tutcard"><div class="row"><span style="font-size:24px">🧭</span><div class="sp"><b>使い方ガイド</b><div class="sm">${done?'いつでもチュートリアルを見直せます':'✨ チュートリアルができました。主な機能をひと通りご案内します'}</div></div><button class="btn" onclick="tutBegin()">チュートリアルを見る</button></div>${!done?`<div class="row" style="margin-top:6px"><span class="sp sm">チュートリアル中の操作は保存されず、終わると元の状態に戻ります。</span><button class="btn g" onclick="tutLS.set(TUT_KEY,'notice');render()">案内を閉じる</button></div>`:''}</div>`}
+function tutAuto(){if(tutLS.get(TUT_KEY))return;if(HAD&&tutLS.get(TUT_AUTO)!='1')return;   // 保存済みデータのある既存ユーザーには自動表示しない（マイページの案内のみ）
+setTimeout(()=>{if(!TUT.on&&!TM&&!S.modal&&!SC.n&&!tutLS.get(TUT_KEY))tutBegin(1)},900)}
+const tutEls=st=>{let t=null;try{t=st&&st.tg?st.tg():null}catch(e){}if(!t)return [];if(!Array.isArray(t))t=[t];return t.filter(e=>e&&e.getBoundingClientRect&&e.isConnected)};
+function tutCloseScreen(){if(!SC.n)return;try{scLeave()}catch(e){}SC={n:null,p:null};const b=$('#sc');if(b){b.style.display='none';b.innerHTML=''}}
+function tutReset(){tutCloseScreen();S.modal='';S.ed=0;S.rq=[];S.selDay=null;for(const k in ACC)delete ACC[k];Object.assign(ACC,TUT.acc0)}
+const dcl=v=>Array.isArray(v)?v.map(dcl):(v&&typeof v=='object')?Object.fromEntries(Object.entries(v).map(([k,x])=>[k,dcl(x)])):v;
+function tutBegin(auto){if(TUT.on)return;
+if(TM)return uiAlert('計測中はチュートリアルを始められません。計測を終えてからお試しください。');
+if(S.modal||SC.n){S.modal='';tutCloseScreen()}
+TUT.bk={};for(const k in S){if(TUT_HEAVY.includes(k))continue;TUT.bk[k]=dcl(S[k])}   // 操作前の状態を退避（終了時に戻す）。音源などの大きいデータは、開くだけなので退避しない
+TUT.acc0=Object.assign({},ACC);TUT.on=1;TUTSB=true;if(auto)tutLS.set(TUT_AUTO,'1');
+const d=document.createElement('div');d.id='tut';d.innerHTML='<div class="tutb"></div><div class="tutb"></div><div class="tutb"></div><div class="tutb"></div><div class="tuth" style="display:none"></div><div class="tutbub"></div>';document.body.appendChild(d);
+document.addEventListener('click',tutClick,true);document.addEventListener('keydown',tutKey,true);window.addEventListener('resize',tutPlace);document.addEventListener('scroll',tutPlace,true);
+TUT.iv=setInterval(tutPlace,250);tutGo(0)}
+function tutGo(i){if(!TUT.on)return;if(i<0)i=0;if(i>=TUT_STEPS.length)return tutEnd('done');TUT.i=i;const my=++TUT.n,st=TUT_STEPS[i];tutReset();
+try{st.pre&&st.pre()}catch(e){console.error(e)}
+tutBubble();tutPlace();
+setTimeout(()=>{if(!TUT.on||my!=TUT.n)return;const el=tutEls(st);if(el.length){try{el[0].scrollIntoView({block:'center',inline:'nearest'})}catch(e){}}tutPlace()},90)}
+function tutBubble(){const st=TUT_STEPS[TUT.i],b=$('#tut .tutbub'),N=TUT_STEPS.length,last=TUT.i==N-1;if(!b||!st)return;
+b.innerHTML=`<div class="tutarr" style="display:none"></div><div class="tuthd">${st.ch?`<span class="tutch">STEP ${st.ch}/${TUT_N}</span>`:''}<b>${esc(st.t)}</b></div><div class="tuttx">${esc(st.x)}</div>${st.tg?`<div class="tuthint">👆 光っている部分をタップ${st.pass?'（実際に操作）':''}しても進みます</div>`:''}<div class="tutbar"><i style="width:${Math.round(TUT.i/(N-1)*100)}%"></i></div><div class="tutbtns">${last?'':`<button class="btn g" onclick="tutEnd('skip')">スキップ</button>`}<span class="sp"></span>${TUT.i?`<button class="btn g" onclick="tutGo(TUT.i-1)">← 戻る</button>`:''}<button class="btn" onclick="${last?`tutEnd('done')`:`tutGo(TUT.i+1)`}">${last?'完了':'次へ'}</button></div>`}
+function tutPlace(){if(!TUT.on)return;const root=$('#tut'),st=TUT_STEPS[TUT.i];if(!root||!st)return;
+const vw=innerWidth,vh=innerHeight;let r=null;
+tutEls(st).forEach(e=>{const b=e.getBoundingClientRect();if(b.width<2&&b.height<2)return;r=r?{l:Math.min(r.l,b.left),t:Math.min(r.t,b.top),r:Math.max(r.r,b.right),b:Math.max(r.b,b.bottom)}:{l:b.left,t:b.top,r:b.right,b:b.bottom}});
+if(r){const P=6;r.l=Math.max(0,r.l-P);r.t=Math.max(0,r.t-P);r.r=Math.min(vw,r.r+P);r.b=Math.min(vh,r.b+P);if(r.r-r.l<8||r.b-r.t<8)r=null}
+TUT.rect=r;const bl=root.querySelectorAll('.tutb'),hole=root.querySelector('.tuth'),set=(e,l,t,w,h)=>{e.style.left=l+'px';e.style.top=t+'px';e.style.width=Math.max(0,w)+'px';e.style.height=Math.max(0,h)+'px'};
+if(!r){set(bl[0],0,0,vw,vh);for(let k=1;k<4;k++)set(bl[k],0,0,0,0);hole.style.display='none'}
+else{set(bl[0],0,0,vw,r.t);set(bl[1],0,r.t,r.l,r.b-r.t);set(bl[2],r.r,r.t,vw-r.r,r.b-r.t);set(bl[3],0,r.b,vw,vh-r.b);hole.style.display='block';set(hole,r.l,r.t,r.r-r.l,r.b-r.t)}
+tutBub(r)}
+function tutBub(r){const b=$('#tut .tutbub');if(!b)return;const vw=innerWidth,vh=innerHeight,M=8,bw=b.offsetWidth,bh=b.offsetHeight,ar=b.querySelector('.tutarr');let l,t,mode='';
+if(!r){l=(vw-bw)/2;t=(vh-bh)/2}
+else{const below=vh-r.b-M-10,above=r.t-M-10;
+if(below>=bh){t=r.b+10;mode='dn'}else if(above>=bh){t=r.t-bh-10;mode='up'}else{t=below>=above?vh-bh-M:M}   // どちらにも入らないときは、広い側に寄せて画面内に収める
+l=(r.l+r.r)/2-bw/2}
+l=Math.min(Math.max(M,l),vw-bw-M);t=Math.min(Math.max(M,t),vh-bh-M);b.style.left=l+'px';b.style.top=t+'px';
+if(ar){if(mode&&r){ar.className='tutarr '+mode;ar.style.left=(Math.min(Math.max(16,(r.l+r.r)/2-l),bw-16)-7)+'px';ar.style.display='block'}else ar.style.display='none'}}
+function tutClick(e){if(!TUT.on)return;const t=e.target;if(t&&t.closest&&(t.closest('#tut')||t.closest('#dg')))return;
+const r=TUT.rect,st=TUT_STEPS[TUT.i],x=e.clientX,y=e.clientY;
+if(!r||!st||!st.tg||!(x||y)||x<r.l||x>r.r||y<r.t||y>r.b){e.stopPropagation();e.preventDefault();return}   // 光っている部分の外・プログラム由来のクリックは無効
+if(!st.pass){e.stopPropagation();e.preventDefault()}   // pass が無いステップは、操作は実行せず「進む」だけ
+const i=TUT.i;setTimeout(()=>{if(TUT.on&&TUT.i==i)tutGo(i+1)},st.pass?500:0)}
+function tutKey(e){if(TUT.on&&e.key=='Escape'){e.stopPropagation();tutEnd('skip')}}
+function tutEnd(how){if(!TUT.on)return;TUT.on=0;TUT.n++;clearInterval(TUT.iv);
+document.removeEventListener('click',tutClick,true);document.removeEventListener('keydown',tutKey,true);window.removeEventListener('resize',tutPlace);document.removeEventListener('scroll',tutPlace,true);
+const d=$('#tut');if(d)d.remove();tutCloseScreen();
+for(const k in TUT.bk)S[k]=TUT.bk[k];TUT.bk=null;S.modal='';S.ed=0;for(const k in ACC)delete ACC[k];Object.assign(ACC,TUT.acc0);   // 操作前の状態に戻す
+TUTSB=false;tutLS.set(TUT_KEY,how=='done'?'done':'skip');tutLS.del(TUT_AUTO);
+render();toast(how=='done'?'チュートリアルを完了しました（マイページからいつでも見直せます）':'チュートリアルを終了しました（マイページから見直せます）')}
+
 /* ===== 起動 ===== */
 async function boot(){$('#m').innerHTML='<p class="sm" style="text-align:center;margin-top:40px">読み込み中…</p>';
 try{await loadState()}catch(e){console.error(e);ensure()}
-pomoLoadLS();pomoSaveLS();ready=true;checkDay();render();rvCheck();flush();
+pomoLoadLS();pomoSaveLS();ready=true;checkDay();render();rvCheck();flush();tutAuto();
 setTimeout(()=>{Assets.preload();SWreg()},800);if(teamOn())setTimeout(teamPush,2500);
 setInterval(penTick,1000);setInterval(()=>{if(teamOn()&&S.tab=='team'&&!document.hidden)teamPull()},15000);
 setInterval(()=>{if(checkDay()&&!S.modal&&!SC.n)render();remind();rvCheck()},30000);
