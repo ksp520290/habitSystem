@@ -1,0 +1,42 @@
+/* ===== 今回追加した機能のスタイル ===== */
+/* --- ホーム：今日の木（最上部のグラフ領域） --- */
+.dtbig{display:flex;gap:10px;justify-content:center;margin-top:6px}
+.dtcol{flex:1;min-width:0;padding:8px 4px;border-radius:12px;background:var(--bg)}
+.dtree{font-size:56px;line-height:1.2;height:68px;display:flex;align-items:center;justify-content:center}
+.dtstg{font-size:16px;margin-top:4px;white-space:nowrap}
+/* --- 探索：霧晴れの開拓日誌 --- */
+.xhd{display:flex;align-items:center;gap:10px;margin:4px 0 12px}
+.xgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.xbtn{border:1px solid var(--bd);background:var(--card);color:var(--tx);border-radius:16px;padding:22px 8px;font:inherit;font-weight:700;font-size:15px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:8px}
+.xbtn span{font-size:34px;line-height:1}
+.xbtn:active{background:var(--bd)}
+/* --- ToDo「#復習」：未達成＝水色／達成＝青 --- */
+.tile.rv{background:#38bdf8}
+.tile.rv.ok{background:#2563eb}
+/* --- チーム：日付ヘッダー／報告bot／復習bot --- */
+.dh{text-align:center;font-size:12px;color:var(--sub);margin:14px 0 8px;position:relative}
+.dh::before,.dh::after{content:"";position:absolute;top:50%;width:calc(50% - 70px);height:1px;background:var(--bd)}
+.dh::before{left:0}.dh::after{right:0}
+.bub.rvb-sky{background:#bae6fd;border-color:#7dd3fc;color:#0c4a6e}
+.bub.rvb-blue{background:#2563eb;border-color:#1d4ed8;color:#fff}
+.bub.rvb-green{background:#4ade80;border-color:#22c55e;color:#052e16}
+.bub.rvb-sky .sm,.bub.rvb-blue .sm,.bub.rvb-green .sm{color:inherit;opacity:.8}
+.prgb{height:6px;background:var(--bd);border-radius:9px;margin-top:6px;overflow:hidden}.prgb i{display:block;height:100%;background:var(--pri)}
+/* --- 教材編集：音声プレーヤー固定・文章一覧 --- */
+.dedit-player{position:sticky;top:-12px;z-index:6;margin:-12px -14px 10px;padding:10px 14px;background:var(--card);border-bottom:1px solid var(--bd);box-shadow:0 2px 8px #0002}
+.dedit-prow{display:flex;align-items:center;gap:8px}
+.dedit-prow audio{flex:1;min-width:0;height:40px}
+.dedit-cut{flex:none;padding:10px 14px;font-size:15px;font-weight:700;background:#d9534f;color:#fff}
+.dedit-file{margin-top:6px}
+.dedit-status{font-size:12px;color:var(--sub);margin-top:6px;min-height:1.3em}
+.dedit-row{padding:10px 12px;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
+.dedit-main{display:flex;gap:8px;align-items:baseline;cursor:pointer}
+.dedit-row.is-sel{outline:3px solid #f59e0b;background:rgba(245,158,11,.12)}
+.dedit-row.is-next{border-color:var(--pri);box-shadow:0 0 0 2px var(--pri) inset}
+.dedit-row.is-playing{background:rgba(111,143,92,.28)}
+.dedit-time{font-size:12px;color:var(--sub);margin:4px 0 0 1.6em}
+.dedit-time.bad{color:#d9534f}
+.dedit-act{display:flex;gap:8px;margin-top:8px}
+.dedit-act .btn{flex:1;padding:8px 6px;font-size:13px}
+.dedit-edit textarea{width:100%;min-height:80px}
+.dedit-edit .dedit-ebtn{display:flex;gap:6px;margin-top:6px}.dedit-edit .dedit-ebtn .btn{flex:1}

@@ -1,0 +1,12 @@
+{
+  "name": "habit-forest-push-server",
+  "version": "1.0.0",
+  "description": "習慣の森：Web Push（VAPID）の最小サーバー。端末を決まった時刻に“起こす”だけで、個人データは持ちません。",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "keys": "web-push generate-vapid-keys"
+  },
+  "dependencies": { "web-push": "^3.6.7" },
+  "engines": { "node": ">=18" }
+}

@@ -1,0 +1,27 @@
+.tabs.t3{display:grid;grid-template-columns:repeat(3,1fr)}
+.rt.off{opacity:.5;cursor:default}
+.av{width:40px;height:40px;border-radius:50%;border:1px solid var(--bd);background:var(--card);font-size:22px;line-height:1;padding:0;flex:none;cursor:pointer}
+.pnl code{display:block;background:var(--bd);border-radius:6px;padding:6px;margin:4px 0;word-break:break-all}
+.accb code{display:block;background:var(--bd);border-radius:6px;padding:6px;margin:4px 0;word-break:break-all}
+/* --- 音読ディクテーション：ヘッダー（戻る／パンくず／閉じる／2行目）とポップアップ --- */
+.scbar .crumb{flex:1;min-width:0;display:flex;align-items:center;gap:4px;font-size:13px;overflow:hidden;white-space:nowrap}
+.crumb .crb{background:none;border:0;color:var(--pri);padding:2px 0;font-size:13px;cursor:pointer;text-decoration:underline}
+.crumb .crc{color:var(--tx);font-weight:700}.crumb .crs{color:var(--sub);font-size:11px}
+#sc2{display:flex;flex-wrap:wrap;align-items:center;gap:6px;padding:6px 12px;border-bottom:1px solid var(--bd);background:var(--card)}
+#sc2:empty{display:none}
+#sc2 .btn{padding:6px 10px;font-size:13px;white-space:nowrap}
+#sc2 .dtitle{flex:1 1 65px;min-width:0;text-align:left;font-weight:700;border:1px dashed var(--bd);border-radius:8px;background:var(--bg);padding:6px 8px;color:var(--tx);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer}
+.dpop{position:fixed;inset:0;background:#0007;display:flex;align-items:center;justify-content:center;z-index:30;padding:12px}
+.dpop-box{background:var(--bg);width:100%;max-width:480px;max-height:92%;overflow:auto;border-radius:16px;padding:16px;box-sizing:border-box}
+.dpop-box label{display:block;font-size:12px;color:var(--sub);margin:10px 0 3px}
+.dpop-box input[type=text],.dpop-box textarea{width:100%;box-sizing:border-box}
+.dpop-box .dpop-btns{display:flex;gap:8px;margin-top:14px}.dpop-box .dpop-btns .btn{flex:1}
+/* --- 絵文字の代わりに使う画像アイコン --- */
+.icimg{width:1.2em;height:1.2em;border-radius:50%;object-fit:cover;vertical-align:middle}
+.tile .ic .icimg,.av .icimg{width:100%;height:100%}
+/* --- 樹種・成長段階の画像表示（絵文字の代わりに画像ファイルを使える） --- */
+.tvimg{width:1.15em;height:1.15em;object-fit:contain;vertical-align:middle;display:inline-block}
+.shop em .tvimg{width:1em;height:1em}
+.stp{text-align:center;flex:1;min-width:0}.stp .tv{font-size:30px;line-height:1.2;height:38px;display:flex;align-items:center;justify-content:center}
+.stg-row{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin:6px 0;padding:6px;border:1px solid var(--bd);border-radius:10px}
+.stg-row input.stem{width:64px}

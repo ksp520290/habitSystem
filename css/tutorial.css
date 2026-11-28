@@ -1,0 +1,12 @@
+/* --- チュートリアル（スポットライト） --- */
+#tut{position:fixed;inset:0;z-index:50;pointer-events:none}
+.tutb{position:fixed;background:rgba(0,0,0,.72);pointer-events:auto;touch-action:none;transition:top .2s,left .2s,width .2s,height .2s}
+.tuth{position:fixed;border:3px solid #8fe0a0;border-radius:12px;pointer-events:none;box-shadow:0 0 0 4px rgba(143,224,160,.35);transition:top .2s,left .2s,width .2s,height .2s;animation:tutp 1.4s ease-in-out infinite}
+@keyframes tutp{50%{box-shadow:0 0 0 9px rgba(143,224,160,.12)}}
+.tutbub{position:fixed;z-index:51;pointer-events:auto;background:var(--card);color:var(--tx);border:1px solid var(--bd);border-radius:14px;padding:12px;box-shadow:0 8px 28px #0007;width:min(340px,calc(100vw - 24px));max-height:calc(100vh - 16px);overflow:auto;font-size:14px;line-height:1.55}
+.tutbub .tuthd{display:flex;align-items:baseline;gap:8px;margin-bottom:4px}.tutbub .tutch{font-size:11px;color:var(--pri);font-weight:700;white-space:nowrap}
+.tutbub .tuttx{white-space:pre-line;margin:2px 0 8px}.tutbub .tuthint{font-size:11px;color:var(--sub);margin-bottom:6px}
+.tutbub .tutbar{height:4px;background:var(--bd);border-radius:9px;overflow:hidden;margin-bottom:8px}.tutbub .tutbar i{display:block;height:100%;background:var(--pri)}
+.tutbub .tutbtns{display:flex;gap:6px;align-items:center}.tutbub .tutbtns .btn{padding:8px 12px;font-size:13px}
+.tutarr{position:absolute;width:14px;height:14px;background:var(--card);border:1px solid var(--bd);transform:rotate(45deg)}
+.tutarr.dn{top:-8px;border-right:0;border-bottom:0}.tutarr.up{bottom:-8px;border-left:0;border-top:0}

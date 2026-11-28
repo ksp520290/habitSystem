@@ -1,0 +1,5 @@
+/* grow */
+function grow(){return forestCard()+`<div class="row"><h3 class="sp" style="margin:4px 0">育成・森</h3><b>🪙 ${S.coins}</b><button class="btn" onclick="lock()">🔒 ロック画面</button></div>
+<div class="card"><div class="tree">${vHtml(treeEm(stage()))}</div><div class="row" style="justify-content:center;font-size:28px;margin-top:6px">${[0,1,2,3,4].map(i=>`<span style="opacity:${i<=stage()&&TM?1:.35}">${vHtml(treeEm(i))}</span>`).join('→')}</div><p class="sm" style="text-align:center">種→若木→成長→つぼみ→満開。途中放棄で🪵枯れ木に</p><p class="sm" style="text-align:center">ホームのルーティーン・ToDoの達成率が20%・40%・60%・80%・100%に届くごとに、その日の木（ルーティーン用・ToDo用）が育ちます。日付が変わった時点の達成率で確定します。</p></div>
+<div class="card"><b>樹種選択（図鑑・ショップ）</b><div class="shop" style="margin-top:8px">${trees().map(t=>{const o=S.own.includes(t[0]);return `<button class="${S.sel==t[0]?'on':''}" onclick="buy('${t[0]}',${t[2]})"><em>${vHtml(t[0])}</em>${esc(t[1])}<br>${o?'所持':'🪙'+t[2]}</button>`}).join('')}</div></div>`}
+function buy(e,c){if(!S.own.includes(e)){if(S.coins<c)return uiAlert('コインが足りません');S.coins-=c;S.own.push(e)}S.sel=e;save();render()}

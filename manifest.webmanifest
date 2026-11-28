@@ -1,0 +1,14 @@
+{
+  "name": "習慣の森",
+  "short_name": "習慣の森",
+  "description": "学習・習慣化アプリ。続けるほど森が育ちます。",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f4f7f4",
+  "theme_color": "#2e7d4f",
+  "lang": "ja",
+  "icons": [
+    { "src": "icon.png", "sizes": "any", "type": "image/png", "purpose": "any" }
+  ]
+}
